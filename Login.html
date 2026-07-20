@@ -152,23 +152,6 @@
         <p class="auth-server-msg" id="signup-server-msg"></p>
       </form>
 
-      <form id="verify-form" class="auth-form is-hidden" novalidate>
-        <div class="verify-icon">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14 M22 4L12 14.01l-3-3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <p class="auth-form__hint">We sent a 5-digit verification code to <strong id="verify-email-display"></strong>. Enter it below to activate your account.</p>
-        <input type="hidden" id="verify-email-hidden">
-        <div class="form-group">
-          <label for="verify-code">Verification code</label>
-          <input id="verify-code" type="text" name="code" placeholder="00000" required maxlength="5" minlength="5" pattern="[0-9]{5}" inputmode="numeric" autocomplete="one-time-code">
-          <span class="form-group__error" id="verify-code-error"></span>
-        </div>
-        <button type="submit" class="btn btn--primary btn--auth">Verify email</button>
-        <p class="auth-server-msg" id="verify-server-msg"></p>
-        <button type="button" class="btn btn--ghost btn--auth" id="resend-code-btn">Resend code</button>
-        <a href="#" class="auth-back" id="back-to-signup">&larr; Back to sign up</a>
-      </form>
-
     </div>
   </section>
 </main>

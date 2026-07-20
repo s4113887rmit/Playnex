@@ -5,15 +5,12 @@
   var loginForm = document.getElementById('login-form');
   var forgotForm = document.getElementById('forgot-form');
   var signupForm = document.getElementById('signup-form');
-  var verifyForm = document.getElementById('verify-form');
   var descField = document.getElementById('signup-description');
   var charCount = document.getElementById('desc-char-count');
   var fileInput = document.getElementById('signup-picture');
   var fileName = document.getElementById('file-name');
   var showForgot = document.getElementById('show-forgot');
   var backToLogin = document.getElementById('back-to-login');
-  var backToSignup = document.getElementById('back-to-signup');
-  var resendBtn = document.getElementById('resend-code-btn');
 
   descField.addEventListener('input', function () {
     charCount.textContent = descField.value.length;
@@ -24,7 +21,7 @@
   });
 
   function showForm(form) {
-    [loginForm, forgotForm, signupForm, verifyForm].forEach(function (f) { f.classList.add('is-hidden'); });
+    [loginForm, forgotForm, signupForm].forEach(function (f) { f.classList.add('is-hidden'); });
     form.classList.remove('is-hidden');
     clearMessages();
     clearErrors();
@@ -55,36 +52,6 @@
     e.preventDefault();
     switchToTab(0);
     showForm(loginForm);
-  });
-
-  backToSignup.addEventListener('click', function (e) {
-    e.preventDefault();
-    switchToTab(1);
-    showForm(signupForm);
-    charCount.textContent = descField.value.length;
-  });
-
-  resendBtn.addEventListener('click', function () {
-    var email = document.getElementById('verify-email-hidden').value;
-    if (!email) return;
-    resendBtn.disabled = true;
-    resendBtn.textContent = 'Resending...';
-    fetch('/api/auth/resend-code', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email })
-    })
-      .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
-      .then(function (result) {
-        showServerMsg('verify', result.data.message, 'success');
-      })
-      .catch(function () {
-        showServerMsg('verify', 'Network error. Please check your connection.', 'error');
-      })
-      .finally(function () {
-        resendBtn.disabled = false;
-        resendBtn.textContent = 'Resend code';
-      });
   });
 
   function clearMessages() {
@@ -175,24 +142,12 @@
     return true;
   }
 
-  function validateVerify() {
-    clearErrors();
-    var code = document.getElementById('verify-code').value.trim();
-    if (!code || code.length !== 5 || !/^[0-9]{5}$/.test(code)) {
-      showFieldError('verify-code', 'Please enter a valid 5-digit code');
-      return false;
-    }
-    return true;
-  }
-
   signupForm.addEventListener('submit', function (e) {
     e.preventDefault();
     clearMessages();
     if (!validateSignup()) return;
 
     var formData = new FormData(signupForm);
-    var email = document.getElementById('signup-email').value.trim();
-
     var btn = signupForm.querySelector('button[type="submit"]');
     btn.disabled = true;
     btn.textContent = 'Creating account...';
@@ -201,13 +156,14 @@
       .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
       .then(function (result) {
         if (result.status === 201) {
-          document.getElementById('verify-email-display').textContent = email;
-          document.getElementById('verify-email-hidden').value = email;
+          showServerMsg('signup', result.data.message, 'success');
           signupForm.reset();
           charCount.textContent = '0';
           fileName.textContent = 'No file chosen';
-          showForm(verifyForm);
-          switchToTab(-1);
+          setTimeout(function () {
+            showForm(loginForm);
+            switchToTab(0);
+          }, 1500);
         } else {
           showServerMsg('signup', result.data.error, 'error');
         }
@@ -245,11 +201,6 @@
         if (result.status === 200) {
           showServerMsg('login', result.data.message, 'success');
           setTimeout(function () { window.location.href = 'homepage.html'; }, 1000);
-        } else if (result.status === 403 && result.data.email) {
-          showServerMsg('login', result.data.error + ' Need to verify?', 'error');
-          document.getElementById('verify-email-display').textContent = result.data.email;
-          document.getElementById('verify-email-hidden').value = result.data.email;
-          setTimeout(function () { showForm(verifyForm); switchToTab(-1); }, 2000);
         } else {
           showServerMsg('login', result.data.error, 'error');
         }
@@ -289,47 +240,6 @@
       .finally(function () {
         btn.disabled = false;
         btn.textContent = 'Send reset link';
-      });
-  });
-
-  verifyForm.addEventListener('submit', function (e) {
-    e.preventDefault();
-    clearMessages();
-    if (!validateVerify()) return;
-
-    var payload = {
-      email: document.getElementById('verify-email-hidden').value,
-      code: document.getElementById('verify-code').value.trim()
-    };
-
-    var btn = verifyForm.querySelector('button[type="submit"]');
-    btn.disabled = true;
-    btn.textContent = 'Verifying...';
-
-    fetch('/api/auth/verify-email', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-      .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
-      .then(function (result) {
-        if (result.status === 200) {
-          showServerMsg('verify', result.data.message, 'success');
-          verifyForm.reset();
-          setTimeout(function () {
-            showForm(loginForm);
-            switchToTab(0);
-          }, 1500);
-        } else {
-          showServerMsg('verify', result.data.error, 'error');
-        }
-      })
-      .catch(function () {
-        showServerMsg('verify', 'Network error. Please check your connection.', 'error');
-      })
-      .finally(function () {
-        btn.disabled = false;
-        btn.textContent = 'Verify email';
       });
   });
 })();

@@ -5,7 +5,6 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 const multer = require('multer');
 const crypto = require('crypto');
-const nodemailer = require('nodemailer');
 
 const app = express();
 
@@ -18,42 +17,6 @@ app.get('/', function (req, res) {
 });
 
 const MONGODB_URI = 'mongodb+srv://playnexuser:playnexpass@playnexcluster.abc123.mongodb.net/playnex?retryWrites=true&w=majority';
-
-var transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: 'your-email@gmail.com',
-    pass: 'your-app-password'
-  }
-});
-
-function generateCode() {
-  return Math.floor(10000 + Math.random() * 90000).toString();
-}
-
-async function sendVerificationEmail(email, code) {
-  console.log('VERIFICATION CODE for ' + email + ': ' + code);
-  try {
-    await transporter.sendMail({
-      from: '"Playnex" <noreply@playnex.com>',
-      to: email,
-      subject: 'Your Playnex verification code',
-      html: '<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;background:#10101e;color:#ebebf6;border-radius:8px">' +
-        '<h1 style="color:#ff8500;font-size:24px">Playnex</h1>' +
-        '<p>Thanks for signing up. Use the code below to verify your email address:</p>' +
-        '<div style="background:#171728;border:1px solid #26263e;border-radius:8px;padding:24px;text-align:center;margin:24px 0">' +
-        '<span style="font-size:36px;font-weight:700;letter-spacing:12px;color:#ff8500">' + code + '</span>' +
-        '</div>' +
-        '<p style="font-size:12px;color:#9797ab">This code expires in 10 minutes. If you did not create this account, ignore this email.</p>' +
-        '</div>'
-    });
-    console.log('Verification email sent to ' + email);
-  } catch (err) {
-    console.error('Failed to send verification email:', err.message);
-  }
-}
 
 const storage = multer.diskStorage({
   destination: path.join(__dirname, 'uploads'),
@@ -123,8 +86,6 @@ app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async
       profilePicture = 'uploads/' + req.file.filename;
     }
 
-    var verificationCode = generateCode();
-
     var user = await User.create({
       username: username,
       name: name || '',
@@ -132,17 +93,13 @@ app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async
       password: password,
       description: description,
       profilePicture: profilePicture,
-      verificationCode: verificationCode,
-      verificationCodeExpires: Date.now() + 10 * 60 * 1000,
-      isVerified: false,
+      isVerified: true,
       subscribe: !!subscribe
     });
 
-    sendVerificationEmail(email, verificationCode);
-
     res.status(201).json({
-      message: 'Account created. Please check your email for a 5-digit verification code.',
-      email: user.email
+      message: 'Account created successfully. You can now log in.',
+      user: { id: user._id, username: user.username, email: user.email, name: user.name }
     });
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -156,68 +113,6 @@ app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async
       return res.status(400).json({ error: 'Only image files (jpeg, jpg, png, gif, webp) are allowed' });
     }
     console.error('Signup error:', err);
-    res.status(500).json({ error: 'Something went wrong. Please try again.' });
-  }
-});
-
-app.post('/api/auth/verify-email', authLimiter, async (req, res) => {
-  try {
-    var { email, code } = req.body;
-    if (!email || !code) {
-      return res.status(400).json({ error: 'Email and verification code are required' });
-    }
-
-    var user = await User.findOne({ email: email.toLowerCase() }).select('+verificationCode +verificationCodeExpires');
-    if (!user) {
-      return res.status(404).json({ error: 'Account not found' });
-    }
-    if (user.isVerified) {
-      return res.status(200).json({ message: 'Email is already verified. You can log in.' });
-    }
-    if (user.verificationCodeExpires < Date.now()) {
-      return res.status(400).json({ error: 'Verification code has expired. Request a new one.' });
-    }
-    if (user.verificationCode !== code) {
-      return res.status(400).json({ error: 'Invalid verification code' });
-    }
-
-    user.isVerified = true;
-    user.verificationCode = undefined;
-    user.verificationCodeExpires = undefined;
-    await user.save({ validateBeforeSave: false });
-
-    res.status(200).json({ message: 'Email verified successfully. You can now log in.' });
-  } catch (err) {
-    console.error('Verify email error:', err);
-    res.status(500).json({ error: 'Something went wrong. Please try again.' });
-  }
-});
-
-app.post('/api/auth/resend-code', authLimiter, async (req, res) => {
-  try {
-    var { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-
-    var user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
-      return res.status(200).json({ message: 'If that account exists, a new code has been sent.' });
-    }
-    if (user.isVerified) {
-      return res.status(200).json({ message: 'Your email is already verified.' });
-    }
-
-    var newCode = generateCode();
-    user.verificationCode = newCode;
-    user.verificationCodeExpires = Date.now() + 10 * 60 * 1000;
-    await user.save({ validateBeforeSave: false });
-
-    sendVerificationEmail(email, newCode);
-
-    res.status(200).json({ message: 'A new verification code has been sent to your email.' });
-  } catch (err) {
-    console.error('Resend code error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
 });
@@ -240,9 +135,6 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
     }
     if (!user.isActive) {
       return res.status(403).json({ error: 'This account has been deactivated.' });
-    }
-    if (!user.isVerified) {
-      return res.status(403).json({ error: 'Please verify your email before logging in. Check your email for the verification code.', email: user.email });
     }
 
     const isMatch = await user.comparePassword(password);
@@ -327,5 +219,5 @@ app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
 
 const PORT = 3000;
 app.listen(PORT, () => {
-  console.log(`Playnex server running on http://localhost:${PORT}`);
+  console.log('Playnex server running on http://localhost:' + PORT);
 });
