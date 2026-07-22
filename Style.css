@@ -1886,28 +1886,15 @@ img {
 
 /* ---------- achievements board ---------- */
 
-.achieve-board {
-  background: var(--surface-1);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 32px;
-  margin-bottom: 32px;
+.achieve-board,
+#section-achievements {
+  /* no outer card -- lives inside .profile-content */
 }
 
-.achieve-board__header {
-  margin-bottom: 24px;
-}
-
-.achieve-board__header h2 {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.achieve-board__subtitle {
-  font-size: 13px;
-  color: var(--text-muted);
+.achieve-board__header,
+#section-achievements h2,
+#section-achievements .profile-section__hint {
+  /* header handled by section h2/hint */
 }
 
 .achieve-board__grid {
