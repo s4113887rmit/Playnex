@@ -11,6 +11,7 @@
   var avatarLetter = document.getElementById('profile-avatar-letter');
   var displayName = document.getElementById('profile-display-name');
   var usernameEl = document.getElementById('profile-username');
+  var emailDisplay = document.getElementById('profile-email-display');
   var descEl = document.getElementById('profile-description');
 
   var nameInput = document.getElementById('profile-name');
@@ -95,6 +96,7 @@
     var name = user.name || user.username;
     displayName.textContent = name;
     usernameEl.textContent = '@' + user.username;
+    emailDisplay.textContent = user.email;
     descEl.textContent = user.description || '';
     nameInput.value = name;
     descInput.value = user.description || '';

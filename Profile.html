@@ -52,6 +52,7 @@
       <div class="profile-header__info">
         <h1 id="profile-display-name">Your Name</h1>
         <p class="profile-header__username" id="profile-username">@username</p>
+        <p class="profile-header__email" id="profile-email-display">email@example.com</p>
         <p class="profile-header__desc" id="profile-description">Your short description goes here.</p>
       </div>
     </div>
@@ -178,6 +179,80 @@
 
       </div>
     </div>
+
+    <!-- ========== ACHIEVEMENT BOARD ========== -->
+    <section class="achieve-board">
+      <div class="achieve-board__header">
+        <h2>Achievement Board</h2>
+        <span class="achieve-board__subtitle">Your rewards, progress, and daily missions</span>
+      </div>
+
+      <div class="achieve-board__grid">
+
+        <div class="achieve-card achieve-card--unlocked">
+          <div class="achieve-card__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 21v-2a5 5 0 0 1 9-3.5M16 3.13a5 5 0 0 1 1.87 9.87M21 21v-2a5 5 0 0 0-2.5-4.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          </div>
+          <div class="achieve-card__info">
+            <h3>Community Starter</h3>
+            <p>Joined the Playnex community</p>
+            <span class="achieve-card__xp">+50 XP</span>
+          </div>
+        </div>
+
+        <div class="achieve-card achieve-card--unlocked">
+          <div class="achieve-card__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="achieve-card__info">
+            <h3>Wishlist Curator</h3>
+            <p>Added 5 items to your wishlist</p>
+            <span class="achieve-card__xp">+100 XP</span>
+          </div>
+        </div>
+
+        <div class="achieve-card achieve-card--locked">
+          <div class="achieve-card__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="achieve-card__info">
+            <h3>First Purchase</h3>
+            <p>Buy your first game or merch item</p>
+            <span class="achieve-card__xp">+200 XP</span>
+          </div>
+        </div>
+
+        <div class="achieve-card achieve-card--locked">
+          <div class="achieve-card__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="achieve-card__info">
+            <h3>Forum Champion</h3>
+            <p>Post 20 replies in the discussion forum</p>
+            <span class="achieve-card__xp">+300 XP</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="achieve-board__mission">
+        <h3>Daily Mission</h3>
+        <div class="mission-card">
+          <div class="mission-card__icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="mission-card__info">
+            <h4>Explore the store</h4>
+            <p>Browse 3 different product categories today</p>
+            <div class="mission-card__progress">
+              <div class="mission-card__bar"><span style="width:33%"></span></div>
+              <span class="mission-card__status">1 / 3</span>
+            </div>
+          </div>
+          <span class="mission-card__reward">+75 XP</span>
+        </div>
+      </div>
+    </section>
 
   </div>
 </main>

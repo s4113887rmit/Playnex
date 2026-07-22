@@ -1620,6 +1620,12 @@ img {
   line-height: 1.5;
 }
 
+.profile-header__email {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
 .profile-body {
   display: grid;
   grid-template-columns: 200px 1fr;
@@ -1875,6 +1881,192 @@ img {
     flex-direction: column;
     text-align: center;
     padding: 24px;
+  }
+}
+
+/* ---------- achievements board ---------- */
+
+.achieve-board {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+}
+
+.achieve-board__header {
+  margin-bottom: 24px;
+}
+
+.achieve-board__header h2 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.achieve-board__subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.achieve-board__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+.achieve-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.achieve-card--unlocked {
+  background: linear-gradient(135deg, rgba(255, 133, 0, 0.08), transparent 60%);
+  border-color: rgba(255, 133, 0, 0.3);
+}
+
+.achieve-card--locked {
+  opacity: 0.45;
+}
+
+.achieve-card--locked .achieve-card__icon svg {
+  color: var(--text-muted);
+}
+
+.achieve-card__icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border-radius: 10px;
+}
+
+.achieve-card--unlocked .achieve-card__icon svg {
+  color: var(--accent);
+}
+
+.achieve-card__icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.achieve-card__info h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.achieve-card__info p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.achieve-card__xp {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.achieve-board__mission h3 {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.mission-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(255, 133, 0, 0.06), transparent);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.mission-card__icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+.mission-card__icon svg {
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+.mission-card__info {
+  flex: 1;
+}
+
+.mission-card__info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.mission-card__info p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+
+.mission-card__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mission-card__bar {
+  flex: 1;
+  height: 4px;
+  background: var(--surface-3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.mission-card__bar span {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+.mission-card__status {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.mission-card__reward {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+@media (max-width: 860px) {
+  .achieve-board__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mission-card {
+    flex-wrap: wrap;
   }
 }
 
