@@ -6,6 +6,9 @@ const path = require('path');
 const multer = require('multer');
 const crypto = require('crypto');
 
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']);
+
 const app = express();
 
 app.use(cors());
@@ -16,7 +19,7 @@ app.get('/', function (req, res) {
   res.redirect('/homepage.html');
 });
 
-const MONGODB_URI = 'mongodb+srv://playnexuser:playnexpass@playnexcluster.abc123.mongodb.net/playnex?retryWrites=true&w=majority';
+const MONGODB_URI = 'mongodb+srv://nguyenkhanhnguyen3967_db_user:NkK9r5QtMJOMJgL5@playnex.mzcuobd.mongodb.net/playnex?retryWrites=true&w=majority';
 
 const storage = multer.diskStorage({
   destination: path.join(__dirname, 'uploads'),
