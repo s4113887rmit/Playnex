@@ -157,6 +157,12 @@
       .then(function (result) {
         if (result.status === 201) {
           showServerMsg('signup', result.data.message, 'success');
+          localStorage.setItem('playnex_user', JSON.stringify({
+            id: result.data.user.id,
+            username: result.data.user.username,
+            email: result.data.user.email,
+            name: result.data.user.name
+          }));
           signupForm.reset();
           charCount.textContent = '0';
           fileName.textContent = 'No file chosen';
@@ -199,6 +205,13 @@
       .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
       .then(function (result) {
         if (result.status === 200) {
+          localStorage.setItem('playnex_user', JSON.stringify({
+            id: result.data.user.id,
+            username: result.data.user.username,
+            email: result.data.user.email,
+            name: result.data.user.name,
+            role: result.data.user.role
+          }));
           showServerMsg('login', result.data.message, 'success');
           setTimeout(function () { window.location.href = 'homepage.html'; }, 1000);
         } else {
