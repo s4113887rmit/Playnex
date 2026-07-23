@@ -2,50 +2,39 @@
 
 Playnex is a digital games and physical merchandise storefront. Browse games, add items to your cart or wishlist, participate in community discussions, and manage your profile.
 
-## Team Members and Responsibilities
+## Team Members
 
-| Member | Role | Modules |
-|--------|------|---------|
-| **Dang** (Lead) | Shopping Cart & Product Reviews | Shopping cart, checkout, confirmation, product catalog, reviews, homepage |
-| **An** | Discussion Forum & Administration | Forum threads/posts, admin panel, user management |
-| **Nguyen** | User Account Management | Registration, login, profile editing, password reset, account deletion |
-| **Bao** | Community Hub, Wishlist & Blog | Wishlist, blog posts, community features |
+| Name | Student ID | Module |
+|------|-----------|--------|
+| Nguyen Ngoc Quang Dang | S4113887 | Homepage and Shopping |
+| Nguyen Khanh Nguyen | S4197203 | Signup and Profile Settings |
 
 ## File and Folder Distribution
 
-### Dang
+### Nguyen Ngoc Quang Dang (S4113887)
 - `homepage.html` - Landing page with hero, new releases, merch shelves
 - `Shopping.html` - Product catalog with filters, sorting, pagination
 - `Cart.html` - Shopping cart with quantity controls and order summary
 - `Checkout.html` - Delivery and payment form
 - `Confirmation.html` - Order confirmation page
-- `reviews/` - Product review and rating system (to be added)
+- `Wishlist.html` - Saved items with purchased/favorited sections
+- `Style.css` - Global stylesheet (shared)
 
-### An
-- `forum/` - Discussion forum threads and posts (to be added)
-- `admin/` - Administration panel for site management (to be added)
-
-### Nguyen
+### Nguyen Khanh Nguyen (S4197203)
 - `Login.html` - Login, sign up, and forgot password forms
 - `Profile.html` - Profile settings with edit profile, achievements, email/password change, account deletion
 - `models/User.js` - MongoDB user schema with authentication fields
-- `server.js` - Express server with auth routes (signup, login, profile, password reset)
+- `server.js` - Express server with auth routes (signup, login, profile, password reset, account management)
 - `public/js/auth.js` - Client-side auth form validation and API calls
 - `public/js/profile.js` - Client-side profile management
 - `public/js/header.js` - Dynamic header (shows profile icon after login)
-- `.gitignore` - Git ignore rules
-
-### Bao
-- `Wishlist.html` - Saved items with purchased/favorited sections
-- `blog/` - Blog platform (to be added)
+- `README.md` - Project documentation
 
 ### Shared / Assets
-- `Style.css` - Global stylesheet with design system (CSS custom properties, BEM naming)
 - `logo.png` - Playnex logo
 - `uploads/` - User-uploaded profile pictures
 - `package.json` - Node.js dependencies
 - `start.bat` - One-click server launcher
-- `sitemap.html` - Auto-generated site map (to be added)
 
 ## Technical Stack
 
