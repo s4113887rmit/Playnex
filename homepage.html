@@ -12,22 +12,23 @@
 <body>
 
 
-
+<!-- ============ SITE HEADER: logo, primary nav, search, account/cart icons ============ -->
 <header class="topbar">
   <div class="topbar__inner">
-    <a href="homepage.html" class="logo">
-    <img src="logo.png" class="logo__img" alt="Playnex Logo">
-</a>
+    <a href="#" class="logo">
+      <img src="logo.png" alt="Playnex" class="logo__img">
+    </a>
 
     <nav class="primary-nav">
       <a href="homepage.html" class="primary-nav__link is-active">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
       <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
       <a href="#" class="primary-nav__link">Community</a>
       <a href="#" class="primary-nav__link">Blog</a>
     </nav>
 
     <div class="topbar__actions">
-      <form class="search" role="search" action="homepage.html" method="get">
+      <form class="search" role="search" action="shopping.html" method="get">
         <label for="site-search" class="visually-hidden">Search games, merch, tags</label>
         <svg viewBox="0 0 24 24" class="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.6" y2="16.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <input id="site-search" name="q" type="search" placeholder="Search games, merch, tags">
@@ -40,15 +41,15 @@
       <a href="cart.html" class="icon-btn" aria-label="Cart, 3 items">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
       </a>
-      <a href="#" class="btn btn--ghost btn--small">Log in</a>
-      <a href="#" class="btn btn--primary btn--small">Sign up</a>
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
   </div>
 
   <nav class="subnav">
-    <a href="homepage.html" class="subnav__link is-active">All</a>
-    <a href="homepage.html#new-releases" class="subnav__link">Digital games</a>
-    <a href="homepage.html#merch" class="subnav__link">Physical merch</a>
+    <a href="shopping.html" class="subnav__link is-active">All</a>
+    <a href="shopping.html?cat=digital" class="subnav__link">Digital games</a>
+    <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
     <a href="#" class="subnav__link">Deals</a>
     <a href="#" class="subnav__link">Free this week</a>
     <a href="#" class="subnav__link">Reviews</a>
@@ -57,11 +58,11 @@
 </header>
 
 
-
+<!-- ============ MAIN CONTENT ============ -->
 <main>
 
   
-
+  <!-- Featured / hero banner -->
   <section class="hero" aria-label="Featured title">
     <div class="hero__art hero__art--embercrown" aria-hidden="true">
       <div class="hero__art-glow"></div>
@@ -100,8 +101,8 @@
   </section>
 
   
- 
-  <section class="promo-strip" id="promo">
+  <!-- Free-game-of-the-week promo banner -->
+  <section class="promo-strip">
     <div class="promo-strip__inner">
       <div class="promo-strip__text">
         <span class="promo-strip__label">Free this week</span>
@@ -113,11 +114,11 @@
   </section>
 
   
-
+  <!-- New releases shelf (digital games) -->
   <section class="shelf" id="new-releases">
     <div class="shelf__header">
       <h2>New releases</h2>
-      <a href="homepage.html" class="see-all">See all<span aria-hidden="true"> &rarr;</span></a>
+      <a href="shopping.html" class="see-all">See all<span aria-hidden="true"> &rarr;</span></a>
     </div>
 
     <ul class="shelf__row list-reset">
@@ -131,7 +132,6 @@
           <h3 class="card__title">Nightfall Protocol</h3>
           <p class="card__meta">Tactical stealth · PC, Console</p>
           <div class="card__price"><span class="card__price-now">$44.99</span></div>
-        <a href="cart.html" class="btn btn--ghost btn--small card__add">Add to cart</a>
         </div>
       </article>
       </li>
@@ -149,7 +149,6 @@
             <span class="card__price-old">$29.99</span>
             <span class="card__price-now">$20.99</span>
           </div>
-        <a href="cart.html" class="btn btn--ghost btn--small card__add">Add to cart</a>
         </div>
       </article>
       </li>
@@ -163,7 +162,6 @@
           <h3 class="card__title">Ironvale Racers</h3>
           <p class="card__meta">Arcade racing · PC, Console</p>
           <div class="card__price"><span class="card__price-now">$34.99</span></div>
-        <a href="cart.html" class="btn btn--ghost btn--small card__add">Add to cart</a>
         </div>
       </article>
       </li>
@@ -178,7 +176,6 @@
           <h3 class="card__title">Emberkeep Tactics</h3>
           <p class="card__meta">Strategy · PC</p>
           <div class="card__price"><span class="card__price-now">$49.99</span></div>
-        <a href="cart.html" class="btn btn--ghost btn--small card__add">Add to cart</a>
         </div>
       </article>
       </li>
@@ -192,7 +189,6 @@
           <h3 class="card__title">Silt and Static</h3>
           <p class="card__meta">Sci-fi horror · PC, Console</p>
           <div class="card__price"><span class="card__price-now">$27.99</span></div>
-        <a href="cart.html" class="btn btn--ghost btn--small card__add">Add to cart</a>
         </div>
       </article>
       </li>
@@ -202,11 +198,11 @@
   </section>
 
   
-
+  <!-- Merch shelf (physical products) -->
   <section class="shelf" id="merch">
     <div class="shelf__header">
       <h2>Merch you'll love</h2>
-      <a href="homepage.html" class="see-all">See all<span aria-hidden="true"> &rarr;</span></a>
+      <a href="shopping.html" class="see-all">See all<span aria-hidden="true"> &rarr;</span></a>
     </div>
 
     <ul class="shelf__row list-reset">
@@ -221,7 +217,6 @@
           <h3 class="card__title">Embercrown throne figure</h3>
           <p class="card__meta">Collectible · 28cm</p>
           <div class="card__price"><span class="card__price-now">$64.00</span></div>
-        <a href="cart.html" class="btn btn--ghost btn--small card__add">Add to cart</a>
         </div>
       </article>
       </li>
@@ -236,7 +231,6 @@
           <h3 class="card__title">Nightfall Protocol hoodie</h3>
           <p class="card__meta">Apparel · S–XXL</p>
           <div class="card__price"><span class="card__price-now">$52.00</span></div>
-        <a href="cart.html" class="btn btn--ghost btn--small card__add">Add to cart</a>
         </div>
       </article>
       </li>
@@ -251,7 +245,6 @@
           <h3 class="card__title">Ruinport Chronicles vinyl</h3>
           <p class="card__meta">Soundtrack · 2xLP</p>
           <div class="card__price"><span class="card__price-now">$38.00</span></div>
-        <a href="cart.html" class="btn btn--ghost btn--small card__add">Add to cart</a>
         </div>
       </article>
       </li>
@@ -266,7 +259,6 @@
           <h3 class="card__title">Ironvale Racers keycap set</h3>
           <p class="card__meta">Accessory · 12 keys</p>
           <div class="card__price"><span class="card__price-now">$29.00</span></div>
-        <a href="cart.html" class="btn btn--ghost btn--small card__add">Add to cart</a>
         </div>
       </article>
       </li>
@@ -281,7 +273,6 @@
           <h3 class="card__title">Emberkeep Tactics art book</h3>
           <p class="card__meta">Hardcover · 180 pages</p>
           <div class="card__price"><span class="card__price-now">$34.00</span></div>
-        <a href="cart.html" class="btn btn--ghost btn--small card__add">Add to cart</a>
         </div>
       </article>
       </li>
@@ -291,7 +282,7 @@
   </section>
 
   
-
+  <!-- Blog + forum teaser cards -->
   <section class="editorial">
     <article class="editorial__card editorial__card--blog">
       <span class="eyebrow">From the blog</span>
@@ -312,13 +303,13 @@
 </main>
 
 
-
+<!-- ============ SITE FOOTER: sitemap-style link columns ============ -->
 <footer class="site-footer">
   <div class="site-footer__inner">
 
     <div class="site-footer__col">
       <a href="#" class="logo logo--footer">
-        <img src="logo.png" alt="Playnex Logo" class="logo__img">
+        <img src="logo.png" alt="Playnex" class="logo__img">
       </a>
       <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
     </div>
@@ -362,5 +353,5 @@
   </div>
 </footer>
 
-</body>
+<script src="public/js/header.js"></script></body>
 </html>
