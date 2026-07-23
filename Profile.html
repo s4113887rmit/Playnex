@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Profile settings — Playnex</title>
+<meta name="description" content="Edit your Playnex profile settings.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+<!-- ============ SITE HEADER ============ -->
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="homepage.html" class="logo">
+      <img src="logo.png" alt="Playnex" class="logo__img">
+    </a>
+    <nav class="primary-nav">
+      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
+      <a href="#" class="primary-nav__link">Community</a>
+      <a href="#" class="primary-nav__link">Blog</a>
+    </nav>
+    <div class="topbar__actions">
+      <a href="Profile.html" class="icon-btn profile-icon" aria-label="Profile">
+        <span class="profile-icon__letter" id="profile-avatar-letter"></span>
+      </a>
+      <a href="cart.html" class="icon-btn" aria-label="Cart">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
+      </a>
+      <a href="Login.html" class="btn btn--ghost btn--small" id="logout-btn">Log out</a>
+    </div>
+  </div>
+</header>
+
+
+<main>
+  <div class="profile-layout">
+
+    <!-- ========== PROFILE HEADER ========== -->
+    <div class="profile-header">
+      <div class="profile-header__avatar" id="profile-avatar">
+        <img id="profile-avatar-img" src="uploads/default-profile.svg" alt="Profile picture">
+        <label for="profile-picture-upload" class="profile-header__avatar-edit" title="Change picture">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 3a2.83 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </label>
+      </div>
+      <div class="profile-header__info">
+        <h1 id="profile-display-name">Your Name</h1>
+        <p class="profile-header__username" id="profile-username">@username</p>
+        <p class="profile-header__email" id="profile-email-display">email@example.com</p>
+        <p class="profile-header__desc" id="profile-description">Your short description goes here.</p>
+      </div>
+    </div>
+
+    <!-- ========== TABS + CONTENT ========== -->
+    <div class="profile-body">
+
+      <nav class="profile-tabs">
+        <button class="profile-tab is-active" data-section="edit-profile">Edit Profile</button>
+        <button class="profile-tab" data-section="achievements">Achievements</button>
+        <button class="profile-tab" data-section="change-email">Change Email</button>
+        <button class="profile-tab" data-section="change-password">Change Password</button>
+        <button class="profile-tab" data-section="delete-account">Delete Account</button>
+      </nav>
+
+      <div class="profile-content">
+
+        <!-- EDIT PROFILE -->
+        <section class="profile-section" id="section-edit-profile">
+          <h2>Edit your profile</h2>
+          <p class="profile-section__hint">These details are visible to other users on your public profile.</p>
+
+          <form id="form-edit-profile" class="profile-form" enctype="multipart/form-data" novalidate>
+            <div class="form-group">
+              <label for="profile-name">Display name</label>
+              <input id="profile-name" type="text" name="name" placeholder="Your name" maxlength="100" autocomplete="name">
+              <span class="form-group__error" id="profile-name-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="profile-desc">Short description</label>
+              <textarea id="profile-desc" name="description" placeholder="Tell others a bit about yourself" maxlength="500" rows="4"></textarea>
+              <span class="form-group__char-count"><span id="prof-desc-char-count">0</span>/500</span>
+              <span class="form-group__error" id="profile-desc-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="profile-picture-upload">Profile picture</label>
+              <div class="file-upload">
+                <input id="profile-picture-upload" type="file" name="profilePicture" accept="image/jpeg,image/png,image/gif,image/webp">
+                <label for="profile-picture-upload" class="file-upload__label">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" class="file-upload__icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span>Choose an image</span>
+                </label>
+                <span class="file-upload__name" id="prof-file-name">No file chosen</span>
+              </div>
+              <span class="form-group__error" id="profile-picture-upload-error"></span>
+            </div>
+            <button type="submit" class="btn btn--primary">Save changes</button>
+            <p class="auth-server-msg" id="profile-edit-msg"></p>
+          </form>
+        </section>
+
+        <!-- CHANGE EMAIL -->
+        <section class="profile-section is-hidden" id="section-change-email">
+          <h2>Change email address</h2>
+          <p class="profile-section__hint">Your email is used for login and notifications.</p>
+
+          <form id="form-change-email" class="profile-form" novalidate>
+            <div class="form-group">
+              <label for="current-email">Current email</label>
+              <input id="current-email" type="email" name="currentEmail" placeholder="Your current email" required autocomplete="email" readonly>
+            </div>
+            <div class="form-group">
+              <label for="new-email">New email address</label>
+              <input id="new-email" type="email" name="newEmail" placeholder="new@example.com" required autocomplete="email">
+              <span class="form-group__error" id="new-email-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="email-password">Current password (required to confirm)</label>
+              <input id="email-password" type="password" name="password" placeholder="Enter current password" required autocomplete="current-password">
+              <span class="form-group__error" id="email-password-error"></span>
+            </div>
+            <button type="submit" class="btn btn--primary">Update email</button>
+            <p class="auth-server-msg" id="email-msg"></p>
+          </form>
+        </section>
+
+        <!-- CHANGE PASSWORD -->
+        <section class="profile-section is-hidden" id="section-change-password">
+          <h2>Change password</h2>
+          <p class="profile-section__hint">Choose a strong password you haven't used before.</p>
+
+          <form id="form-change-password" class="profile-form" novalidate>
+            <div class="form-group">
+              <label for="current-password">Current password</label>
+              <input id="current-password" type="password" name="currentPassword" placeholder="Enter current password" required autocomplete="current-password">
+              <span class="form-group__error" id="current-password-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="new-password">New password</label>
+              <input id="new-password" type="password" name="newPassword" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
+              <span class="form-group__error" id="new-password-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="new-password-confirm">Confirm new password</label>
+              <input id="new-password-confirm" type="password" name="confirmNewPassword" placeholder="Re-enter new password" required autocomplete="new-password">
+              <span class="form-group__error" id="new-password-confirm-error"></span>
+            </div>
+            <button type="submit" class="btn btn--primary">Update password</button>
+            <p class="auth-server-msg" id="password-msg"></p>
+          </form>
+        </section>
+
+        <!-- DELETE ACCOUNT -->
+        <section class="profile-section is-hidden" id="section-delete-account">
+          <h2>Delete your account</h2>
+          <p class="profile-section__hint profile-section__hint--danger">This action is permanent. Your profile, wishlist, posts, and all associated data will be removed. This cannot be undone.</p>
+
+          <form id="form-delete-account" class="profile-form" novalidate>
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" name="confirmDelete" id="confirm-delete" required>
+                <span>I understand that deleting my account is permanent and cannot be undone</span>
+              </label>
+              <span class="form-group__error" id="confirm-delete-error"></span>
+            </div>
+            <div class="form-group">
+              <label for="delete-password">Current password (required to confirm)</label>
+              <input id="delete-password" type="password" name="password" placeholder="Enter your password to confirm" required autocomplete="current-password">
+              <span class="form-group__error" id="delete-password-error"></span>
+            </div>
+            <button type="submit" class="btn btn--danger">Delete my account</button>
+            <p class="auth-server-msg" id="delete-msg"></p>
+          </form>
+        </section>
+
+        <!-- ACHIEVEMENTS -->
+        <section class="profile-section is-hidden" id="section-achievements">
+          <h2>Achievement Board</h2>
+          <p class="profile-section__hint">Your rewards, progress, and daily missions</p>
+
+          <div class="achieve-board__grid">
+
+            <div class="achieve-card achieve-card--unlocked">
+              <div class="achieve-card__icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M3 21v-2a5 5 0 0 1 9-3.5M16 3.13a5 5 0 0 1 1.87 9.87M21 21v-2a5 5 0 0 0-2.5-4.3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </div>
+              <div class="achieve-card__info">
+                <h3>Community Starter</h3>
+                <p>Joined the Playnex community</p>
+                <span class="achieve-card__xp">+50 XP</span>
+              </div>
+            </div>
+
+            <div class="achieve-card achieve-card--unlocked">
+              <div class="achieve-card__icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="achieve-card__info">
+                <h3>Wishlist Curator</h3>
+                <p>Added 5 items to your wishlist</p>
+                <span class="achieve-card__xp">+100 XP</span>
+              </div>
+            </div>
+
+            <div class="achieve-card achieve-card--locked">
+              <div class="achieve-card__icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="achieve-card__info">
+                <h3>First Purchase</h3>
+                <p>Buy your first game or merch item</p>
+                <span class="achieve-card__xp">+200 XP</span>
+              </div>
+            </div>
+
+            <div class="achieve-card achieve-card--locked">
+              <div class="achieve-card__icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="achieve-card__info">
+                <h3>Forum Champion</h3>
+                <p>Post 20 replies in the discussion forum</p>
+                <span class="achieve-card__xp">+300 XP</span>
+              </div>
+            </div>
+
+          </div>
+
+          <div class="achieve-board__mission">
+            <h3>Daily Mission</h3>
+            <div class="mission-card">
+              <div class="mission-card__icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="mission-card__info">
+                <h4>Explore the store</h4>
+                <p>Browse 3 different product categories today</p>
+                <div class="mission-card__progress">
+                  <div class="mission-card__bar"><span style="width:33%"></span></div>
+                  <span class="mission-card__status">1 / 3</span>
+                </div>
+              </div>
+              <span class="mission-card__reward">+75 XP</span>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__col">
+      <a href="#" class="logo logo--footer">
+        <img src="logo.png" alt="Playnex" class="logo__img">
+      </a>
+      <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
+    </div>
+    <div class="site-footer__col"><h3>Store</h3><a href="#">Digital games</a><a href="#">Physical merch</a><a href="#">Deals</a><a href="#">Free this week</a></div>
+    <div class="site-footer__col"><h3>Community</h3><a href="#">Forums</a><a href="#">Blog</a><a href="#">Reviews</a><a href="#">Wishlist</a></div>
+    <div class="site-footer__col"><h3>Support</h3><a href="#">Help center</a><a href="#">Order status</a><a href="#">Returns</a><a href="#">Contact us</a></div>
+    <div class="site-footer__col"><h3>Company</h3><a href="#">About Playnex</a><a href="#">Careers</a><a href="#">Terms of service</a><a href="#">Privacy policy</a></div>
+  </div>
+  <div class="site-footer__bottom">
+    <p>&copy; 2026 Playnex. All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="public/js/profile.js"></script>
+<script src="public/js/header.js"></script></body>
+</html>
