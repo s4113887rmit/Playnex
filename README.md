@@ -57,5 +57,5 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 
 
 ## Assignment Notes
-- No external frameworks (React, jQuery, Bootstrap, etc.) are used per course requirements
+- No external frameworks (React, jQuery, Bootstrap, etc.) are used per course requirement
 - All submitted code is original work
