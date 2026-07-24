@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Community Forum — Playnex</title>
+<meta name="description" content="Discuss games, merch, and get support on the Playnex Community Forums.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Page-specific layout extending style.css variables */
+  .forum-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .forum-toolbar__filters {
+    display: flex;
+    gap: 12px;
+    flex: 1;
+  }
+  .forum-toolbar__filters select, .forum-toolbar__search {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    color: var(--text);
+    font-size: 13px;
+  }
+  .forum-toolbar__search {
+    flex: 1;
+    max-width: 300px;
+  }
+  .forum-list {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .forum-row {
+    display: grid;
+    grid-template-columns: 80px 3fr 1.5fr 80px 80px 1.5fr;
+    gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+  }
+  .forum-row.header {
+    background: var(--surface-2);
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .forum-row:last-child {
+    border-bottom: none;
+  }
+  .forum-author {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+  }
+  .forum-author img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface-3);
+  }
+  .forum-author span {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .forum-thread-info h3 {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .forum-thread-info h3 a:hover {
+    color: var(--accent);
+  }
+  .forum-tag {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    background: var(--surface-3);
+    border: 1px solid var(--border);
+  }
+  .tag--support { border-color: #e74c3c; color: #ff7675; }
+  .tag--review { border-color: #9b59b6; color: #cd84f1; }
+  .tag--general { border-color: #3498db; color: #7efff5; }
+  .forum-stats {
+    font-size: 13px;
+    color: var(--text-muted);
+    text-align: center;
+  }
+  .forum-last-post {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  .forum-last-post strong {
+    color: var(--text);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .load-more-container {
+    text-align: center;
+    padding: 32px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- SITE HEADER -->
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="homepage.html" class="logo">
+      <img src="logo.png" alt="Playnex" class="logo__img">
+    </a>
+    <nav class="primary-nav">
+      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
+      <a href="forum.html" class="primary-nav__link is-active">Community</a>
+      <a href="blog.html" class="primary-nav__link">Blog</a>
+    </nav>
+    <div class="topbar__actions">
+      <!-- Search and Icons omitted for brevity, identical to homepage.html -->
+      <a href="admin.html" class="btn btn--outline btn--small">Admin Panel</a>
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+    </div>
+  </div>
+</header>
+
+<div class="page-header">
+  <h1>COMMUNITY FORUM</h1>
+</div>
+
+<main style="max-width: 1400px; margin: 0 auto; padding: 24px 40px 64px;">
+  
+  <div class="forum-toolbar">
+    <input type="text" class="forum-toolbar__search" placeholder="Search threads...">
+    
+    <div class="forum-toolbar__filters">
+      <select aria-label="Filter Category">
+        <option value="">All Categories</option>
+        <option value="games">Digital Games</option>
+        <option value="merch">Physical Merch</option>
+      </select>
+      <select aria-label="Filter Type">
+        <option value="">All Types</option>
+        <option value="review">Reviews</option>
+        <option value="support">Support</option>
+      </select>
+      <select aria-label="Sort By">
+        <option value="recent">Latest Activity</option>
+        <option value="views">Most Viewed</option>
+        <option value="replies">Most Replies</option>
+      </select>
+    </div>
+
+    <a href="forum-create.html" class="btn btn--primary btn--large">Create New Thread</a>
+  </div>
+
+  <div class="forum-list">
+    <div class="forum-row header">
+      <div>Author</div>
+      <div>Thread Title</div>
+      <div>Category Tag</div>
+      <div style="text-align: center;">Replies</div>
+      <div style="text-align: center;">Views</div>
+      <div>Last Post</div>
+    </div>
+
+    <!-- Thread 1 -->
+    <div class="forum-row">
+      <div class="forum-author">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User avatar">
+        <span>darknexus</span>
+      </div>
+      <div class="forum-thread-info">
+        <h3><a href="forum-detail.html">[Nightfall Protocol] Troubleshooting LAN connectivity for SEA players</a></h3>
+        <p class="forum-last-post">Having high latency issues connecting with friends in Indonesia. Any tips?</p>
+      </div>
+      <div><span class="forum-tag tag--support">Technical Support</span></div>
+      <div class="forum-stats">42</div>
+      <div class="forum-stats">1.2k</div>
+      <div class="forum-last-post">
+        <strong>an_admin</strong>
+        3 hours ago
+      </div>
+    </div>
+
+    <!-- Thread 2 -->
+    <div class="forum-row">
+      <div class="forum-author">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka" alt="User avatar">
+        <span>cyber_fan</span>
+      </div>
+      <div class="forum-thread-info">
+        <h3><a href="forum-detail.html">[Embercrown Saga] Collector's Edition Throne Figure Review</a></h3>
+        <p class="forum-last-post">Unboxing the 28cm figure. The detailing on the crown is amazing.</p>
+      </div>
+      <div><span class="forum-tag tag--review">Merch Review</span></div>
+      <div class="forum-stats">85</div>
+      <div class="forum-stats">3.4k</div>
+      <div class="forum-last-post">
+        <strong>merch_guy</strong>
+        6 hours ago
+      </div>
+    </div>
+
+    <!-- Thread 3 -->
+    <div class="forum-row">
+      <div class="forum-author">
+        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jack" alt="User avatar">
+        <span>sys_hacker</span>
+      </div>
+      <div class="forum-thread-info">
+        <h3><a href="forum-detail.html">Are the firewall breach mechanics in Silt and Static realistic?</a></h3>
+        <p class="forum-last-post">Looking at the attack models used in the game compared to real-world incidents.</p>
+      </div>
+      <div><span class="forum-tag tag--general">Game Discussion</span></div>
+      <div class="forum-stats">12</div>
+      <div class="forum-stats">890</div>
+      <div class="forum-last-post">
+        <strong>sys_hacker</strong>
+        1 day ago
+      </div>
+    </div>
+  </div>
+
+  <div class="load-more-container">
+    <button class="btn btn--ghost btn--large">Load More Threads</button>
+  </div>
+
+</main>
+
+<!-- SITE FOOTER omitted for brevity, paste standard footer here -->
+</body>
+</html>
