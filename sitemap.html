@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sitemap — Playnex</title>
+<meta name="description" content="Complete overview of all pages on Playnex.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .sitemap-layout { max-width: 1000px; margin: 0 auto; padding: 24px 40px 64px; }
+  .sitemap-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 32px; margin-top: 24px; }
+  .sitemap-col h2 { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--accent); margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+  .sitemap-col ul { list-style: none; padding: 0; }
+  .sitemap-col li { margin-bottom: 8px; }
+  .sitemap-col a { color: var(--text); text-decoration: none; font-size: 14px; }
+  .sitemap-col a:hover { color: var(--accent); }
+  .sitemap-col .sitemap-desc { font-size: 12px; color: var(--text-muted); display: block; }
+  .sitemap-intro { color: var(--text-muted); font-size: 14px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="homepage.html" class="logo">
+      <img src="logo.png" alt="Playnex" class="logo__img">
+    </a>
+    <nav class="primary-nav">
+      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
+      <a href="forum.html" class="primary-nav__link">Community</a>
+      <a href="#" class="primary-nav__link">Blog</a>
+    </nav>
+    <div class="topbar__actions">
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
+    </div>
+  </div>
+</header>
+
+<div class="page-header">
+  <h1>SITEMAP</h1>
+</div>
+
+<main class="sitemap-layout">
+  <p class="sitemap-intro">A complete overview of all pages on Playnex. Use this page to quickly find what you are looking for.</p>
+
+  <div class="sitemap-grid">
+
+    <div class="sitemap-col">
+      <h2>Store</h2>
+      <ul>
+        <li><a href="homepage.html">Homepage</a><span class="sitemap-desc">Landing page with featured games and new releases</span></li>
+        <li><a href="shopping.html">Shopping</a><span class="sitemap-desc">Browse digital games and physical merchandise</span></li>
+        <li><a href="cart.html">Shopping Cart</a><span class="sitemap-desc">Review items, update quantities, proceed to checkout</span></li>
+        <li><a href="checkout.html">Checkout</a><span class="sitemap-desc">Enter delivery and payment details</span></li>
+        <li><a href="confirmation.html">Order Confirmation</a><span class="sitemap-desc">View your completed order summary</span></li>
+        <li><a href="wishlist.html">Wishlist</a><span class="sitemap-desc">Save items for later or mark as purchased</span></li>
+      </ul>
+    </div>
+
+    <div class="sitemap-col">
+      <h2>Community</h2>
+      <ul>
+        <li><a href="forum.html">Discussion Forum</a><span class="sitemap-desc">Browse all discussion threads</span></li>
+        <li><a href="forum-create.html">Create Thread</a><span class="sitemap-desc">Start a new discussion</span></li>
+        <li><a href="forum-detail.html">Thread Details</a><span class="sitemap-desc">View a thread and its replies</span></li>
+      </ul>
+    </div>
+
+    <div class="sitemap-col">
+      <h2>Account</h2>
+      <ul>
+        <li><a href="login.html">Login / Sign Up</a><span class="sitemap-desc">Log into your account or create a new one</span></li>
+        <li><a href="profile.html">Profile Settings</a><span class="sitemap-desc">Edit profile, change email, update password</span></li>
+      </ul>
+    </div>
+
+    <div class="sitemap-col">
+      <h2>Administration</h2>
+      <ul>
+        <li><a href="admin.html">Admin Dashboard</a><span class="sitemap-desc">Manage users, lock and unlock accounts</span></li>
+        <li><a href="admin-detail.html">User Moderation</a><span class="sitemap-desc">View flags, warnings, and purchase history</span></li>
+      </ul>
+    </div>
+
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__col">
+      <a href="homepage.html" class="logo logo--footer">
+        <img src="logo.png" alt="Playnex" class="logo__img">
+      </a>
+      <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
+    </div>
+    <div class="site-footer__col">
+      <h3>Store</h3>
+      <a href="shopping.html">Digital games</a>
+      <a href="shopping.html">Physical merch</a>
+      <a href="shopping.html">Deals</a>
+      <a href="shopping.html">Free this week</a>
+    </div>
+    <div class="site-footer__col">
+      <h3>Community</h3>
+      <a href="forum.html">Forums</a>
+      <a href="#">Blog</a>
+      <a href="#">Reviews</a>
+      <a href="wishlist.html">Wishlist</a>
+    </div>
+    <div class="site-footer__col">
+      <h3>Support</h3>
+      <a href="#">Help center</a>
+      <a href="#">Order status</a>
+      <a href="#">Returns</a>
+      <a href="#">Contact us</a>
+    </div>
+    <div class="site-footer__col">
+      <h3>Company</h3>
+      <a href="#">About Playnex</a>
+      <a href="sitemap.html">Sitemap</a>
+      <a href="#">Terms of service</a>
+      <a href="#">Privacy policy</a>
+    </div>
+  </div>
+  <div class="site-footer__bottom">
+    <p>&copy; 2026 Playnex. All rights reserved.</p>
+  </div>
+</footer>
+
+</body>
+</html>
