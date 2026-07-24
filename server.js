@@ -6,6 +6,23 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
+(function loadEnv() {
+  var envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return;
+  var lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line || line[0] === '#') continue;
+    var eq = line.indexOf('=');
+    if (eq === -1) continue;
+    var key = line.substring(0, eq).trim();
+    var value = line.substring(eq + 1).trim();
+    if (value[0] === '"' && value[value.length - 1] === '"') value = value.slice(1, -1);
+    if (value[0] === "'" && value[value.length - 1] === "'") value = value.slice(1, -1);
+    if (!process.env[key]) process.env[key] = value;
+  }
+})();
+
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
@@ -19,7 +36,7 @@ app.get('/', function (req, res) {
   res.redirect('/homepage.html');
 });
 
-const MONGODB_URI = 'mongodb+srv://nguyenkhanhnguyen3967_db_user:NkK9r5QtMJOMJgL5@playnex.mzcuobd.mongodb.net/playnex?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/playnex';
 
 function saveBase64Image(base64Data) {
   if (!base64Data) return null;
@@ -294,6 +311,9 @@ app.put('/api/auth/email', authLimiter, async (req, res) => {
     if (existing) {
       return res.status(409).json({ error: 'That email address is already in use' });
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      return res.status(400).json({ error: 'Please provide a valid email address' });
+    }
     user.email = newEmail;
     await user.save({ validateBeforeSave: false });
     res.status(200).json({
@@ -359,7 +379,7 @@ app.delete('/api/auth/account', authLimiter, async (req, res) => {
   }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('Playnex server running on http://localhost:' + PORT);
 });

@@ -66,7 +66,11 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
    ```
    npm install
    ```
-3. Update the MongoDB URI in `server.js` line 22 with your Atlas connection string
+3. Create a `.env` file from the template:
+   ```
+   cp .env.example .env
+   ```
+   Then edit `.env` and add your MongoDB Atlas connection string.
 4. Start the server:
    - Double-click `start.bat` or run `node server.js`
 5. Open `http://localhost:3000` in your browser
