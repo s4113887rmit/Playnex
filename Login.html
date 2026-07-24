@@ -45,6 +45,16 @@
       <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
   </div>
+
+  <nav class="subnav">
+    <a href="shopping.html" class="subnav__link">All</a>
+    <a href="shopping.html?cat=digital" class="subnav__link">Digital games</a>
+    <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
+    <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
+    <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
+    <a href="rating.html" class="subnav__link">Reviews</a>
+    <a href="forum.html" class="subnav__link">Forums</a>
+  </nav>
 </header>
 
 
@@ -74,8 +84,8 @@
           <span class="form-group__error" id="login-password-error"></span>
         </div>
         <div class="form-group form-group__inline">
-          <label class="checkbox-label">
-            <input type="checkbox" name="remember" checked>
+          <label class="checkbox-label" for="login-remember">
+            <input type="checkbox" name="remember" id="login-remember" checked>
             <span>Remember me</span>
           </label>
           <a href="#" class="auth-forgot" id="show-forgot">Forgot password?</a>
@@ -136,14 +146,14 @@
           <span class="form-group__error" id="signup-picture-error"></span>
         </div>
         <div class="form-group">
-          <label class="checkbox-label">
+          <label class="checkbox-label" for="signup-terms">
             <input type="checkbox" name="terms" id="signup-terms" required>
             <span>I agree to the <a href="#" class="text-link">Terms of Service</a> and <a href="#" class="text-link">Privacy Policy</a></span>
           </label>
           <span class="form-group__error" id="signup-terms-error"></span>
         </div>
         <div class="form-group">
-          <label class="checkbox-label">
+          <label class="checkbox-label" for="signup-subscribe">
             <input type="checkbox" name="subscribe" id="signup-subscribe">
             <span>I would like to subscribe to special offers and newsletters</span>
           </label>
@@ -163,7 +173,7 @@
 
     <div class="site-footer__col">
       <a href="homepage.html" class="logo logo--footer">
-        <img src="logo.png" alt="Playnex logo" class="logo__img">
+        <img src="logo.png" alt="Playnex" class="logo__img">
       </a>
       <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
     </div>
