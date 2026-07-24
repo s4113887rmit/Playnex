@@ -42,7 +42,6 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 - `public/js/auth.js` - Client-side auth form validation and API calls
 - `public/js/profile.js` - Client-side profile management
 - `public/js/header.js` - Dynamic header (shows profile icon after login)
-- `README.md` - Project documentation
 
 ### Shared / Assets
 - `logo.png` - Playnex logo
