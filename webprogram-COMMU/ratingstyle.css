@@ -1,0 +1,448 @@
+
+body{
+  color: white;
+  background-color: #070712;
+  margin: 0;
+  padding:0;
+}
+
+/* searchbar fixed */
+.searchbar form{
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    margin-left: 30px; margin-bottom: -50px;
+}
+#search{
+    display: flex;
+    height: 47px; width: 500px;
+    background-color: #100f1e ;
+    border:1px solid #26243c;
+    color: white;
+    border-radius: 7px;
+    font-size: 130%;
+    padding-left: 20px;
+}
+#search:focus {
+    border: 4px solid #26243c;
+    outline: none;
+}
+.filter-row{
+    display: flex;
+    justify-content: flex-end;
+    transition: transform .18s ease, border-color .18s ease;
+    cursor: pointer;
+}
+.filter{
+    position: relative;
+
+}
+.filter summary{
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: #100f1e ;
+    border:1px solid #26243c;
+    justify-content: center;
+    align-items: center;
+    border-radius: 7px;
+    font-size: 130%;
+    height: 50px; width: 130px;
+}
+.filter-menu{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 110%;
+    background-color: #100f1e ;
+    border:1px solid #26243c;
+    border-radius: 7px;
+    width: 130px;
+    z-index: 5;
+    padding-bottom: 12px;
+    padding-top: 12px;
+    font-size: 85%;
+}
+.filter-menu a{
+    text-decoration: none;
+    border-radius: 7px;
+    font-size: 130%;
+    color: #a3a2ac;
+    padding: 5px;
+}
+.filter-menu a:hover{
+    color: orange;
+}
+.filter-menu a.active{ 
+    color:#d7d1f6 ; 
+}
+.filter-menu hr{
+    padding:-9px -12px;
+}
+.top{
+    margin: 70px 70px 100px 70px;
+}
+.top h1{
+    display: block;
+    font-family:'Cinzel';
+}
+header{
+    font-size: 350%;
+}
+
+.checked {
+  color: orange;
+}
+
+.game{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 50px;
+    row-gap: 100px;
+    margin:70px 100px 0px 100px;
+    margin-bottom: 100px;
+}
+.content{
+   place-self: center;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   background-color: #100f1e;
+   border-radius: 8px;
+   padding-bottom: 20px;
+   box-shadow: 0px 7px 11px rgba(255, 255, 255, 0.1);
+   overflow: hidden;
+   transition: transform .18s ease, border-color .18s ease;
+}
+.content h2{
+    padding-top: 10px;
+}
+.content img{
+    height: 400px; width: 300px;
+}
+.content:hover{
+    cursor: pointer;
+    transform: translateY(-10px) scale(1.05);
+    border-color: rgba(255,255,255,0);
+}
+/* ----detail game rating---- */
+.gameinfo{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-wrap: wrap;
+    overflow: hidden;
+    margin: auto;
+    font-size: 170%;
+    border: 1px solid #26243c;
+    background: #100f1e;
+    border-radius: 8px;
+    width: fit-content;  
+    max-height: 2000px;
+}
+.gameinfo p{
+    color:#6f6e79 ;
+    padding-top: 35px
+    
+}
+.info{
+    line-height: 120%;
+    max-height: 500px;
+    padding-top: 30px;
+}
+.info p{
+    margin-top: -25px;
+    font-size: 70%;
+}
+.gameinfo img{
+    max-width: 350px;   
+    margin: 20px 20px 20px 20px;
+    border-radius: 8px;
+    max-height: 500px;
+}
+.review-sum{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 50px 30px 50px;
+    justify-content: center;
+    margin-top: auto;
+    margin-bottom: auto;
+    margin-left: 160px;
+    margin-right: 30px;
+    border: 1px solid #26243c;
+    background-color: #090815;
+    border-radius: 8px;
+    height: fit-content;
+}
+.review-sum h2{
+    margin: 10px 40px 45px 40px;
+    font-size: 400%;
+}
+.review-sum .sum-star{
+    margin-bottom: -33px;
+    font-size: 130%;
+}
+.review-sum p{
+    font-size: 75%;
+    margin-top: 33px ;
+}
+.review-sum button{
+    margin-bottom: 30px;
+    margin-top: 30px;
+    text-decoration: none;
+    background:#ff8500;
+    border: none;
+    border-radius: 8px;
+    padding: 13px 30px;
+    font-size: 110%;
+    font-weight: 600;
+    cursor: pointer;
+    transition: .1s;
+}
+.review-sum button:hover{background: red;}
+.review-sum button a{
+    text-decoration: none;
+    color: white;
+}
+
+/* rating bar */
+
+.rating-bars {
+    width: 1000px; 
+    max-width: 1000px;
+    background: #0d0d1a;
+    padding: 10;
+}
+
+.rating-row {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin: 10px;
+}
+
+.rating-label {
+    width: 12px;
+    color: #ffffff;
+    font-size: 40px;
+    margin-top: -10px;
+}
+
+.bar-track {
+    flex: 1;
+    height: 16px;
+    background: #1c1c2e;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    background: #f2d94e;
+    border-radius: 8px;
+}
+
+/* detail rating */
+
+.detailreview{
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    gap: 100px;
+    justify-content: center;
+    max-width: 2000px;
+    margin: 100px auto;
+    border: 1px solid #26243c;
+    width: fit-content;
+    padding: 40px;
+    background: #100f1e;
+    border-radius: 8px;
+}
+.detail-star{
+    display: flex;
+}
+.revieweva{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 500px;
+    font-size: 250%;
+    border: 1px solid #26243c;
+    background: #090815;
+    padding: 25px;
+    border-radius: 8px;
+}
+.revieweva h2{
+    margin-top: 5px ;
+}
+.revieweva h3{
+    font-size: 50%;
+    color: #6f6e79;
+}
+
+/* write review */
+.writestar{
+    font-size: 250%;
+}
+/* comments  */
+.comments{
+  margin: 0 150px 60px 150px;
+}
+
+.comments h3{
+  font-size: 150%;
+  color: white;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.comment{
+  display:flex;
+  gap: 20px;
+  background: #100f1e;
+  border: 1px solid #26243c;
+  border-radius: 8px;
+  padding: 22px 26px;
+  margin-bottom: 16px;
+}
+
+.comment-avatar{
+  flex: 0 0 auto;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: white;
+}
+
+.comment-content{
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.comment-meta{
+  display:flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-meta .author{
+  color: #6f6e79;
+  font-weight: 600;
+}
+
+.comment-meta .date{
+  color: #6f6e79;
+  font-size: 90%;
+}
+
+.comment-content p{
+  margin: 0;
+  color: #cfcbe8;
+  line-height: 1.6;
+}
+
+/* new thread page  */
+.new-thread-wrap{
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 28px 100px;
+}
+
+.new-thread-wrap h2{
+  font-size: 220%;
+  margin: 0 0 30px;
+}
+
+.new-thread-form label{
+  display:block;
+  color:#a3a2ac;
+  font-size: 110%;
+  margin-bottom: 8px;
+}
+
+.new-thread-form .field{
+  margin-bottom: 22px;
+}
+
+.new-thread-form textarea{
+  min-height: 220px;
+}
+
+.new-thread-form input[type="text"],
+.new-thread-form textarea{
+  width: 100%;
+  background-color: #070712;
+  border: 1px solid #26243c;
+  color: white;
+  border-radius: 7px;
+  font-size: 110%;
+  padding: 14px 16px;
+  resize: vertical;
+}
+
+.new-thread-form input[type="text"]:focus,
+.new-thread-form textarea:focus{
+  border: 2px solid #26243c;
+  outline: none;
+}
+
+.new-thread-form button{
+  margin-top: 16px;
+  background:#ff8500;
+  color:#100f1e;
+  border: none;
+  border-radius: 999px;
+  padding: 13px 30px;
+  font-size: 110%;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.new-thread-form button:hover{
+  background:red;
+}
+
+@media (max-width: 900px){
+  .comments{
+    margin-left: 24px;
+    margin-right: 24px;
+  }
+}
+
+@media (min-width: 3000px) {
+    .game {
+        grid-template-columns: repeat(8, 1fr);
+    }
+}
+@media (max-width: 4000px) {
+    .game {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
+@media (max-width: 2300px) {
+    .game {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+@media (max-width: 1790px) {
+    .game {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+@media (max-width: 1500px) {
+    .game {
+        grid-template-columns:1fr 1fr;
+    }
+}
+@media (max-width: 500px) {
+    .game {
+        grid-template-columns: 1fr;
+    }
+}
