@@ -27,8 +27,11 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 - `Style.css` - Global stylesheet (shared)
 
 ### Tran Binh An (S4206755)
-- `admin/` - Administration panel for site management (to be added)
-- Discussion forum pages (to be added)
+- `forum.html` - Main thread list and category filters
+- `forum-detail.html` - Detailed view of a single thread and replies
+- `forum-create.html` - Form to create or edit a discussion post
+- `admin.html` - Administrator dashboard for managing locked/normal accounts
+- `admin-detail.html` - Detailed user moderation view with flags and purchase history
 
 ### Nguyen Khanh Nguyen (S4197203)
 - `Login.html` - Login, sign up, and forgot password forms
