@@ -114,7 +114,6 @@ h1,h2,h3, .brand{
   min-width: 150px;
   max-width: 200px;
   text-align: center;
-  box-shadow: var(--shadow-glow);
   position: relative;
   z-index: 2; 
   transition: transform .15s ease, border-color .15s ease;
@@ -143,13 +142,13 @@ h1,h2,h3, .brand{
 .sitemap-wrap::-webkit-scrollbar-track{ background: #1e2044; border-radius: 10px; }
 .sitemap-wrap::-webkit-scrollbar-thumb{ background: #2c2e5c; border-radius: 10px; }
 .node .title a {
-  color: inherit; /* Tự động lấy màu chữ của thẻ cha (--text-main) */
-  text-decoration: none; /* Bỏ gạch chân mặc định */
+  color: inherit; 
+  text-decoration: none; 
   display: inline-block;
   width: 100%;
 }
 
 .node .title a:hover {
-  color: var(--accent-primary-light); /* Đổi màu nhẹ khi hover (tùy chọn) */
+  color: var(--accent-primary-light);
   text-decoration: none;
 }
