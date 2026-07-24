@@ -58,6 +58,4 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 
 ## Assignment Notes
 - No external frameworks (React, jQuery, Bootstrap, etc.) are used per course requirements
-- No external file upload libraries (multer replaced with built-in fs + base64)
-- Images and static files are stored locally; their URLs are referenced in the database
 - All submitted code is original work
