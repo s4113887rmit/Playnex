@@ -23,7 +23,7 @@
       <a href="homepage.html" class="primary-nav__link">Home</a>
       <a href="shopping.html" class="primary-nav__link">Shopping</a>
       <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
-      <a href="#" class="primary-nav__link">Community</a>
+      <a href="forum.html" class="primary-nav__link">Community</a>
       <a href="#" class="primary-nav__link">Blog</a>
     </nav>
 
@@ -96,7 +96,7 @@
         <a href="#" class="auth-back" id="back-to-login">&larr; Back to log in</a>
       </form>
 
-      <form id="signup-form" class="auth-form is-hidden" novalidate>
+      <form id="signup-form" class="auth-form is-hidden" enctype="multipart/form-data" novalidate>
         <div class="form-group">
           <label for="signup-username">Username</label>
           <input id="signup-username" type="text" name="username" placeholder="Choose a username" required autocomplete="username" minlength="3" maxlength="30">
