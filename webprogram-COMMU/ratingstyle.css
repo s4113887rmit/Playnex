@@ -88,7 +88,12 @@ body{
 }
 .top h1{
     display: block;
+    font-family:'Cinzel';   
+}
+.writetop{
+    display: block;
     font-family:'Cinzel';
+    margin: 70px 70px 20px 70px; 
 }
 header{
     font-size: 350%;
@@ -134,7 +139,7 @@ header{
     display: flex;
     flex-direction: row;
     justify-content: center;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     overflow: hidden;
     margin: auto;
     font-size: 170%;
