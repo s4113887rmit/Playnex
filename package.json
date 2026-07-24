@@ -1,0 +1,19 @@
+{
+  "name": "playnex",
+  "version": "1.0.0",
+  "description": "Playnex — Digital games and merch, all in one store",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "mongodb": "^6.9.0",
+    "mongoose": "^8.7.0",
+    "validator": "^13.12.0"
+  }
+}
