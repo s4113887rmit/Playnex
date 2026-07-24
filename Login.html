@@ -28,7 +28,7 @@
     </nav>
 
     <div class="topbar__actions">
-      <form class="search" role="search" action="shopping.html" method="get">
+      <form class="search" role="search" action="shopping.html" method="post">
         <label for="site-search" class="visually-hidden">Search games, merch, tags</label>
         <svg viewBox="0 0 24 24" class="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.6" y2="16.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <input id="site-search" name="q" type="search" placeholder="Search games, merch, tags">
@@ -69,7 +69,7 @@
 
       <h2 class="auth-heading">Log in to your account</h2>
 
-      <form class="auth-form" action="homepage.html" method="get">
+      <form class="auth-form" action="homepage.html" method="post">
         <div class="form-group">
           <label for="login-email">Email address</label>
           <input id="login-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
@@ -94,7 +94,7 @@
 
       <h2 class="auth-heading">Create your Playnex account</h2>
 
-      <form class="auth-form" action="Profile.html" method="get">
+      <form class="auth-form" action="Profile.html" method="post">
         <div class="form-group">
           <label for="signup-username">Username</label>
           <input id="signup-username" type="text" name="username" placeholder="Choose a username" required autocomplete="username" minlength="3" maxlength="30">
@@ -139,6 +139,21 @@
           </label>
         </div>
         <button type="submit" class="btn btn--primary btn--auth">Create account</button>
+      </form>
+
+      <div class="auth-divider">
+        <span>Forgot your password?</span>
+      </div>
+
+      <h2 class="auth-heading">Reset your password</h2>
+      <p class="auth-form__hint" style="text-align:center">Enter your email and we'll send you a reset link.</p>
+
+      <form class="auth-form" action="#" method="post">
+        <div class="form-group">
+          <label for="forgot-email">Email address</label>
+          <input id="forgot-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <button type="submit" class="btn btn--primary btn--auth">Send reset link</button>
       </form>
 
     </div>
