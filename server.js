@@ -3,8 +3,11 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const multer = require('multer');
+const fs = require('fs');
 const crypto = require('crypto');
+
+const dns = require('dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const app = express();
 
@@ -18,24 +21,20 @@ app.get('/', function (req, res) {
 
 const MONGODB_URI = 'mongodb+srv://nguyenkhanhnguyen3967_db_user:NkK9r5QtMJOMJgL5@playnex.mzcuobd.mongodb.net/playnex?retryWrites=true&w=majority';
 
-const storage = multer.diskStorage({
-  destination: path.join(__dirname, 'uploads'),
-  filename: function (req, file, cb) {
-    cb(null, 'profile-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));
+function saveBase64Image(base64Data) {
+  if (!base64Data) return null;
+  var matches = base64Data.match(/^data:image\/(png|jpeg|jpg|gif|webp);base64,(.+)$/);
+  if (!matches) return null;
+  var ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+  var data = matches[2];
+  var filename = 'profile-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.' + ext;
+  var filepath = path.join(__dirname, 'uploads', filename);
+  if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
+    fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
   }
-});
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: function (req, file, cb) {
-    var allowed = /jpeg|jpg|png|gif|webp/;
-    var ext = allowed.test(path.extname(file.originalname).toLowerCase());
-    var mime = allowed.test(file.mimetype);
-    if (ext && mime) return cb(null, true);
-    cb(new Error('Only image files (jpeg, jpg, png, gif, webp) are allowed'));
-  }
-});
+  fs.writeFileSync(filepath, data, 'base64');
+  return 'uploads/' + filename;
+}
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -52,9 +51,9 @@ mongoose
 
 const User = require('./models/User');
 
-app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async (req, res) => {
+app.post('/api/auth/signup', authLimiter, async (req, res) => {
   try {
-    const { username, name, email, password, confirmPassword, description, subscribe } = req.body;
+    const { username, name, email, password, confirmPassword, description, subscribe, profilePicture } = req.body;
 
     if (!username || !email || !password || !confirmPassword || !description) {
       var missing = [];
@@ -81,10 +80,9 @@ app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async
       return res.status(409).json({ error: field + ' is already registered' });
     }
 
-    var profilePicture = 'uploads/default-profile.svg';
-    if (req.file) {
-      profilePicture = 'uploads/' + req.file.filename;
-    }
+    var profilePic = 'uploads/default-profile.svg';
+    var saved = saveBase64Image(profilePicture);
+    if (saved) profilePic = saved;
 
     var user = await User.create({
       username: username,
@@ -92,7 +90,7 @@ app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async
       email: email,
       password: password,
       description: description,
-      profilePicture: profilePicture,
+      profilePicture: profilePic,
       isVerified: true,
       subscribe: !!subscribe
     });
@@ -108,9 +106,6 @@ app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async
     }
     if (err.code === 11000) {
       return res.status(409).json({ error: 'Username or email already exists' });
-    }
-    if (err.message && err.message.indexOf('image files') !== -1) {
-      return res.status(400).json({ error: 'Only image files (jpeg, jpg, png, gif, webp) are allowed' });
     }
     console.error('Signup error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
@@ -213,6 +208,153 @@ app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
     res.status(200).json({ message: 'Password has been reset successfully. You can now log in.' });
   } catch (err) {
     console.error('Reset password error:', err);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+});
+
+app.post('/api/auth/profile', authLimiter, async (req, res) => {
+  try {
+    var { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+    var user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.status(200).json({
+      id: user._id,
+      username: user.username,
+      name: user.name,
+      email: user.email,
+      description: user.description,
+      profilePicture: user.profilePicture,
+      role: user.role
+    });
+  } catch (err) {
+    console.error('Profile fetch error:', err);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+});
+
+app.put('/api/auth/profile', authLimiter, async (req, res) => {
+  try {
+    var { email, name, description, profilePicture } = req.body;
+    if (!email) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+    var user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    if (name) user.name = name;
+    if (description) user.description = description;
+    if (profilePicture) {
+      var saved = saveBase64Image(profilePicture);
+      if (saved) user.profilePicture = saved;
+    }
+    await user.save({ validateBeforeSave: false });
+    res.status(200).json({
+      message: 'Profile updated successfully.',
+      user: {
+        id: user._id,
+        username: user.username,
+        name: user.name,
+        email: user.email,
+        description: user.description,
+        profilePicture: user.profilePicture,
+        role: user.role
+      }
+    });
+  } catch (err) {
+    if (err.name === 'ValidationError') {
+      var messages = Object.values(err.errors).map(function (e) { return e.message; }).join('. ');
+      return res.status(400).json({ error: messages });
+    }
+    console.error('Profile update error:', err);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+});
+
+app.put('/api/auth/email', authLimiter, async (req, res) => {
+  try {
+    var { currentEmail, newEmail, password } = req.body;
+    if (!currentEmail || !newEmail || !password) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    var user = await User.findOne({ email: currentEmail.toLowerCase() }).select('+password');
+    if (!user) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+    var isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Password is incorrect' });
+    }
+    var existing = await User.findOne({ email: newEmail.toLowerCase() });
+    if (existing) {
+      return res.status(409).json({ error: 'That email address is already in use' });
+    }
+    user.email = newEmail;
+    await user.save({ validateBeforeSave: false });
+    res.status(200).json({
+      message: 'Email address updated successfully.',
+      email: user.email
+    });
+  } catch (err) {
+    console.error('Email change error:', err);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+});
+
+app.put('/api/auth/change-password', authLimiter, async (req, res) => {
+  try {
+    var { email, currentPassword, newPassword, confirmNewPassword } = req.body;
+    if (!email || !currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    if (newPassword !== confirmNewPassword) {
+      return res.status(400).json({ error: 'New passwords do not match' });
+    }
+    if (newPassword.length < 8) {
+      return res.status(400).json({ error: 'New password must be at least 8 characters' });
+    }
+    var user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    if (!user) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+    var isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Current password is incorrect' });
+    }
+    user.password = newPassword;
+    await user.save();
+    res.status(200).json({ message: 'Password changed successfully.' });
+  } catch (err) {
+    console.error('Password change error:', err);
+    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+  }
+});
+
+app.delete('/api/auth/account', authLimiter, async (req, res) => {
+  try {
+    var { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+    var user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    if (!user) {
+      return res.status(404).json({ error: 'Account not found' });
+    }
+    var isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ error: 'Password is incorrect' });
+    }
+    user.isActive = false;
+    user.email = user.email + '_deactivated_' + Date.now();
+    await user.save({ validateBeforeSave: false });
+    res.status(200).json({ message: 'Your account has been deactivated. We are sorry to see you go.' });
+  } catch (err) {
+    console.error('Account deletion error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
 });

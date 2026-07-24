@@ -147,16 +147,48 @@
     clearMessages();
     if (!validateSignup()) return;
 
-    var formData = new FormData(signupForm);
     var btn = signupForm.querySelector('button[type="submit"]');
     btn.disabled = true;
     btn.textContent = 'Creating account...';
 
-    fetch('/api/auth/signup', { method: 'POST', body: formData })
+    var file = fileInput.files[0];
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        sendSignup(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      sendSignup(null);
+    }
+  });
+
+  function sendSignup(pictureBase64) {
+    var payload = {
+      username: document.getElementById('signup-username').value.trim(),
+      email: document.getElementById('signup-email').value.trim(),
+      password: document.getElementById('signup-password').value,
+      confirmPassword: document.getElementById('signup-confirm').value,
+      description: descField.value.trim(),
+      subscribe: document.getElementById('signup-subscribe').checked,
+      profilePicture: pictureBase64 || null
+    };
+
+    fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
       .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
       .then(function (result) {
         if (result.status === 201) {
           showServerMsg('signup', result.data.message, 'success');
+          localStorage.setItem('playnex_user', JSON.stringify({
+            id: result.data.user.id,
+            username: result.data.user.username,
+            email: result.data.user.email,
+            name: result.data.user.name
+          }));
           signupForm.reset();
           charCount.textContent = '0';
           fileName.textContent = 'No file chosen';
@@ -175,7 +207,7 @@
         btn.disabled = false;
         btn.textContent = 'Create account';
       });
-  });
+  }
 
   loginForm.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -199,6 +231,13 @@
       .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
       .then(function (result) {
         if (result.status === 200) {
+          localStorage.setItem('playnex_user', JSON.stringify({
+            id: result.data.user.id,
+            username: result.data.user.username,
+            email: result.data.user.email,
+            name: result.data.user.name,
+            role: result.data.user.role
+          }));
           showServerMsg('login', result.data.message, 'success');
           setTimeout(function () { window.location.href = 'homepage.html'; }, 1000);
         } else {
