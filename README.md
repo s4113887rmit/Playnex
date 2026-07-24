@@ -14,8 +14,12 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 ## File and Folder Distribution
 
 ### Ngo Gia Bao (S4186655)
-- Game rating and review pages
-- Site map page
+- `rating.html` - Browse games with search, rating filters, and average star ratings
+- `ratinggame.html` - Game review details with rating breakdown and user reviews
+- `writegamereview.html` - Submit a star rating and written review for a game
+- `sitemap.html` - Website sitemap showing page navigation and module structure
+- `sitemap.css` - Stylesheet for the sitemap page
+- `ratingStyle.css` - Shared stylesheet for all game rating pages
 
 ### Nguyen Ngoc Quang Dang (S4113887)
 - `homepage.html` - Landing page with hero, new releases, merch shelves
