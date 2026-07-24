@@ -6,17 +6,16 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 
 | Full Name | Student ID | Module |
 |-----------|-----------|--------|
-| Ngo Gia Bao | S4186655 | Game Rating, Blog, Forum |
+| Ngo Gia Bao | S4186655 | Game Rating, Site Map |
 | Nguyen Ngoc Quang Dang | S4113887 | Shopping Cart, Homepage, Wishlist, Checkout, Confirmation |
-| Tran Binh An | S4206755 | Administration Page, Discussion Forum |
-| Nguyen Khanh Nguyen | S4197203 | Shared User Account, User Settings |
+| Tran Binh An | S4206755 | Discussion Forums, Administration Page |
+| Nguyen Khanh Nguyen | S4197203 | Blogs, User Account |
 
 ## File and Folder Distribution
 
 ### Ngo Gia Bao (S4186655)
-- `blog/` - Blog platform (to be added)
-- Forum pages (to be added)
-- Review and rating pages (to be added)
+- Game rating and review pages
+- Site map page
 
 ### Nguyen Ngoc Quang Dang (S4113887)
 - `homepage.html` - Landing page with hero, new releases, merch shelves
@@ -29,11 +28,12 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 
 ### Tran Binh An (S4206755)
 - `admin/` - Administration panel for site management (to be added)
-- Forum pages (to be added)
+- Discussion forum pages (to be added)
 
 ### Nguyen Khanh Nguyen (S4197203)
 - `Login.html` - Login, sign up, and forgot password forms
 - `Profile.html` - Profile settings with edit profile, achievements, email/password change, account deletion
+- `blog/` - Blog platform (to be added)
 - `models/User.js` - MongoDB user schema with authentication fields
 - `server.js` - Express server with auth routes (signup, login, profile, password reset, account management)
 - `public/js/auth.js` - Client-side auth form validation and API calls
