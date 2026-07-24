@@ -1450,6 +1450,26 @@ img {
   color: var(--accent);
 }
 
+.auth-heading {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  text-align: center;
+}
+
+.auth-divider {
+  text-align: center;
+  margin: 32px 0;
+  border-top: 1px solid var(--border);
+  padding-top: 28px;
+}
+
+.auth-divider span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
 .auth-form .form-group textarea {
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -1852,7 +1872,25 @@ img {
 }
 
 @media (max-width: 860px) {
-  .profile-body {
+.profile-body-static {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.profile-body-static .profile-content {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px;
+}
+
+.profile-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 32px 0;
+}
+
+.profile-body {
     grid-template-columns: 1fr;
   }
 
