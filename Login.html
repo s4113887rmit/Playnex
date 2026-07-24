@@ -68,12 +68,12 @@
         <div class="form-group">
           <label for="login-email">Email address</label>
           <input id="login-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
-          role="alert" id="login-email-error" role="alert"></span>
+          <span class="form-group__error" role="alert" id="login-email-error"></span>
         </div>
         <div class="form-group">
           <label for="login-password">Password</label>
           <input id="login-password" type="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
-          role="alert" id="login-password-error"></span>
+          <span class="form-group__error" role="alert" id="login-password-error"></span>
         </div>
         <div class="form-group form-group__inline">
           <label class="checkbox-label">
@@ -91,7 +91,7 @@
         <div class="form-group">
           <label for="forgot-email">Email address</label>
           <input id="forgot-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
-          role="alert" id="forgot-email-error"></span>
+          <span class="form-group__error" role="alert" id="forgot-email-error"></span>
         </div>
         <button type="submit" class="btn btn--primary btn--auth">Send reset link</button>
         <p class="auth-server-msg" id="forgot-server-msg"></p>
@@ -102,28 +102,28 @@
         <div class="form-group">
           <label for="signup-username">Username</label>
           <input id="signup-username" type="text" name="username" placeholder="Choose a username" required autocomplete="username" minlength="3" maxlength="30">
-          role="alert" id="signup-username-error"></span>
+          <span class="form-group__error" role="alert" id="signup-username-error"></span>
         </div>
         <div class="form-group">
           <label for="signup-email">Email address</label>
           <input id="signup-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
-          role="alert" id="signup-email-error"></span>
+          <span class="form-group__error" role="alert" id="signup-email-error"></span>
         </div>
         <div class="form-group">
           <label for="signup-password">Password</label>
           <input id="signup-password" type="password" name="password" placeholder="At least 8 characters" required autocomplete="new-password" minlength="8">
-          role="alert" id="signup-password-error"></span>
+          <span class="form-group__error" role="alert" id="signup-password-error"></span>
         </div>
         <div class="form-group">
           <label for="signup-confirm">Confirm password</label>
           <input id="signup-confirm" type="password" name="confirmPassword" placeholder="Re-enter your password" required autocomplete="new-password">
-          role="alert" id="signup-confirm-error"></span>
+          <span class="form-group__error" role="alert" id="signup-confirm-error"></span>
         </div>
         <div class="form-group">
           <label for="signup-description">Short description</label>
           <textarea id="signup-description" name="description" placeholder="Tell us a bit about yourself (max 500 characters)" required maxlength="500" rows="3"></textarea>
           <span class="form-group__char-count"><span id="desc-char-count">0</span>/500</span>
-          role="alert" id="signup-description-error"></span>
+          <span class="form-group__error" role="alert" id="signup-description-error"></span>
         </div>
         <div class="form-group">
           <label for="signup-picture">Profile picture (optional)</label>
@@ -135,14 +135,14 @@
             </label>
             <span class="file-upload__name" id="file-name">No file chosen</span>
           </div>
-          role="alert" id="signup-picture-error"></span>
+          <span class="form-group__error" role="alert" id="signup-picture-error"></span>
         </div>
         <div class="form-group">
           <label class="checkbox-label">
             <input type="checkbox" name="terms" id="signup-terms" required>
             <span>I agree to the <a href="#" class="text-link">Terms of Service</a> and <a href="#" class="text-link">Privacy Policy</a></span>
           </label>
-          role="alert" id="signup-terms-error"></span>
+          <span class="form-group__error" role="alert" id="signup-terms-error"></span>
         </div>
         <div class="form-group">
           <label class="checkbox-label">
