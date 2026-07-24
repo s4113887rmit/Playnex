@@ -52,7 +52,7 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 
 | Layer | Technology |
 |-------|-----------|
-| Front-end | HTML5, CSS3, JavaScript (Vanilla) |
+| Front-end | HTML, CSS |
 
 
 
