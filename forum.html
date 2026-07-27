@@ -8,114 +8,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<style>
-  /* Page-specific layout extending style.css variables */
-  .forum-toolbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-  }
-  .forum-toolbar__filters {
-    display: flex;
-    gap: 12px;
-    flex: 1;
-  }
-  .forum-toolbar__filters select, .forum-toolbar__search {
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px 14px;
-    color: var(--text);
-    font-size: 13px;
-  }
-  .forum-toolbar__search {
-    flex: 1;
-    max-width: 300px;
-  }
-  .forum-list {
-    background: var(--surface-1);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .forum-row {
-    display: grid;
-    grid-template-columns: 80px 3fr 1.5fr 80px 80px 1.5fr;
-    gap: 16px;
-    padding: 16px 24px;
-    border-bottom: 1px solid var(--border);
-    align-items: center;
-  }
-  .forum-row.header {
-    background: var(--surface-2);
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    letter-spacing: 0.05em;
-  }
-  .forum-row:last-child {
-    border-bottom: none;
-  }
-  .forum-author {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 6px;
-  }
-  .forum-author img {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: var(--surface-3);
-  }
-  .forum-author span {
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-  .forum-thread-info h3 {
-    font-size: 15px;
-    font-weight: 600;
-    margin-bottom: 4px;
-  }
-  .forum-thread-info h3 a:hover {
-    color: var(--accent);
-  }
-  .forum-tag {
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    background: var(--surface-3);
-    border: 1px solid var(--border);
-  }
-  .tag--support { border-color: #e74c3c; color: #ff7675; }
-  .tag--review { border-color: #9b59b6; color: #cd84f1; }
-  .tag--general { border-color: #3498db; color: #7efff5; }
-  .forum-stats {
-    font-size: 13px;
-    color: var(--text-muted);
-    text-align: center;
-  }
-  .forum-last-post {
-    font-size: 12px;
-    color: var(--text-muted);
-  }
-  .forum-last-post strong {
-    color: var(--text);
-    display: block;
-    margin-bottom: 2px;
-  }
-  .load-more-container {
-    text-align: center;
-    padding: 32px 0;
-  }
-</style>
 </head>
 <body>
 <a class="skip-to-content" href="#main-content">Skip to main content</a>
@@ -145,7 +37,7 @@
   <h1>COMMUNITY FORUM</h1>
 </div>
 
-<main id="main-content" style="max-width: 1400px; margin: 0 auto; padding: 24px 40px 64px;">
+<main id="main-content" class="forum-main">
   
   <div class="forum-toolbar">
     <input type="text" class="forum-toolbar__search" placeholder="Search threads...">
@@ -176,8 +68,8 @@
       <div>Author</div>
       <div>Thread Title</div>
       <div>Category Tag</div>
-      <div style="text-align: center;">Replies</div>
-      <div style="text-align: center;">Views</div>
+      <div class="forum-header-cell">Replies</div>
+      <div class="forum-header-cell">Views</div>
       <div>Last Post</div>
     </div>
 
@@ -254,10 +146,10 @@
       <a href="homepage.html" class="logo logo--footer"><img src="logo.png" alt="Playnex" class="logo__img"></a>
       <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
     </div>
-    <div class="site-footer__col"><h3>Store</h3><a href="Shopping.html">Digital games</a><a href="Shopping.html">Physical merch</a><a href="Shopping.html">Deals</a><a href="Shopping.html">Free this week</a></div>
-    <div class="site-footer__col"><h3>Community</h3><a href="forum.html">Forums</a><a href="blog.html">Blog</a><a href="rating.html">Reviews</a><a href="Wishlist.html">Wishlist</a></div>
-    <div class="site-footer__col"><h3>Support</h3><a href="#">Help center</a><a href="sitemap.html">Sitemap</a><a href="#">Order status</a><a href="#">Returns</a><a href="#">Contact us</a></div>
-    <div class="site-footer__col"><h3>Company</h3><a href="#">About Playnex</a><a href="#">Careers</a><a href="#">Terms of service</a><a href="#">Privacy policy</a></div>
+    <div class="site-footer__col"><h3>Store</h3><a href="shopping.html">Digital games</a><a href="shopping.html">Physical merch</a><a href="shopping.html">Deals</a><a href="shopping.html">Free this week</a></div>
+    <div class="site-footer__col"><h3>Community</h3><a href="forum.html">Forums</a><a href="blog.html">Blog</a><a href="rating.html">Reviews</a><a href="wishlist.html">Wishlist</a></div>
+    <div class="site-footer__col"><h3>Support</h3><a href="#">Help center</a><a href="#">Order status</a><a href="#">Returns</a><a href="#">Contact us</a></div>
+    <div class="site-footer__col"><h3>Company</h3><a href="#">About Playnex</a><a href="sitemap.html">Sitemap</a><a href="#">Terms</a><a href="#">Privacy</a></div>
   </div>
   <div class="site-footer__bottom"><p>&copy; 2026 Playnex. All rights reserved.</p></div>
 </footer></body>
