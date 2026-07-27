@@ -231,6 +231,7 @@
       .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
       .then(function (result) {
         if (result.status === 200) {
+          localStorage.removeItem('playnex_user');
           localStorage.setItem('playnex_user', JSON.stringify({
             id: result.data.user.id,
             username: result.data.user.username,
@@ -238,7 +239,7 @@
             name: result.data.user.name,
             role: result.data.user.role
           }));
-          showServerMsg('login', result.data.message, 'success');
+          showServerMsg('login', 'Welcome, ' + (result.data.user.name || result.data.user.username) + '! Logged in successfully.', 'success');
           setTimeout(function () { window.location.href = 'homepage.html'; }, 1000);
         } else {
           localStorage.removeItem('playnex_user');
