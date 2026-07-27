@@ -37,6 +37,10 @@
   list-style: none;
 }
 
+.is-hidden {
+  display: none !important;
+}
+
 .skip-to-content {
   position: absolute;
   top: -100%;
