@@ -240,7 +240,7 @@
             role: result.data.user.role
           }));
           showServerMsg('login', 'Welcome, ' + (result.data.user.name || result.data.user.username) + '! Logged in successfully.', 'success');
-          setTimeout(function () { window.location.href = 'homepage.html'; }, 1000);
+          setTimeout(function () { window.location.href = 'index.html'; }, 1000);
         } else {
           localStorage.removeItem('playnex_user');
           showServerMsg('login', result.data.error, 'error');

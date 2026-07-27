@@ -33,7 +33,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 app.get('/', function (req, res) {
-  res.redirect('/homepage.html');
+  res.redirect('/index.html');
 });
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/playnex';

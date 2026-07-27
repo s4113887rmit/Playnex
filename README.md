@@ -22,7 +22,7 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 - ratingStyle.css - Shared stylesheet for all game rating pages
 
 ### Nguyen Ngoc Quang Dang (S4113887)
-- `homepage.html` - Landing page with hero, new releases, merch shelves
+- `index.html` - Landing page with hero, new releases, merch shelves
 - `Shopping.html` - Product catalog with filters, sorting, pagination
 - `Cart.html` - Shopping cart with quantity controls and order summary
 - `Checkout.html` - Delivery and payment form

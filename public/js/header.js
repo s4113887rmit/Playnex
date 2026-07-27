@@ -2,7 +2,7 @@
   'use strict';
 
   function updateHeader() {
-    var page = window.location.pathname.split('/').pop() || 'homepage.html';
+    var page = window.location.pathname.split('/').pop() || 'index.html';
     if (page === 'Login.html' || page === 'Profile.html') return;
 
     var user = localStorage.getItem('playnex_user');
