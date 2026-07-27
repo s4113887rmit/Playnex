@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  localStorage.removeItem('playnex_user');
+
   var tabs = document.querySelectorAll('.auth-tab');
   var loginForm = document.getElementById('login-form');
   var forgotForm = document.getElementById('forgot-form');
@@ -183,12 +185,6 @@
       .then(function (result) {
         if (result.status === 201) {
           showServerMsg('signup', result.data.message, 'success');
-          localStorage.setItem('playnex_user', JSON.stringify({
-            id: result.data.user.id,
-            username: result.data.user.username,
-            email: result.data.user.email,
-            name: result.data.user.name
-          }));
           signupForm.reset();
           charCount.textContent = '0';
           fileName.textContent = 'No file chosen';
