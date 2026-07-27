@@ -67,12 +67,14 @@
   function loadProfile() {
     var stored = localStorage.getItem('playnex_user');
     if (!stored) {
-      showServerMsg('profile-edit-msg', 'No user session found. Please log in.', 'error');
+      showServerMsg('profile-edit-msg', 'No user session found. Please log in first.', 'error');
       return;
     }
     var userData = JSON.parse(stored);
     currentEmail = userData.email;
     profileId = userData.id;
+
+    showServerMsg('profile-edit-msg', 'Loading profile for ' + currentEmail + '...', 'success');
 
     fetch('/api/auth/profile', {
       method: 'POST',
@@ -82,13 +84,14 @@
       .then(function (res) { return res.json().then(function (d) { return { status: res.status, data: d }; }); })
       .then(function (result) {
         if (result.status === 200) {
+          showServerMsg('profile-edit-msg', '', 'success');
           renderProfile(result.data);
         } else {
-          showServerMsg('profile-edit-msg', result.data.error || 'Failed to load profile.', 'error');
+          showServerMsg('profile-edit-msg', 'Error: ' + (result.data.error || 'Unknown') + ' (status ' + result.status + ')', 'error');
         }
       })
-      .catch(function () {
-        showServerMsg('profile-edit-msg', 'Network error.', 'error');
+      .catch(function (err) {
+        showServerMsg('profile-edit-msg', 'Network error. Check that the server is running.', 'error');
       });
   }
 
