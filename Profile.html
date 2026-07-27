@@ -61,9 +61,9 @@
         </label>
       </div>
       <div class="profile-header__info">
-        <h1>NexusGamer</h1>
-        <p class="profile-header__username">@nexusgamer</p>
-        <p class="profile-header__email">nexusgamer@playnex.com</p>
+        <h1 id="profile-display-name">Profile</h1>
+        <p class="profile-header__username" id="profile-username">@username</p>
+        <p class="profile-header__email" id="profile-email-display">email@example.com</p>
         <p class="profile-header__desc">Hardcore RPG fan and indie game enthusiast. Always hunting for the next big adventure.</p>
       </div>
     </div>
@@ -81,7 +81,7 @@
           <form class="profile-form" action="#" method="post">
             <div class="form-group">
               <label for="profile-name">Display name</label>
-              <input id="profile-name" type="text" name="name" value="NexusGamer" maxlength="100" autocomplete="name">
+              <input id="profile-name" type="text" name="name" value="" maxlength="100" autocomplete="name">
             </div>
             <div class="form-group">
               <label for="profile-desc">Short description</label>
@@ -112,7 +112,7 @@
           <form class="profile-form" action="#" method="post">
             <div class="form-group">
               <label for="current-email">Current email</label>
-              <input id="current-email" type="email" name="currentEmail" value="nexusgamer@playnex.com" readonly>
+              <input id="current-email" type="email" name="currentEmail" value="" readonly>
             </div>
             <div class="form-group">
               <label for="new-email">New email address</label>
@@ -269,5 +269,5 @@
   <div class="site-footer__bottom">
     <p>&copy; 2026 Playnex. All rights reserved.</p>
   </div>
-</footer><script src="public/js/header.js"></script></body>
+</footer><script src="public/js/profile.js"></script><script src="public/js/header.js"></script></body>
 </html>
