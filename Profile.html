@@ -64,7 +64,7 @@
         <h1 id="profile-display-name">Profile</h1>
         <p class="profile-header__username" id="profile-username">@username</p>
         <p class="profile-header__email" id="profile-email-display">email@example.com</p>
-        <p class="profile-header__desc">Hardcore RPG fan and indie game enthusiast. Always hunting for the next big adventure.</p>
+        <p class="profile-header__desc" id="profile-description">Hardcore RPG fan and indie game enthusiast. Always hunting for the next big adventure.</p>
       </div>
     </div>
 
@@ -78,7 +78,7 @@
           <h2>Edit your profile</h2>
           <p class="profile-section__hint">These details are visible to other users on your public profile.</p>
 
-          <form class="profile-form" action="#" method="post">
+          <form class="profile-form" id="form-edit-profile" action="#" method="post">
             <div class="form-group">
               <label for="profile-name">Display name</label>
               <input id="profile-name" type="text" name="name" value="" maxlength="100" autocomplete="name">
@@ -109,7 +109,7 @@
           <h2>Change email address</h2>
           <p class="profile-section__hint">Your email is used for login and notifications.</p>
 
-          <form class="profile-form" action="#" method="post">
+          <form class="profile-form" id="form-change-email" action="#" method="post">
             <div class="form-group">
               <label for="current-email">Current email</label>
               <input id="current-email" type="email" name="currentEmail" value="" readonly>
@@ -133,7 +133,7 @@
           <h2>Change password</h2>
           <p class="profile-section__hint">Choose a strong password you haven't used before.</p>
 
-          <form class="profile-form" action="#" method="post">
+          <form class="profile-form" id="form-change-password" action="#" method="post">
             <div class="form-group">
               <label for="current-password">Current password</label>
               <input id="current-password" type="password" name="currentPassword" placeholder="Enter current password" required autocomplete="current-password">
@@ -157,7 +157,7 @@
           <h2>Delete your account</h2>
           <p class="profile-section__hint profile-section__hint--danger">This action is permanent. Your profile, wishlist, posts, and all associated data will be removed. This cannot be undone.</p>
 
-          <form class="profile-form" action="#" method="post">
+          <form class="profile-form" id="form-delete-account" action="#" method="post">
             <div class="form-group">
               <label class="checkbox-label" for="confirm-delete">
                 <input type="checkbox" name="confirmDelete" id="confirm-delete" required>
