@@ -193,10 +193,12 @@
             switchToTab(0);
           }, 1500);
         } else {
+          localStorage.removeItem('playnex_user');
           showServerMsg('signup', result.data.error, 'error');
         }
       })
       .catch(function () {
+        localStorage.removeItem('playnex_user');
         showServerMsg('signup', 'Network error. Please check your connection.', 'error');
       })
       .finally(function () {
@@ -214,6 +216,8 @@
       email: document.getElementById('login-email').value.trim(),
       password: document.getElementById('login-password').value
     };
+
+    localStorage.removeItem('playnex_user');
 
     var btn = loginForm.querySelector('button[type="submit"]');
     btn.disabled = true;
@@ -237,10 +241,12 @@
           showServerMsg('login', result.data.message, 'success');
           setTimeout(function () { window.location.href = 'homepage.html'; }, 1000);
         } else {
+          localStorage.removeItem('playnex_user');
           showServerMsg('login', result.data.error, 'error');
         }
       })
       .catch(function () {
+        localStorage.removeItem('playnex_user');
         showServerMsg('login', 'Network error. Please check your connection.', 'error');
       })
       .finally(function () {

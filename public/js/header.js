@@ -37,6 +37,8 @@
       }
 
       wrapper.insertBefore(profileLink, wrapper.firstElementChild);
+    } else {
+      localStorage.removeItem('playnex_user');
     }
   }
 
