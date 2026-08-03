@@ -36,7 +36,7 @@ app.get('/', function (req, res) {
   res.redirect('/index.html');
 });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/playnex';
+const MONGODB_URI = 'mongodb+srv://nguyenkhanhnguyen3967_db_user:NkK9r5QtMJOMJgL5@playnex.mzcuobd.mongodb.net/playnex?retryWrites=true&w=majority';
 
 function saveBase64Image(base64Data) {
   if (!base64Data) return null;
