@@ -28,7 +28,7 @@
     </nav>
 
     <div class="topbar__actions">
-      <form class="search" role="search" action="shopping.html" method="get">
+      <form class="search" role="search" action="shopping.html" method="post">
         <label for="site-search" class="visually-hidden">Search games, merch, tags</label>
         <svg viewBox="0 0 24 24" class="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.6" y2="16.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <input id="site-search" name="q" type="search" placeholder="Search games, merch, tags">
@@ -45,6 +45,16 @@
       <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
   </div>
+
+  <nav class="subnav">
+    <a href="shopping.html" class="subnav__link">All</a>
+    <a href="shopping.html?cat=digital" class="subnav__link">Digital games</a>
+    <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
+    <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
+    <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
+    <a href="rating.html" class="subnav__link">Reviews</a>
+    <a href="forum.html" class="subnav__link">Forums</a>
+  </nav>
 </header>
 
 
@@ -54,74 +64,56 @@
     <div class="auth-card">
 
       <div class="auth-logo">
-        <img src="logo.png" alt="Playnex logo" class="auth-logo__img">
+        <img src="logo.png" alt="Playnex" class="auth-logo__img">
       </div>
 
-      <div class="auth-tabs">
-        <button class="auth-tab is-active" data-tab="login">Log in</button>
-        <button class="auth-tab" data-tab="signup">Sign up</button>
-      </div>
+      <h2 class="auth-heading">Log in to your account</h2>
 
-      <form id="login-form" class="auth-form" novalidate>
+      <form class="auth-form" action="homepage.html" method="post">
         <div class="form-group">
           <label for="login-email">Email address</label>
           <input id="login-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
-          <span class="form-group__error" id="login-email-error"></span>
         </div>
         <div class="form-group">
           <label for="login-password">Password</label>
           <input id="login-password" type="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
-          <span class="form-group__error" id="login-password-error"></span>
         </div>
         <div class="form-group form-group__inline">
-          <label class="checkbox-label">
-            <input type="checkbox" name="remember" checked>
+          <label class="checkbox-label" for="login-remember">
+            <input type="checkbox" name="remember" id="login-remember" checked>
             <span>Remember me</span>
           </label>
-          <a href="#" class="auth-forgot" id="show-forgot">Forgot password?</a>
+          <a href="#" class="auth-forgot">Forgot password?</a>
         </div>
         <button type="submit" class="btn btn--primary btn--auth">Log in</button>
-        <p class="auth-server-msg" id="login-server-msg"></p>
       </form>
 
-      <form id="forgot-form" class="auth-form is-hidden" novalidate>
-        <p class="auth-form__hint">Enter your email address and we'll send you a link to reset your password.</p>
-        <div class="form-group">
-          <label for="forgot-email">Email address</label>
-          <input id="forgot-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
-          <span class="form-group__error" id="forgot-email-error"></span>
-        </div>
-        <button type="submit" class="btn btn--primary btn--auth">Send reset link</button>
-        <p class="auth-server-msg" id="forgot-server-msg"></p>
-        <a href="#" class="auth-back" id="back-to-login">&larr; Back to log in</a>
-      </form>
+      <div class="auth-divider">
+        <span>Don't have an account yet?</span>
+      </div>
 
-      <form id="signup-form" class="auth-form is-hidden" enctype="multipart/form-data" novalidate>
+      <h2 class="auth-heading">Create your Playnex account</h2>
+
+      <form class="auth-form" action="Profile.html" method="post">
         <div class="form-group">
           <label for="signup-username">Username</label>
           <input id="signup-username" type="text" name="username" placeholder="Choose a username" required autocomplete="username" minlength="3" maxlength="30">
-          <span class="form-group__error" id="signup-username-error"></span>
         </div>
         <div class="form-group">
           <label for="signup-email">Email address</label>
           <input id="signup-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
-          <span class="form-group__error" id="signup-email-error"></span>
         </div>
         <div class="form-group">
           <label for="signup-password">Password</label>
           <input id="signup-password" type="password" name="password" placeholder="At least 8 characters" required autocomplete="new-password" minlength="8">
-          <span class="form-group__error" id="signup-password-error"></span>
         </div>
         <div class="form-group">
           <label for="signup-confirm">Confirm password</label>
           <input id="signup-confirm" type="password" name="confirmPassword" placeholder="Re-enter your password" required autocomplete="new-password">
-          <span class="form-group__error" id="signup-confirm-error"></span>
         </div>
         <div class="form-group">
           <label for="signup-description">Short description</label>
           <textarea id="signup-description" name="description" placeholder="Tell us a bit about yourself (max 500 characters)" required maxlength="500" rows="3"></textarea>
-          <span class="form-group__char-count"><span id="desc-char-count">0</span>/500</span>
-          <span class="form-group__error" id="signup-description-error"></span>
         </div>
         <div class="form-group">
           <label for="signup-picture">Profile picture (optional)</label>
@@ -131,25 +123,37 @@
               <svg viewBox="0 0 24 24" aria-hidden="true" class="file-upload__icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span>Choose an image</span>
             </label>
-            <span class="file-upload__name" id="file-name">No file chosen</span>
+            <span class="file-upload__name">No file chosen</span>
           </div>
-          <span class="form-group__error" id="signup-picture-error"></span>
         </div>
         <div class="form-group">
-          <label class="checkbox-label">
+          <label class="checkbox-label" for="signup-terms">
             <input type="checkbox" name="terms" id="signup-terms" required>
             <span>I agree to the <a href="#" class="text-link">Terms of Service</a> and <a href="#" class="text-link">Privacy Policy</a></span>
           </label>
-          <span class="form-group__error" id="signup-terms-error"></span>
         </div>
         <div class="form-group">
-          <label class="checkbox-label">
+          <label class="checkbox-label" for="signup-subscribe">
             <input type="checkbox" name="subscribe" id="signup-subscribe">
             <span>I would like to subscribe to special offers and newsletters</span>
           </label>
         </div>
         <button type="submit" class="btn btn--primary btn--auth">Create account</button>
-        <p class="auth-server-msg" id="signup-server-msg"></p>
+      </form>
+
+      <div class="auth-divider">
+        <span>Forgot your password?</span>
+      </div>
+
+      <h2 class="auth-heading">Reset your password</h2>
+      <p class="auth-form__hint" style="text-align:center">Enter your email and we'll send you a reset link.</p>
+
+      <form class="auth-form" action="#" method="post">
+        <div class="form-group">
+          <label for="forgot-email">Email address</label>
+          <input id="forgot-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
+        </div>
+        <button type="submit" class="btn btn--primary btn--auth">Send reset link</button>
       </form>
 
     </div>
@@ -163,7 +167,7 @@
 
     <div class="site-footer__col">
       <a href="homepage.html" class="logo logo--footer">
-        <img src="logo.png" alt="Playnex logo" class="logo__img">
+        <img src="logo.png" alt="Playnex" class="logo__img">
       </a>
       <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
     </div>
@@ -186,7 +190,7 @@
 
     <div class="site-footer__col">
       <h3>Support</h3>
-      <a href="#">Help center</a>
+      <a href="#">Help center</a><a href="sitemap.html">Sitemap</a>
       <a href="#">Order status</a>
       <a href="#">Returns</a>
       <a href="#">Contact us</a>
@@ -205,8 +209,5 @@
   <div class="site-footer__bottom">
     <p>&copy; 2026 Playnex. All rights reserved.</p>
   </div>
-</footer>
-
-<script src="public/js/auth.js"></script>
-<script src="public/js/header.js"></script></body>
+</footer></body>
 </html>

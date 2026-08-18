@@ -5,10 +5,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sitemap - PlayNex</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="sitemap.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="homepage.html" class="logo">
+      <img src="logo.png" alt="Playnex" class="logo__img">
+    </a>
+    <nav class="primary-nav">
+      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="Shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="Wishlist.html" class="primary-nav__link">Wishlist</a>
+      <a href="forum.html" class="primary-nav__link">Community</a>
+      <a href="blog.html" class="primary-nav__link">Blog</a>
+    </nav>
+    <div class="topbar__actions">
+      <a href="Profile.html" class="icon-btn profile-icon" aria-label="Profile" title="Profile"><span class="profile-icon__letter">N</span></a>
+      <a href="Cart.html" class="icon-btn" aria-label="Cart">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
+      </a>
+      <a href="Login.html" class="btn btn--ghost btn--small">Log out</a>
+    </div>
+  </div>
+  <nav class="subnav">
+    <a href="Shopping.html" class="subnav__link">All</a>
+    <a href="shopping.html?cat=digital" class="subnav__link">Digital games</a>
+    <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
+    <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
+    <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
+    <a href="rating.html" class="subnav__link">Reviews</a>
+    <a href="forum.html" class="subnav__link">Forums</a>
+  </nav>
+</header>
 
 <div class="page-intro">
   <h1>PlayNex Sitemap</h1>
@@ -105,7 +137,7 @@
                   <div class="node page"><span class="title"><a href="Login.html">Sign Up</a></span></div>
                 </li>
                 <li>
-                  <div class="node page"><span class="title"><a href="Login.html">Forget Password</a></span></div>
+                  <div class="node page"><span class="title"><a href="Login.html">Forgot Password</a></span></div>
                 </li>
               </ul>
             </li>
@@ -127,6 +159,20 @@
     </li>
   </ul>
 </div>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__col">
+      <a href="homepage.html" class="logo logo--footer"><img src="logo.png" alt="Playnex" class="logo__img"></a>
+      <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
+    </div>
+    <div class="site-footer__col"><h3>Store</h3><a href="Shopping.html">Digital games</a><a href="Shopping.html">Physical merch</a><a href="Shopping.html">Deals</a><a href="Shopping.html">Free this week</a></div>
+    <div class="site-footer__col"><h3>Community</h3><a href="forum.html">Forums</a><a href="blog.html">Blog</a><a href="rating.html">Reviews</a><a href="Wishlist.html">Wishlist</a></div>
+    <div class="site-footer__col"><h3>Support</h3><a href="#">Help center</a><a href="#">Order status</a><a href="#">Returns</a><a href="#">Contact us</a></div>
+    <div class="site-footer__col"><h3>Company</h3><a href="#">About Playnex</a><a href="#">Careers</a><a href="#">Terms of service</a><a href="#">Privacy policy</a></div>
+  </div>
+  <div class="site-footer__bottom"><p>&copy; 2026 Playnex. All rights reserved.</p></div>
+</footer>
 
 </body>
 </html>
