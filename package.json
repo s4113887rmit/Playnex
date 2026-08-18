@@ -1,0 +1,11 @@
+{
+  "name": "playnex-webdesign",
+  "version": "2.0.0",
+  "description": "Playnex Assessment 2 dynamic prototype with NodeJS routes and client-side JavaScript.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "author": "Nguyen Ngoc Quang Dang",
+  "license": "UNLICENSED"
+}
