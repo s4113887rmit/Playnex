@@ -1,0 +1,24 @@
+{
+  "name": "playnex",
+  "version": "1.0.0",
+  "description": "Playnex is a digital games and physical merchandise storefront. Browse games, add items to your cart or wishlist, participate in community discussions, and manage your profile.",
+  "homepage": "https://github.com/s4113887rmit/Playnex#readme",
+  "bugs": {
+    "url": "https://github.com/s4113887rmit/Playnex/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s4113887rmit/Playnex.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ejs": "^6.0.1",
+    "express": "^5.2.1"
+  }
+}
