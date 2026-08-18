@@ -28,7 +28,7 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 - `Checkout.html` - Delivery and payment form
 - `Confirmation.html` - Order confirmation page
 - `Wishlist.html` - Saved items with purchased/favorited sections
-- `Style.css` - Global stylesheet (shared)
+- `style.css` - Global stylesheet (shared)
 
 ### Tran Binh An (S4206755)
 - `forum.html` - Main thread list and category filters
