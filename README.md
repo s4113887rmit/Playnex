@@ -7,7 +7,7 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 | Full Name | Student ID | Module |
 |-----------|-----------|--------|
 | Ngo Gia Bao | S4186655 | Game Rating, Site Map |
-| Nguyen Ngoc Quang Dang | S4113887 | Shopping, Cart, Homepage, Wishlist, Checkout, Confirmation |
+| Nguyen Ngoc Quang Dang | S4113887 | shopping, cart, homepage, wishlist, checkout, confirmation |
 | Tran Binh An | S4206755 | Discussion Forums, Administration Page |
 | Nguyen Khanh Nguyen | S4197203 | Blogs, User Account |
 
@@ -23,11 +23,11 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 
 ### Nguyen Ngoc Quang Dang (S4113887)
 - `homepage.html` - Landing page with hero, new releases, merch shelves
-- `Shopping.html` - Product catalog with filters, sorting, pagination
-- `Cart.html` - Shopping cart with quantity controls and order summary
-- `Checkout.html` - Delivery and payment form
-- `Confirmation.html` - Order confirmation page
-- `Wishlist.html` - Saved items with purchased/favorited sections
+- `shopping.html` - Product catalog with filters, sorting, pagination
+- `cart.html` - Shopping cart with quantity controls and order summary
+- `checkout.html` - Delivery and payment form
+- `confirmation.html` - Order confirmation page
+- `wishlist.html` - Saved items with purchased/favorited sections
 - `style.css` - Global stylesheet (shared)
 
 ### Tran Binh An (S4206755)
