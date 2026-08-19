@@ -1834,7 +1834,24 @@ img {
 .listing-toast--error {
   border-color: rgba(231, 76, 60, 0.7);
 }
-
+.review-sum-btn {
+  display: inline-block;
+  justify-content: center;
+  margin-top: 20px;
+  text-decoration: none;
+  background: #ff8500;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 13px 30px;
+  font-size: 40%;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.1s;
+}
+.review-sum-btn:hover {
+  background: red;
+}
 @media (max-width: 980px) {
   .listing-hero {
     grid-template-columns: 1fr;
