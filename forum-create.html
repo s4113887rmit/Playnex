@@ -2,57 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="description" content="Create a new discussion thread on Playnex.">
 <title>Create Thread — Playnex</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<style>
-  .create-layout { max-width: 800px; margin: 0 auto; padding: 24px 40px 64px; }
-  .create-header { margin-bottom: 24px; }
-  .create-header h1 { font-family: var(--font-display); font-size: 28px; font-weight: 600; }
-  
-  .create-form { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 32px; display: flex; flex-direction: column; gap: 20px; }
-  .form-group { display: flex; flex-direction: column; gap: 8px; }
-  .form-group label { font-size: 13px; font-weight: 600; color: var(--text-muted); }
-  
-  .form-group input, .form-group select {
-    background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px;
-    padding: 12px 14px; font-size: 14px; color: var(--text); font-family: var(--font-body);
-  }
-  
-  .rich-text-editor {
-    background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px;
-    min-height: 250px; padding: 12px 14px; font-size: 14px; color: var(--text);
-    font-family: var(--font-body); resize: vertical;
-  }
-  
-  .drag-drop-box {
-    border: 2px dashed var(--border); border-radius: 8px; padding: 40px 20px;
-    text-align: center; background: rgba(255, 255, 255, 0.02); cursor: pointer;
-    transition: border-color 0.2s;
-  }
-  .drag-drop-box:hover { border-color: var(--accent); }
-  .drag-drop-box p { font-size: 13px; color: var(--text-muted); margin-top: 8px; }
-  
-  .form-actions { display: flex; justify-content: flex-end; gap: 16px; margin-top: 16px; border-top: 1px solid var(--border); padding-top: 24px; }
-</style>
+<link rel="icon" href="logo.png"><link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a class="skip-to-content" href="#main-content">Skip to main content</a>
 
 <header class="topbar">
   <div class="topbar__inner">
-    <a href="homepage.html" class="logo">
+    <a href="index.html" class="logo">
       <img src="logo.png" alt="Playnex" class="logo__img">
     </a>
     <nav class="primary-nav">
-      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="index.html" class="primary-nav__link">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
       <a href="forum.html" class="primary-nav__link is-active">Community</a>
+      <a href="blog.html" class="primary-nav__link">Blog</a>
     </nav>
   </div>
 </header>
 
-<main class="create-layout">
+<main id="main-content" class="create-layout">
   <div class="create-header">
     <h1>Create/Edit Thread</h1>
   </div>
@@ -63,7 +38,7 @@
       <input type="text" id="thread-title" placeholder="Enter a descriptive title for your thread" required>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+    <div class="create-form-grid">
       <div class="form-group">
         <label for="game-selector">Game/Product Selector</label>
         <select id="game-selector">
@@ -94,7 +69,7 @@
     <div class="form-group">
       <label>Upload Images / Attachments</label>
       <div class="drag-drop-box">
-        <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" style="color: var(--text-muted);"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+        <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" class="drag-drop-icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
         <p>Image drag and drop box (or click to browse)</p>
       </div>
     </div>
@@ -110,14 +85,20 @@
 <footer class="site-footer">
   <div class="site-footer__inner">
     <div class="site-footer__col">
-      <a href="homepage.html" class="logo logo--footer"><img src="logo.png" alt="Playnex" class="logo__img"></a>
+      <a href="index.html" class="logo logo--footer"><img src="logo.png" alt="Playnex" class="logo__img"></a>
       <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
     </div>
-    <div class="site-footer__col"><h3>Store</h3><a href="Shopping.html">Digital games</a><a href="Shopping.html">Physical merch</a><a href="Shopping.html">Deals</a><a href="Shopping.html">Free this week</a></div>
-    <div class="site-footer__col"><h3>Community</h3><a href="forum.html">Forums</a><a href="blog.html">Blog</a><a href="rating.html">Reviews</a><a href="Wishlist.html">Wishlist</a></div>
-    <div class="site-footer__col"><h3>Support</h3><a href="#">Help center</a><a href="sitemap.html">Sitemap</a><a href="#">Order status</a><a href="#">Returns</a><a href="#">Contact us</a></div>
-    <div class="site-footer__col"><h3>Company</h3><a href="#">About Playnex</a><a href="#">Careers</a><a href="#">Terms of service</a><a href="#">Privacy policy</a></div>
+    <div class="site-footer__col">
+      <h3>Support</h3>
+      <a href="contact.html">Contact us</a>
+      <a href="sitemap.html">Sitemap</a>
+    </div>
+    <div class="site-footer__col">
+      <h3>Company</h3>
+      <a href="terms.html">Terms of service</a>
+      <a href="privacy.html">Privacy policy</a>
+    </div>
   </div>
   <div class="site-footer__bottom"><p>&copy; 2026 Playnex. All rights reserved.</p></div>
-</footer></body>
+</footer><script src="public/js/header.js"></script></body>
 </html>
