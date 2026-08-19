@@ -1,0 +1,117 @@
+[
+  {
+    "id": 1,
+    "name": "Elden Ring",
+    "genre": "Action RPG",
+    "releaseDate": "25/02/2022",
+    "description": "The journey on becoming the Elden Lord",
+    "image": "/IMG/eldenringposter.jpg",
+    "baseRating": 5,
+    "baseCount": 36,
+    "reviews": [
+      {
+        "id": "r_1787067730449",
+        "author": "You",
+        "date": "18/8/2026 (edited)",
+        "stars": 5,
+        "title": "hehe",
+        "content": "game hay nên chơi bai baiadadada",
+        "image": ""
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Cyberpunk 2077",
+    "genre": "Action RPG",
+    "releaseDate": "10/12/2020",
+    "description": "Dystopian feature open world game",
+    "image": "/IMG/cyberpunkposter.jpg",
+    "baseRating": 4,
+    "baseCount": 24,
+    "reviews": []
+  },
+  {
+    "id": 3,
+    "name": "Ghost of Tsushima",
+    "genre": "Action Adventure",
+    "releaseDate": "17/07/2020",
+    "description": "An open-world adventure game set during the Mongol invasion of Japan in 1274.",
+    "image": "/IMG/ghostposter.jpg",
+    "baseRating": 4,
+    "baseCount": 20,
+    "reviews": [
+      {
+        "author": "You",
+        "date": "18/8/2026",
+        "stars": 5,
+        "title": "helllo",
+        "content": "alibaba",
+        "id": "r_17870674047101uw6rq"
+      },
+      {
+        "author": "You",
+        "date": "18/8/2026",
+        "stars": 1,
+        "title": "đă",
+        "content": "ưdad",
+        "id": "r_1787067404710ik7wdz"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Red Dead Redemption II",
+    "genre": "Action Adventure",
+    "releaseDate": "26/10/2018",
+    "description": "A sprawling Western tale of loyalty, conviction, and the price of infamy.",
+    "image": "/IMG/reddeadposter.jpg",
+    "baseRating": 4,
+    "baseCount": 30,
+    "reviews": []
+  },
+  {
+    "id": 5,
+    "name": "Hades",
+    "genre": "Roguelike",
+    "releaseDate": "17/09/2020",
+    "description": "Escape Hell",
+    "image": "/IMG/hadesposter.png",
+    "baseRating": 5,
+    "baseCount": 18,
+    "reviews": []
+  },
+  {
+    "id": 6,
+    "name": "Hollow Knight",
+    "genre": "Metroidvania",
+    "releaseDate": "24/02/2017",
+    "description": "Journey into the Insect Kingdom",
+    "image": "/IMG/hollowposter.jpg",
+    "baseRating": 4,
+    "baseCount": 22,
+    "reviews": []
+  },
+  {
+    "id": 7,
+    "name": "NieR Automata",
+    "genre": "Action RPG",
+    "releaseDate": "17/02/2017",
+    "description": "The Battle Between Robots and Androids.",
+    "image": "/IMG/nierposter.jpg",
+    "baseRating": 3,
+    "baseCount": 15,
+    "reviews": []
+  },
+  {
+    "id": 8,
+    "name": "Death Stranding",
+    "genre": "Action",
+    "releaseDate": "08/11/2019",
+    "description": "The Delivery Man Reconnects America.",
+    "image": "/IMG/deathstandposter.jpg",
+    "baseRating": 3,
+    "baseCount": 12,
+    "reviews": []
+  }
+]
