@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const app = express();
 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
@@ -30,7 +31,7 @@ app.use(express.urlencoded({ extended: true }));
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
-const app = express();
+
 
 app.use(cors());
 app.use(express.json());
