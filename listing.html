@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game details — Playnex</title>
+    <meta name="description" content="View the selected Playnex game listing and discover similar titles.">
+    <link rel="stylesheet" href="style.css">
+    <script src="js/playnex-store.js" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar__inner">
+        <a href="homepage.html" class="logo" aria-label="Playnex home">
+          <img src="logo.png" alt="Playnex" class="logo__img">
+        </a>
+
+        <nav class="primary-nav" aria-label="Main navigation">
+          <a href="homepage.html" class="primary-nav__link">Home</a>
+          <a href="shopping.html" class="primary-nav__link is-active">Shopping</a>
+          <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
+          <a href="forum.html" class="primary-nav__link">Community</a>
+          <a href="blog.html" class="primary-nav__link">Blog</a>
+        </nav>
+
+        <div class="topbar__actions">
+          <form class="search" role="search" action="shopping.html" method="get">
+            <label for="site-search" class="visually-hidden">Search games, merch, tags</label>
+            <svg viewBox="0 0 24 24" class="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.6" y2="16.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <input id="site-search" name="q" type="search" placeholder="Search games, merch, tags">
+            <button type="submit" class="visually-hidden">Search</button>
+          </form>
+
+          <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 14.9 3 8.9C3 5.9 5.4 3.5 8.4 3.5c1.7 0 3.3.8 4.3 2.1a5.3 5.3 0 0 1 4.3-2.1C20 3.5 21.5 5.9 21.5 8.9c0 6-9.5 11.6-9.5 11.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          </a>
+          <a href="cart.html" class="icon-btn" aria-label="Cart">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
+          </a>
+          <a href="Profile.html" class="icon-btn profile-icon" aria-label="Profile" title="Profile"><span class="profile-icon__letter">N</span></a>
+          <a href="Login.html" class="btn btn--ghost btn--small">Log out</a>
+        </div>
+      </div>
+
+      <nav class="subnav" aria-label="Categories">
+        <a href="shopping.html" class="subnav__link is-active">All</a>
+        <a href="shopping.html?cat=digital" class="subnav__link">Digital games</a>
+        <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
+        <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
+        <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
+        <a href="rating.html" class="subnav__link">Reviews</a>
+        <a href="forum.html" class="subnav__link">Forums</a>
+      </nav>
+    </header>
+
+    <main class="listing-page">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a href="homepage.html">Home</a><span>/</span>
+        <a href="shopping.html">Shopping</a><span>/</span>
+        <span id="breadcrumb-game" aria-current="page">Game</span>
+      </nav>
+
+      <section class="listing-hero">
+        <div class="listing-hero__media">
+          <img id="listing-image" src="" alt="">
+        </div>
+
+        <div class="listing-hero__content">
+          <span class="eyebrow">Featured title</span>
+          <h1 id="listing-title">Game title</h1>
+          <div class="listing-hero__meta">
+            <span id="listing-genre">Genre</span>
+            <span class="listing-hero__dot">•</span>
+            <span id="listing-platforms">Platform</span>
+          </div>
+
+          <div class="listing-hero__pricing">
+            <span id="listing-price" class="listing-price">$0.00</span>
+            <span id="listing-old-price" class="listing-price listing-price--old"></span>
+          </div>
+
+          <p id="listing-description" class="listing-hero__description"></p>
+
+          <div class="listing-hero__actions">
+            <button id="listing-add-cart" type="button" class="btn btn--primary btn--large">Add to cart</button>
+            <button id="listing-add-wishlist" type="button" class="btn btn--outline btn--large">Add to wishlist</button>
+            <a id="listing-buy-now" href="checkout.html" class="btn btn--ghost btn--large">Buy now</a>
+          </div>
+
+          <ul class="listing-hero__facts">
+            <li><span>Type</span><strong id="listing-type">Digital</strong></li>
+            <li><span>Availability</span><strong id="listing-availability">In stock</strong></li>
+            <li><span>Release</span><strong id="listing-release">2026</strong></li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="listing-section">
+        <div class="listing-section__heading">
+          <h2>About this game</h2>
+        </div>
+
+        <div class="listing-section__grid">
+          <div class="listing-copy">
+            <p id="listing-long-description"></p>
+            <ul id="listing-features" class="listing-features"></ul>
+          </div>
+
+          <aside class="listing-aside">
+            <h3>Game details</h3>
+            <dl class="listing-details">
+              <div>
+                <dt>Genre</dt>
+                <dd id="detail-genre">—</dd>
+              </div>
+              <div>
+                <dt>Platform</dt>
+                <dd id="detail-platforms">—</dd>
+              </div>
+              <div>
+                <dt>Edition</dt>
+                <dd id="detail-edition">Digital</dd>
+              </div>
+              <div>
+                <dt>Included</dt>
+                <dd id="detail-included">Full game</dd>
+              </div>
+            </dl>
+          </aside>
+        </div>
+      </section>
+
+      <section class="listing-section">
+        <div class="listing-section__heading">
+          <h2>Games you may like</h2>
+        </div>
+        <ul id="related-list" class="listing-related list-reset"></ul>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="site-footer__inner">
+        <div class="site-footer__col">
+          <a href="homepage.html" class="logo logo--footer">
+            <img src="logo.png" alt="Playnex" class="logo__img">
+          </a>
+          <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
+        </div>
+
+        <div class="site-footer__col">
+          <h3>Store</h3>
+          <a href="shopping.html?cat=digital">Digital games</a>
+          <a href="shopping.html?cat=merch">Physical merch</a>
+          <a href="shopping.html?cat=deals">Deals</a>
+          <a href="shopping.html?cat=free">Free this week</a>
+        </div>
+
+        <div class="site-footer__col">
+          <h3>Community</h3>
+          <a href="forum.html">Forums</a>
+          <a href="rating.html">Reviews</a>
+          <a href="blog.html">Blog</a>
+          <a href="sitemap.html">Sitemap</a>
+        </div>
+      </div>
+
+      <div class="site-footer__bottom">
+        <p>&copy; 2026 Playnex. All rights reserved.</p>
+      </div>
+    </footer>
+
+    <script>
+      const GAMES = [
+        {
+          id: "elden-ring",
+          title: "Elden Ring",
+          genre: "Action RPG",
+          platforms: ["PC", "Console"],
+          price: 59.99,
+          oldPrice: null,
+          image: "webprogram-COMMU/IMG/eldenringposter.jpg",
+          badge: "Featured",
+          type: "Digital",
+          availability: "In stock",
+          release: "2022",
+          edition: "Standard edition",
+          included: "Full game + launcher access",
+          description: "An open-world action RPG where every step into the Lands Between brings a new battle, mystery, and myth to unravel.",
+          longDescription: "Elden Ring blends exploration, brutal combat, and layered storytelling in a vast world shaped by ancient forces. Venture through ruined kingdoms, encounter legendary bosses, and uncover the truth behind the shattered Elden Ring.",
+          features: ["Massive open world exploration", "Challenging boss encounters", "Deep RPG progression and builds", "Cross-platform digital delivery"]
+        },
+        {
+          id: "cyberpunk-2077",
+          title: "Cyberpunk",
+          genre: "Open world",
+          platforms: ["PC"],
+          price: 20.99,
+          oldPrice: 29.99,
+          image: "webprogram-COMMU/IMG/cyberpunkposter.jpg",
+          badge: "-30%",
+          type: "Digital",
+          availability: "In stock",
+          release: "2020",
+          edition: "Ultimate edition",
+          included: "Digital deluxe extras",
+          description: "A neon-soaked future where megacorp power, street survival, and style collide in Night City.",
+          longDescription: "Step into the role of V and shape your story across Night City’s crowded districts. Every mission, upgrade, and choice pushes you closer to a destiny that can either break or redefine the city around you.",
+          features: ["Branching story decisions", "High-speed vehicle chases", "Character upgrades and cybernetic builds", "Rich urban exploration"]
+        },
+        {
+          id: "ghost-of-tsushima",
+          title: "Ghost of Tsushima",
+          genre: "Action adventure",
+          platforms: ["PC", "Console"],
+          price: 34.99,
+          oldPrice: null,
+          image: "webprogram-COMMU/IMG/ghostposter.jpg",
+          badge: "Popular",
+          type: "Digital",
+          availability: "In stock",
+          release: "2021",
+          edition: "Digital deluxe",
+          included: "Full game + bonus pack",
+          description: "A cinematic samurai adventure set on a windswept island, where honor and stealth are both weapons.",
+          longDescription: "Fight as the Ghost to defend Tsushima from the Mongol invasion. Every region offers a new landscape, a new rival, and a new reason to defend the land you love.",
+          features: ["Master swordsman combat", "Open-world exploration", "Story-driven side quests", "Stunning cinematic atmosphere"]
+        },
+        {
+          id: "red-dead-redemption-2",
+          title: "Red Dead Redemption II",
+          genre: "Western RPG",
+          platforms: ["PC"],
+          price: 49.99,
+          oldPrice: null,
+          image: "webprogram-COMMU/IMG/reddeadposter.jpg",
+          badge: "New",
+          type: "Digital",
+          availability: "In stock",
+          release: "2018",
+          edition: "Standard edition",
+          included: "Full game + campaign",
+          description: "Ride through the American frontier and survive a changing world in one of the richest open-world epics ever made.",
+          longDescription: "Red Dead Redemption II follows Arthur Morgan through a breathtaking western saga, blending cinematic storytelling with legendary open-world exploration and slow-burn survival tension.",
+          features: ["Detailed open-country travel", "Honor and morality choices", "Story-rich missions and camp life", "Immersive wildlife and scenery"]
+        },
+        {
+          id: "hades",
+          title: "Hades",
+          genre: "Roguelike",
+          platforms: ["PC", "Console"],
+          price: 27.99,
+          oldPrice: null,
+          image: "webprogram-COMMU/IMG/hadesposter.png",
+          badge: "Fan favorite",
+          type: "Digital",
+          availability: "In stock",
+          release: "2020",
+          edition: "Standard edition",
+          included: "Full game + soundtrack",
+          description: "Fight your way out of the underworld in a relentless roguelike where each run changes the story.",
+          longDescription: "Hades pairs fast, stylish combat with a deeply personal narrative. Every attempted escape reforms the dungeon and adds another layer to Zagreus’s struggle for freedom.",
+          features: ["Fast combat loops", "Procedural dungeon runs", "Rich mythological narrative", "Endless build experimentation"]
+        },
+        {
+          id: "hollow-knight",
+          title: "Hollow Knight",
+          genre: "Metroidvania",
+          platforms: ["PC", "Console"],
+          price: 29.99,
+          oldPrice: null,
+          image: "webprogram-COMMU/IMG/hollowposter.jpg",
+          badge: "Critic pick",
+          type: "Digital",
+          availability: "In stock",
+          release: "2017",
+          edition: "Standard edition",
+          included: "Full game + bonus art pack",
+          description: "Descend through a forgotten kingdom and fight for survival in a beautifully eerie insect world.",
+          longDescription: "Hollow Knight is a hall-of-fame metroidvania full of hidden paths, stealthy combat, and a haunting atmosphere. The deeper you go, the more the kingdom reveals its tragic past.",
+          features: ["Expansive interconnected world", "Responsive precision combat", "Beautiful hand-drawn art direction", "Tons of secrets and upgrades"]
+        },
+        {
+          id: "nier-automata",
+          title: "NieR Automata",
+          genre: "Action RPG",
+          platforms: ["PC", "Console"],
+          price: 39.99,
+          oldPrice: null,
+          image: "webprogram-COMMU/IMG/nierposter.jpg",
+          badge: "Awarded",
+          type: "Digital",
+          availability: "In stock",
+          release: "2017",
+          edition: "Complete edition",
+          included: "Full game + DLC access",
+          description: "A dark, stylish action RPG where androids fight for humanity in a broken, futuristic world.",
+          longDescription: "NieR Automata blends fast combat, unforgettable music, and a philosophical sci-fi story into one of the most memorable action RPGs on the market.",
+          features: ["Dynamic combat and weapons", "A moving sci-fi story", "Memorable soundtrack", "Multiple playthrough perspectives"]
+        },
+        {
+          id: "death-standing",
+          title: "Death Standing",
+          genre: "Shooter",
+          platforms: ["PC", "Console"],
+          price: 24.99,
+          oldPrice: null,
+          image: "webprogram-COMMU/IMG/deathstandposter.jpg",
+          badge: "Hot deal",
+          type: "Digital",
+          availability: "In stock",
+          release: "2024",
+          edition: "Standard edition",
+          included: "Full game + season pass",
+          description: "A relentless sci-fi shooter where every level becomes a duel for survival in a collapsing world.",
+          longDescription: "Death Standing delivers high-speed shooting, tactical mobility, and ambient dread in a haunted future world. It rewards aggressive play, sharp reactions, and fearless exploration.",
+          features: ["Fast, responsive shooting", "High-stakes survival runs", "Rich environmental storytelling", "Replayable challenge modes"]
+        }
+      ];
+
+      const gameMap = Object.fromEntries(GAMES.map((game) => [game.id, game]));
+      const query = new URLSearchParams(window.location.search);
+      const selectedId = gameMap[query.get("game")] ? query.get("game") : GAMES[0].id;
+      const currentGame = gameMap[selectedId];
+
+      const money = (value) => `$${Number(value).toFixed(2)}`;
+
+      function readStorage(key, fallback) {
+        try {
+          const raw = localStorage.getItem(key);
+          return raw ? JSON.parse(raw) : fallback;
+        } catch {
+          return fallback;
+        }
+      }
+
+      function writeStorage(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+      }
+
+      function nextId(prefix) {
+        return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+      }
+
+      function showToast(message, type = "success") {
+        let toast = document.querySelector("[data-listing-toast]");
+        if (!toast) {
+          toast = document.createElement("div");
+          toast.setAttribute("data-listing-toast", "true");
+          toast.className = "listing-toast";
+          document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.classList.toggle("listing-toast--error", type === "error");
+        toast.classList.add("is-visible");
+        clearTimeout(showToast.timer);
+        showToast.timer = setTimeout(() => toast.classList.remove("is-visible"), 2400);
+      }
+
+      function addToCart(productId) {
+        const key = "playnex:user-nguyen:cart";
+        const cart = readStorage(key, []);
+        const product = gameMap[productId];
+        const variant = `Digital - ${product.platforms.includes("PC") ? "PC" : "Console"} key`;
+        const existing = cart.find((item) => item.userId === "user-nguyen" && item.productId === productId && item.variant === variant);
+
+        if (existing) {
+          existing.quantity = Math.min(10, existing.quantity + 1);
+        } else {
+          cart.push({ id: nextId("cart"), userId: "user-nguyen", productId, quantity: 1, variant });
+        }
+
+        writeStorage(key, cart);
+        if (window.Playnex && typeof window.Playnex.updateHeaderCounts === "function") {
+          window.Playnex.updateHeaderCounts();
+        }
+      }
+
+      function addToWishlist(productId) {
+        const key = "playnex:user-nguyen:wishlist";
+        const wishlist = readStorage(key, []);
+        const product = gameMap[productId];
+        if (wishlist.some((item) => item.userId === "user-nguyen" && item.productId === productId)) {
+          showToast(`${product.title} is already in your wishlist.`, "error");
+          return;
+        }
+
+        wishlist.push({ id: nextId("wish"), userId: "user-nguyen", productId, addedAt: new Date().toISOString(), purchased: false });
+        writeStorage(key, wishlist);
+        if (window.Playnex && typeof window.Playnex.updateHeaderCounts === "function") {
+          window.Playnex.updateHeaderCounts();
+        }
+        showToast(`${product.title} added to wishlist`);
+      }
+
+      function renderGame(game) {
+        document.title = `${game.title} — Playnex`;
+        document.getElementById("breadcrumb-game").textContent = game.title;
+        document.getElementById("listing-image").src = game.image;
+        document.getElementById("listing-image").alt = `${game.title} poster`;
+        document.getElementById("listing-title").textContent = game.title;
+        document.getElementById("listing-genre").textContent = game.genre;
+        document.getElementById("listing-platforms").textContent = game.platforms.join(", ");
+        document.getElementById("listing-price").textContent = money(game.price);
+        document.getElementById("listing-old-price").textContent = game.oldPrice ? money(game.oldPrice) : "";
+        document.getElementById("listing-description").textContent = game.description;
+        document.getElementById("listing-long-description").textContent = game.longDescription;
+        document.getElementById("listing-type").textContent = game.type;
+        document.getElementById("listing-availability").textContent = game.availability;
+        document.getElementById("listing-release").textContent = game.release;
+        document.getElementById("detail-genre").textContent = game.genre;
+        document.getElementById("detail-platforms").textContent = game.platforms.join(", ");
+        document.getElementById("detail-edition").textContent = game.edition;
+        document.getElementById("detail-included").textContent = game.included;
+
+        const featureList = document.getElementById("listing-features");
+        featureList.innerHTML = "";
+        game.features.forEach((feature) => {
+          const item = document.createElement("li");
+          item.textContent = feature;
+          featureList.appendChild(item);
+        });
+
+        const related = GAMES.filter((item) => item.id !== game.id);
+        const relatedList = document.getElementById("related-list");
+        relatedList.innerHTML = "";
+        related.forEach((item) => {
+          const li = document.createElement("li");
+          const article = document.createElement("article");
+          article.className = "listing-related__card";
+          article.innerHTML = `
+            <a href="listing.html?game=${item.id}" class="listing-related__art" aria-label="View ${item.title}">
+              <img src="${item.image}" alt="${item.title} poster">
+            </a>
+            <div class="listing-related__body">
+              <h3><a href="listing.html?game=${item.id}">${item.title}</a></h3>
+              <p>${item.genre} · ${item.platforms.join(", ")}</p>
+              <div class="listing-related__price-row">
+                <span>${money(item.price)}</span>
+              </div>
+            </div>
+          `;
+          li.appendChild(article);
+          relatedList.appendChild(li);
+        });
+      }
+
+      document.getElementById("listing-add-cart").addEventListener("click", () => {
+        addToCart(currentGame.id);
+        showToast(`${currentGame.title} added to cart`);
+      });
+
+      document.getElementById("listing-add-wishlist").addEventListener("click", () => {
+        addToWishlist(currentGame.id);
+      });
+
+      document.getElementById("listing-buy-now").addEventListener("click", (event) => {
+        event.preventDefault();
+        addToCart(currentGame.id);
+        window.location.href = "checkout.html";
+      });
+
+      renderGame(currentGame);
+      if (window.Playnex && typeof window.Playnex.updateHeaderCounts === "function") {
+        window.Playnex.updateHeaderCounts();
+      }
+    </script>
+  </body>
+</html>
