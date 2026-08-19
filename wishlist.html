@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<script src="js/playnex-store.js" defer></script>
 </head>
 <body>
 
@@ -17,12 +16,12 @@
 <!-- ============ SITE HEADER: logo, primary nav, search, account/cart icons ============ -->
 <header class="topbar">
   <div class="topbar__inner">
-    <a href="index.html" class="logo">
+    <a href="homepage.html" class="logo">
       <img src="logo.png" alt="Playnex" class="logo__img">
     </a>
 
     <nav class="primary-nav">
-      <a href="index.html" class="primary-nav__link">Home</a>
+      <a href="homepage.html" class="primary-nav__link">Home</a>
       <a href="shopping.html" class="primary-nav__link">Shopping</a>
       <a href="wishlist.html" class="primary-nav__link is-active">Wishlist</a>
       <a href="forum.html" class="primary-nav__link">Community</a>
@@ -60,7 +59,7 @@
 </header>
 
 <nav class="breadcrumb" aria-label="Breadcrumb">
-  <a href="index.html">Home</a><span>/</span><span aria-current="page">Wishlist</span>
+  <a href="homepage.html">Home</a><span>/</span><span aria-current="page">Wishlist</span>
 </nav>
 
 <div class="page-header">
@@ -69,14 +68,31 @@
 </div>
 
 <div class="wishlist-summary">
-  <span><strong>6</strong> items saved</span>
-  <span><strong>$246.94</strong> total value</span>
-  <span><strong>1</strong> already purchased</span>
+  <span><strong>0</strong> items saved</span>
+  <span><strong>$0.00</strong> total value</span>
+  <span><strong>0</strong> already purchased</span>
 </div>
-
 
 <!-- ============ MAIN CONTENT ============ -->
 <main>
+
+  <div class="shop-toolbar" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    <div class="wishlist-filter-tabs" style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <button type="button" class="btn btn--ghost btn--small is-active" data-wishlist-filter="all">All items</button>
+      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="digital">Digital games</button>
+      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="physical">Physical merch</button>
+      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="purchased">Purchased</button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label for="wishlist-sort" class="visually-hidden">Sort wishlist</label>
+      <select id="wishlist-sort" class="sort-select" aria-label="Sort wishlist">
+        <option value="default">Sort: Recently Added</option>
+        <option value="title">Sort: Title (A–Z)</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+      </select>
+    </div>
+  </div>
 
   <ul class="wishlist-grid list-reset">
     <li>
@@ -294,7 +310,7 @@
   <div class="site-footer__inner">
 
     <div class="site-footer__col">
-      <a href="index.html" class="logo logo--footer">
+      <a href="homepage.html" class="logo logo--footer">
         <img src="logo.png" alt="Playnex" class="logo__img">
       </a>
       <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
@@ -317,5 +333,10 @@
   <div class="site-footer__bottom">
     <p>&copy; 2026 Playnex. All rights reserved.</p>
   </div>
-</footer></body>
+</footer>
+<script src="public/js/current-user.js"></script>
+<script src="public/js/api.js"></script>
+<script src="public/js/header.js"></script>
+<script src="public/js/wishlist.js"></script>
+</body>
 </html>

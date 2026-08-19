@@ -9,19 +9,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<script src="js/playnex-store.js" defer></script>
 </head>
 <body>
 
 <!-- ============ SITE HEADER: logo, primary nav, search, account/cart icons ============ -->
 <header class="topbar">
   <div class="topbar__inner">
-    <a href="index.html" class="logo">
+    <a href="homepage.html" class="logo">
       <img src="logo.png" alt="Playnex" class="logo__img">
     </a>
 
     <nav class="primary-nav">
-      <a href="index.html" class="primary-nav__link is-active">Home</a>
+      <a href="homepage.html" class="primary-nav__link is-active">Home</a>
       <a href="shopping.html" class="primary-nav__link">Shopping</a>
       <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
       <a href="forum.html" class="primary-nav__link">Community</a>
@@ -59,7 +58,7 @@
 </header>
 
 <nav class="breadcrumb" aria-label="Breadcrumb">
-  <a href="index.html">Home</a><span>/</span>
+  <a href="homepage.html">Home</a><span>/</span>
   <a href="shopping.html">Shopping</a><span>/</span>
   <span aria-current="page">Cart</span>
 </nav>
@@ -73,14 +72,17 @@
 <main class="cart-layout">
 
   <div>
-    <div class="cart-toolbar">
-      <span class="cart-toolbar__count">3 items in your cart</span>
-      <label class="visually-hidden" for="cart-sort">Sort cart items</label>
-      <select id="cart-sort" class="sort-select">
-        <option>Sort: Product title</option>
-        <option>Sort: Quantity</option>
-        <option>Sort: Price</option>
-      </select>
+    <div class="cart-toolbar" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+      <span class="cart-toolbar__count">0 items in your cart</span>
+      <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <input type="search" id="cart-filter" placeholder="Filter in cart..." aria-label="Filter cart items" style="padding: 6px 12px; font-size: 13px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface-2); color: var(--text);">
+        <label class="visually-hidden" for="cart-sort">Sort cart items</label>
+        <select id="cart-sort" class="sort-select" aria-label="Sort cart items">
+          <option value="title">Sort: Product title</option>
+          <option value="quantity">Sort: Quantity</option>
+          <option value="price">Sort: Price</option>
+        </select>
+      </div>
     </div>
 
     <ul class="cart-list list-reset">
@@ -163,7 +165,7 @@
   <div class="site-footer__inner">
 
     <div class="site-footer__col">
-      <a href="index.html" class="logo logo--footer">
+      <a href="homepage.html" class="logo logo--footer">
         <img src="logo.png" alt="Playnex" class="logo__img">
       </a>
       <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
@@ -187,135 +189,9 @@
     <p>&copy; 2026 Playnex. All rights reserved.</p>
   </div>
 </footer>
-<script>
-  (() => {
-    const cartKey = 'playnex:user-nguyen:cart';
-    const productMap = {
-      'elden-ring': { title: 'Elden Ring', price: 59.99, variant: 'Digital · PC key', image: 'webprogram-COMMU/IMG/eldenringposter.jpg', href: 'listing.html?game=elden-ring' },
-      'cyberpunk-2077': { title: 'Cyberpunk', price: 20.99, variant: 'Digital · Console edition', image: 'webprogram-COMMU/IMG/cyberpunkposter.jpg', href: 'listing.html?game=cyberpunk-2077' },
-      'ghost-of-tsushima': { title: 'Ghost of Tsushima', price: 34.99, variant: 'Digital · Deluxe edition', image: 'webprogram-COMMU/IMG/ghostposter.jpg', href: 'listing.html?game=ghost-of-tsushima' },
-      'red-dead-redemption-2': { title: 'Red Dead Redemption II', price: 49.99, variant: 'Digital · Standard edition', image: 'webprogram-COMMU/IMG/reddeadposter.jpg', href: 'listing.html?game=red-dead-redemption-2' },
-      'hades': { title: 'Hades', price: 27.99, variant: 'Digital · PC key', image: 'webprogram-COMMU/IMG/hadesposter.png', href: 'listing.html?game=hades' },
-      'hollow-knight': { title: 'Hollow Knight', price: 29.99, variant: 'Digital · Console edition', image: 'webprogram-COMMU/IMG/hollowposter.jpg', href: 'listing.html?game=hollow-knight' }
-    };
-
-    function readStorage(key, fallback) {
-      try {
-        const value = localStorage.getItem(key);
-        return value ? JSON.parse(value) : fallback;
-      } catch {
-        return fallback;
-      }
-    }
-
-    function writeStorage(key, value) {
-      localStorage.setItem(key, JSON.stringify(value));
-    }
-
-    function formatMoney(value) {
-      return `$${Number(value || 0).toFixed(2)}`;
-    }
-
-    function renderCart() {
-      const cart = readStorage(cartKey, []);
-      const rows = cart.map((item) => {
-        const product = productMap[item.productId] || { title: item.productId, price: 0, variant: 'Digital', image: '', href: 'shopping.html' };
-        return {
-          ...item,
-          product,
-          total: Number(item.quantity || 1) * Number(product.price || 0)
-        };
-      });
-
-      const list = document.querySelector('.cart-list');
-      const count = document.querySelector('.page-header__count');
-      const toolbarCount = document.querySelector('.cart-toolbar__count');
-      const summary = document.querySelector('.cart-summary');
-
-      if (!list) return;
-
-      if (!rows.length) {
-        list.innerHTML = '<li><div class="cart-empty">Your cart is empty.</div></li>';
-        if (count) count.textContent = '0 items';
-        if (toolbarCount) toolbarCount.textContent = '0 items in your cart';
-        if (summary) {
-          summary.innerHTML = '<h2>Order summary</h2><div class="cart-summary__row"><span>Subtotal</span><span>$0.00</span></div><div class="cart-summary__row"><span>Shipping</span><span>$0.00</span></div><div class="cart-summary__row"><span>Tax</span><span>$0.00</span></div><div class="cart-summary__row cart-summary__row--total"><span>Total</span><span>$0.00</span></div><a href="shopping.html" class="btn btn--primary btn--large">Browse games</a>';
-        }
-        if (window.Playnex && typeof window.Playnex.updateHeaderCounts === 'function') {
-          window.Playnex.updateHeaderCounts();
-        }
-        return;
-      }
-
-      list.innerHTML = rows.map((item) => `
-        <li>
-          <article class="cart-item" data-cart-id="${item.id}">
-            <a href="${item.product.href}" class="cart-item__art" aria-label="View ${item.product.title} detail page">
-              <img src="${item.product.image}" alt="${item.product.title} poster">
-            </a>
-            <div>
-              <h3 class="cart-item__title"><a href="${item.product.href}">${item.product.title}</a></h3>
-              <p class="cart-item__variant">${item.product.variant}</p>
-            </div>
-            <div class="cart-item__qty">
-              <label for="qty-${item.id}">Qty</label>
-              <input id="qty-${item.id}" name="qty-${item.id}" type="number" min="1" max="10" value="${item.quantity}">
-            </div>
-            <span class="cart-item__price">${formatMoney(item.total)}</span>
-            <button type="button" class="cart-item__remove" data-remove-id="${item.id}">Remove</button>
-          </article>
-        </li>
-      `).join('');
-
-      const subtotal = rows.reduce((sum, item) => sum + item.total, 0);
-      const shipping = rows.some((item) => item.product.variant.startsWith('Digital') ? false : true) ? 6 : 0;
-      const tax = subtotal * 0.0828;
-      const total = subtotal + shipping + tax;
-
-      if (count) count.textContent = `${rows.length} item${rows.length === 1 ? '' : 's'}`;
-      if (toolbarCount) toolbarCount.textContent = `${rows.length} item${rows.length === 1 ? '' : 's'} in your cart`;
-      if (summary) {
-        summary.innerHTML = `
-          <h2>Order summary</h2>
-          <div class="cart-summary__row"><span>Subtotal</span><span>${formatMoney(subtotal)}</span></div>
-          <div class="cart-summary__row"><span>Shipping</span><span>${formatMoney(shipping)}</span></div>
-          <div class="cart-summary__row"><span>Tax</span><span>${formatMoney(tax)}</span></div>
-          <div class="cart-summary__row cart-summary__row--total"><span>Total</span><span>${formatMoney(total)}</span></div>
-          <a href="checkout.html" class="btn btn--primary btn--large">Proceed to checkout</a>
-          <form class="promo-form">
-            <label for="promo-code" class="visually-hidden">Promo code</label>
-            <input id="promo-code" name="promo-code" type="text" placeholder="Promo code">
-            <button type="submit" class="btn btn--ghost btn--small">Apply</button>
-          </form>
-        `;
-      }
-
-      document.querySelectorAll('.cart-item__remove').forEach((button) => {
-        button.addEventListener('click', (event) => {
-          const removeId = event.currentTarget.getAttribute('data-remove-id');
-          const nextCart = cart.filter((item) => item.id !== removeId);
-          writeStorage(cartKey, nextCart);
-          renderCart();
-        });
-      });
-
-      document.querySelectorAll('.cart-item__qty input').forEach((input) => {
-        input.addEventListener('change', (event) => {
-          const inputId = event.currentTarget.id.replace('qty-', '');
-          const qty = Math.max(1, Math.min(10, Number(event.currentTarget.value) || 1));
-          const nextCart = cart.map((item) => (item.id === inputId ? { ...item, quantity: qty } : item));
-          writeStorage(cartKey, nextCart);
-          renderCart();
-        });
-      });
-
-      if (window.Playnex && typeof window.Playnex.updateHeaderCounts === 'function') {
-        window.Playnex.updateHeaderCounts();
-      }
-    }
-
-    document.addEventListener('DOMContentLoaded', renderCart);
-  })();
-</script>
+<script src="public/js/current-user.js"></script>
+<script src="public/js/api.js"></script>
+<script src="public/js/header.js"></script>
+<script src="public/js/cart.js"></script>
 </body>
 </html>

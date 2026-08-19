@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<script src="js/playnex-store.js" defer></script>
 </head>
 <body>
 
@@ -17,12 +16,12 @@
 <!-- ============ SITE HEADER: logo, primary nav, search, account/cart icons ============ -->
 <header class="topbar">
   <div class="topbar__inner">
-    <a href="index.html" class="logo">
+    <a href="homepage.html" class="logo">
       <img src="logo.png" alt="Playnex" class="logo__img">
     </a>
 
     <nav class="primary-nav">
-      <a href="index.html" class="primary-nav__link ">Home</a>
+      <a href="homepage.html" class="primary-nav__link ">Home</a>
       <a href="shopping.html" class="primary-nav__link is-active">Shopping</a>
       <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
       <a href="forum.html" class="primary-nav__link">Community</a>
@@ -79,7 +78,7 @@
 </header>
 
 <nav class="breadcrumb" aria-label="Breadcrumb">
-  <a href="index.html">Home</a><span>/</span><span aria-current="page">Shopping</span>
+  <a href="homepage.html">Home</a><span>/</span><span aria-current="page">Shopping</span>
 </nav>
 
 <div class="page-header">
@@ -367,7 +366,7 @@
   <div class="site-footer__inner">
 
     <div class="site-footer__col">
-      <a href="index.html" class="logo logo--footer">
+      <a href="homepage.html" class="logo logo--footer">
         <img src="logo.png" alt="Playnex" class="logo__img">
       </a>
       <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
@@ -390,5 +389,10 @@
   <div class="site-footer__bottom">
     <p>&copy; 2026 Playnex. All rights reserved.</p>
   </div>
-</footer></body>
+</footer>
+<script src="public/js/current-user.js"></script>
+<script src="public/js/api.js"></script>
+<script src="public/js/header.js"></script>
+<script src="public/js/shopping.js"></script>
+</body>
 </html>

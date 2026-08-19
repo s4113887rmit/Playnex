@@ -9,7 +9,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<script src="js/playnex-store.js" defer></script>
 </head>
 <body>
 
@@ -17,12 +16,12 @@
 <!-- ============ SITE HEADER: logo, primary nav, search, account/cart icons ============ -->
 <header class="topbar">
   <div class="topbar__inner">
-    <a href="index.html" class="logo">
+    <a href="homepage.html" class="logo">
       <img src="logo.png" alt="Playnex" class="logo__img">
     </a>
 
     <nav class="primary-nav">
-      <a href="index.html" class="primary-nav__link is-active">Home</a>
+      <a href="homepage.html" class="primary-nav__link is-active">Home</a>
       <a href="shopping.html" class="primary-nav__link">Shopping</a>
       <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
       <a href="forum.html" class="primary-nav__link">Community</a>
@@ -122,7 +121,15 @@
   <section class="shelf" id="new-releases">
     <div class="shelf__header">
       <h2>New releases</h2>
-      <a href="shopping.html" class="see-all">See all<span aria-hidden="true"> &rarr;</span></a>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <label for="sort-digital" class="visually-hidden">Sort digital games</label>
+        <select id="sort-digital" class="sort-select" aria-label="Sort digital games">
+          <option value="title">Sort: Title (A–Z)</option>
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+        </select>
+        <a href="shopping.html?cat=digital" class="see-all">See all<span aria-hidden="true"> &rarr;</span></a>
+      </div>
     </div>
 
     <ul class="shelf__row list-reset">
@@ -130,14 +137,15 @@
         <article class="card">
           <div class="card__art card__art--1">
             <a href="listing.html?game=elden-ring" aria-label="View Elden Ring detail page">
-              <img src="webprogram-COMMU/IMG/eldenringposter.jpg" alt="Elden Ring poster">
+              <img src="public/img/eldenringposter.jpg" alt="Elden Ring poster">
             </a>
-            <button class="card__wishlist" aria-label="Add Elden Ring to wishlist" type="button">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Elden Ring to wishlist" type="button" data-action="wishlist" data-id="elden-ring">&hearts;</button>
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="listing.html?game=elden-ring">Elden Ring</a></h3>
             <p class="card__meta">Action RPG · PC, Console</p>
             <div class="card__price"><span class="card__price-now">$59.99</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="elden-ring">Add to cart</button>
           </div>
         </article>
       </li>
@@ -146,10 +154,10 @@
         <article class="card">
           <div class="card__art card__art--2">
             <a href="listing.html?game=cyberpunk-2077" aria-label="View Cyberpunk detail page">
-              <img src="webprogram-COMMU/IMG/cyberpunkposter.jpg" alt="Cyberpunk poster">
+              <img src="public/img/cyberpunkposter.jpg" alt="Cyberpunk poster">
             </a>
             <span class="card__badge">-30%</span>
-            <button class="card__wishlist" aria-label="Add Cyberpunk to wishlist" type="button">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Cyberpunk to wishlist" type="button" data-action="wishlist" data-id="cyberpunk-2077">&hearts;</button>
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="listing.html?game=cyberpunk-2077">Cyberpunk</a></h3>
@@ -158,6 +166,7 @@
               <span class="card__price-old">$29.99</span>
               <span class="card__price-now">$20.99</span>
             </div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="cyberpunk-2077">Add to cart</button>
           </div>
         </article>
       </li>
@@ -166,14 +175,15 @@
         <article class="card">
           <div class="card__art card__art--3">
             <a href="listing.html?game=ghost-of-tsushima" aria-label="View Ghost of Tsushima detail page">
-              <img src="webprogram-COMMU/IMG/ghostposter.jpg" alt="Ghost of Tsushima poster">
+              <img src="public/img/ghostposter.jpg" alt="Ghost of Tsushima poster">
             </a>
-            <button class="card__wishlist" aria-label="Add Ghost of Tsushima to wishlist" type="button">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Ghost of Tsushima to wishlist" type="button" data-action="wishlist" data-id="ghost-of-tsushima">&hearts;</button>
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="listing.html?game=ghost-of-tsushima">Ghost of Tsushima</a></h3>
             <p class="card__meta">Action adventure · PC, Console</p>
             <div class="card__price"><span class="card__price-now">$34.99</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="ghost-of-tsushima">Add to cart</button>
           </div>
         </article>
       </li>
@@ -182,15 +192,16 @@
         <article class="card">
           <div class="card__art card__art--4">
             <a href="listing.html?game=red-dead-redemption-2" aria-label="View Red Dead Redemption II detail page">
-              <img src="webprogram-COMMU/IMG/reddeadposter.jpg" alt="Red Dead Redemption II poster">
+              <img src="public/img/reddeadposter.jpg" alt="Red Dead Redemption II poster">
             </a>
             <span class="card__badge card__badge--new">New</span>
-            <button class="card__wishlist" aria-label="Add Red Dead Redemption II to wishlist" type="button">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Red Dead Redemption II to wishlist" type="button" data-action="wishlist" data-id="red-dead-redemption-2">&hearts;</button>
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="listing.html?game=red-dead-redemption-2">Red Dead Redemption II</a></h3>
             <p class="card__meta">Western RPG · PC</p>
             <div class="card__price"><span class="card__price-now">$49.99</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="red-dead-redemption-2">Add to cart</button>
           </div>
         </article>
       </li>
@@ -199,14 +210,15 @@
         <article class="card">
           <div class="card__art card__art--5">
             <a href="listing.html?game=hades" aria-label="View Hades detail page">
-              <img src="webprogram-COMMU/IMG/hadesposter.png" alt="Hades poster">
+              <img src="public/img/hadesposter.png" alt="Hades poster">
             </a>
-            <button class="card__wishlist" aria-label="Add Hades to wishlist" type="button">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Hades to wishlist" type="button" data-action="wishlist" data-id="hades">&hearts;</button>
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="listing.html?game=hades">Hades</a></h3>
             <p class="card__meta">Roguelike · PC, Console</p>
             <div class="card__price"><span class="card__price-now">$27.99</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="hades">Add to cart</button>
           </div>
         </article>
       </li>
@@ -215,14 +227,15 @@
         <article class="card">
           <div class="card__art card__art--5">
             <a href="listing.html?game=hollow-knight" aria-label="View Hollow Knight detail page">
-              <img src="webprogram-COMMU/IMG/hollowposter.jpg" alt="Hollow Knight poster">
+              <img src="public/img/hollowposter.jpg" alt="Hollow Knight poster">
             </a>
-            <button class="card__wishlist" aria-label="Add Hollow Knight to wishlist" type="button">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Hollow Knight to wishlist" type="button" data-action="wishlist" data-id="hollow-knight">&hearts;</button>
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="listing.html?game=hollow-knight">Hollow Knight</a></h3>
             <p class="card__meta">Metroidvania · PC, Console</p>
             <div class="card__price"><span class="card__price-now">$29.99</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="hollow-knight">Add to cart</button>
           </div>
         </article>
       </li>
@@ -231,14 +244,15 @@
         <article class="card">
           <div class="card__art card__art--4">
             <a href="listing.html?game=nier-automata" aria-label="View NieR Automata detail page">
-              <img src="webprogram-COMMU/IMG/nierposter.jpg" alt="NieR Automata poster">
+              <img src="public/img/nierposter.jpg" alt="NieR Automata poster">
             </a>
-            <button class="card__wishlist" aria-label="Add NieR Automata to wishlist" type="button">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add NieR Automata to wishlist" type="button" data-action="wishlist" data-id="nier-automata">&hearts;</button>
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="listing.html?game=nier-automata">NieR Automata</a></h3>
             <p class="card__meta">Action RPG · PC, Console</p>
             <div class="card__price"><span class="card__price-now">$39.99</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="nier-automata">Add to cart</button>
           </div>
         </article>
       </li>
@@ -247,14 +261,15 @@
         <article class="card">
           <div class="card__art card__art--3">
             <a href="listing.html?game=death-standing" aria-label="View Death Standing detail page">
-              <img src="webprogram-COMMU/IMG/deathstandposter.jpg" alt="Death Standing poster">
+              <img src="public/img/deathstandposter.jpg" alt="Death Standing poster">
             </a>
-            <button class="card__wishlist" aria-label="Add Death Standing to wishlist" type="button">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Death Standing to wishlist" type="button" data-action="wishlist" data-id="death-standing">&hearts;</button>
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="listing.html?game=death-standing">Death Standing</a></h3>
             <p class="card__meta">Shooter · PC, Console</p>
             <div class="card__price"><span class="card__price-now">$24.99</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="death-standing">Add to cart</button>
           </div>
         </article>
       </li>
@@ -266,37 +281,47 @@
   <section class="shelf" id="merch">
     <div class="shelf__header">
       <h2>Merch you'll love</h2>
-      <a href="shopping.html" class="see-all">See all<span aria-hidden="true"> &rarr;</span></a>
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <label for="sort-merch" class="visually-hidden">Sort merchandise</label>
+        <select id="sort-merch" class="sort-select" aria-label="Sort merchandise">
+          <option value="title">Sort: Title (A–Z)</option>
+          <option value="price-asc">Price: low to high</option>
+          <option value="price-desc">Price: high to low</option>
+        </select>
+        <a href="shopping.html?cat=merch" class="see-all">See all<span aria-hidden="true"> &rarr;</span></a>
+      </div>
     </div>
 
     <ul class="shelf__row list-reset">
 
       <li>
-<article class="card">
-        <div class="card__art card__art--merch-1">
-          <span class="card__badge card__badge--merch">Physical</span>
-          <button class="card__wishlist" aria-label="Add Embercrown throne figure to wishlist">&hearts;</button>
-        </div>
-        <div class="card__body">
-          <h3 class="card__title">Embercrown throne figure</h3>
-          <p class="card__meta">Collectible · 28cm</p>
-          <div class="card__price"><span class="card__price-now">$64.00</span></div>
-        </div>
-      </article>
+        <article class="card">
+          <div class="card__art card__art--merch-1">
+            <span class="card__badge card__badge--merch">Physical</span>
+            <button class="card__wishlist" aria-label="Add Embercrown throne figure to wishlist" type="button" data-action="wishlist" data-id="embercrown-throne-figure">&hearts;</button>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">Embercrown throne figure</h3>
+            <p class="card__meta">Collectible · 28cm</p>
+            <div class="card__price"><span class="card__price-now">$64.00</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="embercrown-throne-figure">Add to cart</button>
+          </div>
+        </article>
       </li>
 
       <li>
-<article class="card">
-        <div class="card__art card__art--merch-2">
-          <span class="card__badge card__badge--merch">Physical</span>
-          <button class="card__wishlist" aria-label="Add Nightfall Protocol hoodie to wishlist">&hearts;</button>
-        </div>
-        <div class="card__body">
-          <h3 class="card__title">Nightfall Protocol hoodie</h3>
-          <p class="card__meta">Apparel · S–XXL</p>
-          <div class="card__price"><span class="card__price-now">$52.00</span></div>
-        </div>
-      </article>
+        <article class="card">
+          <div class="card__art card__art--merch-2">
+            <span class="card__badge card__badge--merch">Physical</span>
+            <button class="card__wishlist" aria-label="Add Nightfall Protocol hoodie to wishlist" type="button" data-action="wishlist" data-id="nightfall-hoodie">&hearts;</button>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">Nightfall Protocol hoodie</h3>
+            <p class="card__meta">Apparel · S–XXL</p>
+            <div class="card__price"><span class="card__price-now">$52.00</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="nightfall-hoodie">Add to cart</button>
+          </div>
+        </article>
       </li>
 
       <li>
@@ -314,31 +339,31 @@
       </li>
 
       <li>
-<article class="card">
-        <div class="card__art card__art--merch-4">
-          <span class="card__badge card__badge--merch">Physical</span>
-          <button class="card__wishlist" aria-label="Add Ironvale Racers keycap set to wishlist">&hearts;</button>
-        </div>
-        <div class="card__body">
-          <h3 class="card__title">Ironvale Racers keycap set</h3>
-          <p class="card__meta">Accessory · 12 keys</p>
-          <div class="card__price"><span class="card__price-now">$29.00</span></div>
-        </div>
-      </article>
+        <article class="card">
+          <div class="card__art card__art--merch-4">
+            <span class="card__badge card__badge--merch">Physical</span>
+            <button class="card__wishlist" aria-label="Add Ironvale Racers keycap set to wishlist">&hearts;</button>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">Ironvale Racers keycap set</h3>
+            <p class="card__meta">Accessory · 12 keys</p>
+            <div class="card__price"><span class="card__price-now">$29.00</span></div>
+          </div>
+        </article>
       </li>
 
       <li>
-<article class="card">
-        <div class="card__art card__art--merch-5">
-          <span class="card__badge card__badge--merch">Physical</span>
-          <button class="card__wishlist" aria-label="Add Emberkeep Tactics art book to wishlist">&hearts;</button>
-        </div>
-        <div class="card__body">
-          <h3 class="card__title">Emberkeep Tactics art book</h3>
-          <p class="card__meta">Hardcover · 180 pages</p>
-          <div class="card__price"><span class="card__price-now">$34.00</span></div>
-        </div>
-      </article>
+        <article class="card">
+          <div class="card__art card__art--merch-5">
+            <span class="card__badge card__badge--merch">Physical</span>
+            <button class="card__wishlist" aria-label="Add Emberkeep Tactics art book to wishlist">&hearts;</button>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">Emberkeep Tactics art book</h3>
+            <p class="card__meta">Hardcover · 180 pages</p>
+            <div class="card__price"><span class="card__price-now">$34.00</span></div>
+          </div>
+        </article>
       </li>
 
     
@@ -372,7 +397,7 @@
   <div class="site-footer__inner">
 
     <div class="site-footer__col">
-      <a href="index.html" class="logo logo--footer">
+      <a href="homepage.html" class="logo logo--footer">
         <img src="logo.png" alt="Playnex" class="logo__img">
       </a>
       <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
@@ -395,5 +420,10 @@
   <div class="site-footer__bottom">
     <p>&copy; 2026 Playnex. All rights reserved.</p>
   </div>
-</footer></body>
+</footer>
+<script src="public/js/current-user.js"></script>
+<script src="public/js/api.js"></script>
+<script src="public/js/header.js"></script>
+<script src="public/js/homepage.js"></script>
+</body>
 </html>

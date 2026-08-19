@@ -3961,3 +3961,117 @@ h3,
   color: var(--accent-primary-light);
   text-decoration: none;
 }
+
+/* ==========================================================================
+   Playnex Store, Cart, Wishlist, Checkout & Toast Helper Styles (Assessment 2)
+   ========================================================================== */
+
+/* Toast notification */
+.playnex-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 14px 22px;
+  background: #18192b;
+  color: #f0f0ff;
+  border: 1px solid #3c3e66;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 9999;
+  opacity: 0;
+  transform: translateY(20px);
+  pointer-events: none;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.playnex-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.playnex-toast.is-success {
+  border-left: 4px solid #2ecc71;
+}
+
+.playnex-toast.is-error {
+  border-left: 4px solid #e74c3c;
+}
+
+.playnex-toast.is-info {
+  border-left: 4px solid #7c5cff;
+}
+
+/* Form validation inline errors */
+.form-group__error {
+  display: block;
+  font-size: 12px;
+  color: #ff6b6b;
+  margin-top: 5px;
+  font-weight: 500;
+  min-height: 16px;
+}
+
+.checkout-form input.is-invalid,
+.checkout-form select.is-invalid,
+.promo-form input.is-invalid {
+  border-color: #e74c3c !important;
+  background-color: rgba(231, 76, 60, 0.08) !important;
+}
+
+.checkout-form input.is-valid,
+.promo-form input.is-valid {
+  border-color: #2ecc71 !important;
+}
+
+/* Button disabled state */
+.btn.is-disabled,
+a.btn.is-disabled {
+  opacity: 0.5;
+  cursor: not-allowed !important;
+  pointer-events: none;
+}
+
+/* Wishlist heart active state */
+.card__wishlist.is-saved {
+  color: #ff4757;
+  transform: scale(1.15);
+}
+
+/* Empty shelf & list state */
+.shelf-empty {
+  padding: 36px 20px;
+  text-align: center;
+  color: var(--text-muted, #8b8ea8);
+  font-size: 15px;
+  width: 100%;
+  list-style: none;
+}
+
+.shelf-empty a {
+  color: var(--accent, #7c5cff);
+  text-decoration: underline;
+  margin-left: 6px;
+}
+
+/* Cart discount summary row */
+.cart-summary__row--discount {
+  color: #2ecc71;
+  font-weight: 600;
+}
+
+/* Card placeholder art */
+.card__placeholder-art {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  font-weight: 700;
+  color: #434674;
+  background: linear-gradient(135deg, #181a30 0%, #0d0e1c 100%);
+}
+

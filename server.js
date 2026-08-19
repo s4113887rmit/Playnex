@@ -5,12 +5,8 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
-const app = express();
-const DATA_PATH = path.join(__dirname, 'data', 'games.json');
 
-app.set("view engine", "ejs");
-app.use(express.static("public"));
-app.use(express.urlencoded({ extended: true }));
+const DATA_PATH = path.join(__dirname, 'data', 'games.json');
 
 (function loadEnv() {
   var envPath = path.join(__dirname, '.env');
@@ -32,14 +28,32 @@ app.use(express.urlencoded({ extended: true }));
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
+const app = express();
 
-
+app.set("view engine", "ejs");
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname)));
 
+// Current User middleware
+const currentUser = require('./middleware/currentUser');
+app.use(currentUser);
+
+// Store / Shopping Cart / Wishlist / Checkout routes
+const productsRouter = require('./routes/products');
+const cartRouter = require('./routes/cart');
+const wishlistRouter = require('./routes/wishlist');
+const checkoutRouter = require('./routes/checkout');
+
+app.use('/api/products', productsRouter);
+app.use('/api/cart', cartRouter);
+app.use('/api/wishlist', wishlistRouter);
+app.use('/api/checkout', checkoutRouter);
+
 app.get('/', function (req, res) {
-  res.redirect('/index.html');
+  res.redirect('/homepage.html');
 });
 
 const MONGODB_URI = 'mongodb+srv://nguyenkhanhnguyen3967_db_user:NkK9r5QtMJOMJgL5@playnex.mzcuobd.mongodb.net/playnex?retryWrites=true&w=majority';
@@ -479,18 +493,7 @@ app.get("/game/:id", (req, res) => {
 
   res.render("ratinggame", { game, avg, count, distribution });
 });
-// Game listing
-app.get("/listing/:id", (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
 
-  const { avg, count } = getAvgRating(game);
-  const distribution = getDistribution(game);
-  const related = games.filter((g) => g.id !== game.id).slice(0, 4);
-
-  res.render("listing", { game, avg, count, distribution, related });
-});
 // Write game review
 
 app.get("/game/:id/review", (req, res) => {
