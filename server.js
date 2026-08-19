@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const app = express();
+const DATA_PATH = path.join(__dirname, 'data', 'games.json');
 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
@@ -478,7 +479,18 @@ app.get("/game/:id", (req, res) => {
 
   res.render("ratinggame", { game, avg, count, distribution });
 });
+// Game listing
+app.get("/listing/:id", (req, res) => {
+  const games = readGames();
+  const game = games.find((g) => g.id === parseInt(req.params.id));
+  if (!game) return res.status(404).send("Game not found");
 
+  const { avg, count } = getAvgRating(game);
+  const distribution = getDistribution(game);
+  const related = games.filter((g) => g.id !== game.id).slice(0, 4);
+
+  res.render("listing", { game, avg, count, distribution, related });
+});
 // Write game review
 
 app.get("/game/:id/review", (req, res) => {
