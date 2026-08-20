@@ -50,7 +50,12 @@
 </header>
 
 <main id="main-content">
-  <div class="page-header">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/homepage.html">Home</a><span>/</span>
+    <a href="/blog">Blog</a><span>/</span>
+    <span aria-current="page"><%= isEdit ? 'Edit post' : 'Write a post' %></span>
+  </nav>
+<div class="page-header">
     <h1><%= isEdit ? 'Edit post' : 'Write a post' %></h1>
   </div>
 
