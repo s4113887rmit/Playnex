@@ -61,7 +61,7 @@ app.get('/', function (req, res) {
   res.redirect('/homepage.html');
 });
 
-const MONGODB_URI = 'mongodb+srv://nguyenkhanhnguyen3967_db_user:NkK9r5QtMJOMJgL5@playnex.mzcuobd.mongodb.net/playnex?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 function saveBase64Image(base64Data) {
   if (!base64Data) return null;
@@ -284,13 +284,17 @@ async function seedDemoAccounts() {
   }
 }
 
-mongoose
-  .connect(MONGODB_URI, { serverSelectionTimeoutMS: 8000 })
-  .then(() => {
-    console.log('Connected to MongoDB Atlas');
-    return seedDemoAccounts().catch((err) => console.log('Demo seed skipped:', err.message));
-  })
-  .catch((err) => console.log('MongoDB unreachable, using in-memory users (A2 prototype):', err.message));
+if (MONGODB_URI) {
+  mongoose
+    .connect(MONGODB_URI, { serverSelectionTimeoutMS: 8000 })
+    .then(() => {
+      console.log('Connected to MongoDB Atlas');
+      return seedDemoAccounts().catch((err) => console.log('Demo seed skipped:', err.message));
+    })
+    .catch((err) => console.log('MongoDB unreachable, using in-memory users (A2 prototype):', err.message));
+} else {
+  console.log('MONGODB_URI not set; running with in-memory users (A2 prototype)');
+}
 
 app.post('/api/auth/signup', authLimiter, authGuard('signup'), async (req, res) => {
   try {
