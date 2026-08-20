@@ -399,174 +399,171 @@ app.delete('/api/auth/account', authLimiter, async (req, res) => {
   }
 });
 
-// Game rating
-function readGames() {
-  const games = JSON.parse(fs.readFileSync(DATA_PATH, "utf-8"));
-  let changed = false;
-  games.forEach((g) => {
-    g.reviews.forEach((r) => {
-      if (!r.id) {
-        r.id = "r_" + Date.now() + Math.random().toString(36).slice(2, 8);
-        changed = true;
-      }
-    });
-  });
-  if (changed) writeGames(games);
-  return games;
-}
-
-function writeGames(games) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(games, null, 2));
-}
-
-// Calculate avarage rating//
-function getAvgRating(game) {
-  const totalCount = game.baseCount + game.reviews.length;
-  const totalScore =
-    game.baseRating * game.baseCount +
-    game.reviews.reduce((sum, r) => sum + r.stars, 0);
-  const avg = totalCount ? totalScore / totalCount : 0;
-  return { avg, count: totalCount };
-}
-
-// Calculate the percentage of game rating//
-function getDistribution(game) {
-  const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-  dist[game.baseRating] += game.baseCount;
-  game.reviews.forEach((r) => (dist[r.stars] += 1));
-  const total = Object.values(dist).reduce((a, b) => a + b, 0) || 1;
-  const percent = {};
-  for (const star in dist) {
-    percent[star] = Math.round((dist[star] / total) * 100);
+// --- FORUM MODULE: IN-MEMORY DATA ---
+let forumThreads = [
+  {
+    id: 1,
+    title: "[Nightfall Protocol] Troubleshooting LAN connectivity for SEA players",
+    author: "darknexus",
+    tag: "Technical Support",
+    tagClass: "tag--support",
+    replies: 42,
+    views: 1200,
+    lastPostAuthor: "an_admin",
+    lastPostTime: "3 hours ago"
+  },
+  {
+    id: 2,
+    title: "[Embercrown Saga] Collector's Edition Throne Figure Review",
+    author: "cyber_fan",
+    tag: "Merch Review",
+    tagClass: "tag--review",
+    replies: 85,
+    views: 3400,
+    lastPostAuthor: "merch_guy",
+    lastPostTime: "6 hours ago"
   }
-  return percent;
-}
-function validateReviewInput(title, content, rating) {
-  const errors = [];
-  const t = (title || "").trim();
-  const c = (content || "").trim();
-  const r = parseInt(rating);
+];
 
-  if (!t) errors.push("Cant leave blank");
-  if (t.length > 80) errors.push("Title maximum 80   characters");
-  if (c.length < 10) errors.push("The content must be at least 10 characters long.");
-  if (c.length > 2000) errors.push("The content must be no more than 2,000 characters long.");
-  if (!Number.isInteger(r) || r < 1 || r > 5) errors.push("The rating must be between 1 and 5.");
-
-  return errors;
-}
-
-// RATING
-app.get("/rating", (req, res) => {
-  let games = readGames();
-  games = games.map((g) => ({ ...g, ...getAvgRating(g) }));
-
-  const filterStar = req.query.stars ? parseInt(req.query.stars) : null;
-  const q = (req.query.search || "").toLowerCase();
-
-  let filtered = games;
-  if (filterStar) {
-    filtered = filtered.filter((g) => Math.round(g.avg) === filterStar);
-  }
-  if (q) {
-    filtered = filtered.filter((g) => g.name.toLowerCase().includes(q));
-  }
-
-  res.render("rating", { games: filtered, filterStar, search: req.query.search || "" });
+// GET: Retrieve all forum threads
+app.get('/api/threads', (req, res) => {
+  // Send the in-memory array to the frontend as JSON
+  res.json(forumThreads);
 });
 
-app.get("/api/games", (req, res) => {
-  let games = readGames().map((g) => ({ ...g, ...getAvgRating(g) }));
-  const q = (req.query.search || "").toLowerCase();
-  if (q) games = games.filter((g) => g.name.toLowerCase().includes(q));
-  res.json(games.map(({ id, name, image, avg }) => ({ id, name, image, avg })));
-});
+// POST: Create a new forum thread
+app.post('/api/threads', (req, res) => {
+  const { title, game, category, content } = req.body;
 
-// RATINGGAME
-app.get("/game/:id", (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
-
-  const { avg, count } = getAvgRating(game);
-  const distribution = getDistribution(game);
-
-  res.render("ratinggame", { game, avg, count, distribution });
-});
-
-// Write game review
-
-app.get("/game/:id/review", (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
-
-  let review = null;
-  if (req.query.edit) {
-    review = game.reviews.find((r) => r.id === req.query.edit) || null;
+  // Server-Side Validation
+  if (!title || title.trim() === '') {
+    return res.status(400).json({ error: "Thread title is strictly required." });
+  }
+  if (!category || category.trim() === '') {
+    return res.status(400).json({ error: "A category selection is required." });
+  }
+  if (!content || content.trim() === '') {
+    return res.status(400).json({ error: "Post content cannot be empty." });
   }
 
-  res.render("writegamereview", { game, review, errors: [] });
+  // Determine the tag class based on the category for styling
+  let tagClass = "tag--general";
+  if (category === "support") tagClass = "tag--support";
+  if (category === "review") tagClass = "tag--review";
+
+  // Create the new thread object
+  const newThread = {
+    id: forumThreads.length + 1,
+    title: title,
+    content: content,
+    // Dynamic behaviour: Pull the actual logged-in user's name if available, otherwise fallback
+    author: req.session?.user?.username || "Guest_User", 
+    tag: category,
+    tagClass: tagClass,
+    replies: 0,
+    views: 0,
+    lastPostAuthor: req.session?.user?.username || "Guest_User",
+    lastPostTime: "Just now"
+  };
+
+  // Save it to our temporary "database"
+  forumThreads.unshift(newThread); // unshift adds it to the top of the array
+
+  // Send a success response back to the client
+  res.status(201).json({ message: "Thread created successfully!", thread: newThread });
 });
 
+// ==========================================
+// ADMIN MODULE: IN-MEMORY DATA & ROUTES
+// ==========================================
 
-app.post("/game/:id/review", (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
+let adminUsers = [
+  { 
+    id: 1, 
+    username: "John_A", 
+    status: "normal", 
+    joined: "Jan 12, 2026", 
+    avatarSeed: "Ngyuen", 
+    flags: "0 active flags" 
+  },
+  { 
+    id: 2, 
+    username: "jane_B", 
+    status: "normal", 
+    joined: "Mar 05, 2026", 
+    avatarSeed: "Dang", 
+    flags: "1 resolved warning" 
+  },
+  { 
+    id: 3, 
+    username: "spammer_99", 
+    status: "locked", 
+    lockedDate: "Jul 21, 2026", 
+    avatarSeed: "Spam", 
+    reason: "Forum Abuse" 
+  }
+];
 
-  const { title, content, rating, image, reviewId } = req.body;
-  const errors = validateReviewInput(title, content, rating);
+// GET: Retrieve all users for the dashboard
+app.get('/api/users', (req, res) => {
+  res.json(adminUsers);
+});
 
-  if (errors.length) {
-    const review = reviewId ? game.reviews.find((r) => r.id === reviewId) : null;
-    return res.status(400).render("writegamereview", { game, review, errors });
+// POST: Toggle user lock status
+app.post('/api/users/:id/toggle-lock', (req, res) => {
+  // Grab the ID from the URL and convert it to an integer
+  const userId = parseInt(req.params.id);
+  
+  // Find the specific user in our in-memory array
+  const user = adminUsers.find(u => u.id === userId);
+
+  // Server-side validation: Make sure the user actually exists
+  if (!user) {
+    return res.status(404).json({ error: "User not found." });
   }
 
-  if (reviewId) {
-    // update already exist review
-    const review = game.reviews.find((r) => r.id === reviewId);
-    if (!review) return res.status(404).send("Review not found");
-    review.title = title.trim();
-    review.content = content.trim();
-    review.stars = parseInt(rating);
-    review.image = (image || "").trim();
-    review.date = new Date().toLocaleDateString("vi-VN") + " (edited)";
+  // Toggle the status
+  if (user.status === 'normal') {
+    user.status = 'locked';
+    user.lockedDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    user.reason = req.body.reason || "Manual Admin Lock";
   } else {
-    // create new review
-    game.reviews.push({
-      id: "r_" + Date.now(),
-      author: "You", // TODO: replace by req.session.user.username after have login
-      date: new Date().toLocaleDateString("vi-VN"),
-      stars: parseInt(rating),
-      title: title.trim(),
-      content: content.trim(),
-      image: (image || "").trim(),
-    });
+    user.status = 'normal';
+    // Clean up locked properties
+    delete user.lockedDate;
+    delete user.reason;
   }
 
-  writeGames(games);
-  res.redirect("/game/" + game.id);
+  res.json({ message: `User status successfully updated to ${user.status}`, user: user });
+});
+// GET: Retrieve a single thread by ID
+app.get('/api/threads/:id', (req, res) => {
+  const threadId = parseInt(req.params.id);
+  const thread = forumThreads.find(t => t.id === threadId);
+  
+  if (thread) {
+    res.json(thread);
+  } else {
+    res.status(404).json({ error: "Thread not found." });
+  }
 });
 
-// delete review
-app.post("/game/:id/review/:reviewId/delete", (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
+// DELETE: Remove a forum thread
+app.delete('/api/threads/:id', (req, res) => {
+  const threadId = parseInt(req.params.id);
+  const initialLength = forumThreads.length;
+  
+  // Filter out the thread with the matching ID
+  forumThreads = forumThreads.filter(t => t.id !== threadId);
 
-  const exists = game.reviews.some((r) => r.id === req.params.reviewId);
-  if (!exists) return res.status(404).send("Review not found");
-
-  // if have login: check review.userId === req.session.user.id before
-
-  game.reviews = game.reviews.filter((r) => r.id !== req.params.reviewId);
-  writeGames(games);
-  res.redirect("/game/" + game.id);
+  if (forumThreads.length < initialLength) {
+    res.json({ message: "Thread successfully deleted." });
+  } else {
+    res.status(404).json({ error: "Thread not found." });
+  }
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 app.listen(PORT, () => {
   console.log('Playnex server running on http://localhost:' + PORT);
 });
-

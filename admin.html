@@ -7,7 +7,45 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" href="logo.png"><link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="Style.css">
+<style>
+  .admin-layout { max-width: 1200px; margin: 0 auto; padding: 24px 40px 64px; }
+  .admin-toolbar { display: flex; justify-content: space-between; margin-bottom: 24px; }
+  .admin-toolbar input {
+    background: var(--surface-2); border: 1px solid var(--border);
+    padding: 12px 16px; border-radius: 4px; color: var(--text); width: 100%; max-width: 400px;
+  }
+  .admin-section { margin-bottom: 40px; }
+  .admin-section-header {
+    padding: 12px; border-radius: 6px 6px 0 0; text-align: center;
+    font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; font-size: 13px;
+  }
+  .header-normal { background: #27ae60; color: #ffffff; }
+  .header-locked { background: #c0392b; color: #ffffff; }
+  
+  .admin-list {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+  }
+  .admin-row {
+    display: flex; align-items: center; gap: 20px; padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .admin-row:last-child { border-bottom: none; }
+  .admin-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+  
+  .account-profile { display: flex; align-items: center; gap: 12px; flex: 1; }
+  .account-profile img { width: 48px; height: 48px; border-radius: 4px; background: var(--surface-3); }
+  .account-info h4 { font-size: 15px; font-weight: 600; }
+  .account-info p { font-size: 12px; color: var(--text-muted); }
+  
+  .admin-actions { display: flex; gap: 12px; align-items: center; }
+  
+  .btn--success { border-color: #27ae60; color: #27ae60; background: transparent; }
+  .btn--success:hover { background: #27ae60; color: #fff; }
+</style>
 </head>
 <body>
 <a class="skip-to-content" href="#main-content">Skip to main content</a>
@@ -49,37 +87,7 @@
     <h2 class="admin-section-header header-normal">Normal Accounts</h2>
     <div class="admin-list">
       
-      <!-- User 1 -->
-      <div class="admin-row">
-        <input type="checkbox" aria-label="Select user">
-        <div class="account-profile">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ngyuen" alt="Avatar">
-          <div class="account-info">
-            <h3>John_A</h3>
-            <p>Joined: Jan 12, 2026 · 0 active flags</p>
-          </div>
-        </div>
-        <div class="admin-actions">
-          <a href="admin-detail.html" class="btn btn--outline btn--small">View flags/warnings</a>
-          <button class="btn btn--danger btn--small">Lock account</button>
-        </div>
-      </div>
-
-      <!-- User 2 -->
-      <div class="admin-row">
-        <input type="checkbox" aria-label="Select user">
-        <div class="account-profile">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Dang" alt="Avatar">
-          <div class="account-info">
-            <h3>jane_B</h3>
-            <p>Joined: Mar 05, 2026 · 1 resolved warning</p>
-          </div>
-        </div>
-        <div class="admin-actions">
-          <a href="admin-detail.html" class="btn btn--outline btn--small">View flags/warnings</a>
-          <button class="btn btn--danger btn--small">Lock account</button>
-        </div>
-      </div>
+      
 
     </div>
   </section>
@@ -90,48 +98,14 @@
     <div class="admin-list">
       
       <!-- Locked User 1 -->
-      <div class="admin-row">
-        <input type="checkbox" aria-label="Select user">
-        <div class="account-profile">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Spam" alt="Avatar" class="admin-locked-avatar">
-          <div class="account-info">
-            <h3>spammer_99</h3>
-            <p>Locked: Jul 21, 2026 · Reason: Forum Abuse</p>
-          </div>
-        </div>
-        <div class="admin-actions">
-          <div class="admin-locked-actions">
-            <a href="admin-detail.html" class="btn btn--outline btn--small">View flags/warnings</a>
-            <a href="#" class="btn btn--outline btn--small">View appeals</a>
-          </div>
-          <button class="btn btn--success btn--small">Unlock account</button>
-        </div>
-      </div>
+      
 
     </div>
   </section>
 
 </main>
-
-
-
-<footer class="site-footer">
-  <div class="site-footer__inner">
-    <div class="site-footer__col">
-      <a href="homepage.html" class="logo logo--footer"><img src="logo.png" alt="Playnex" class="logo__img"></a>
-      <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
-    </div>
-    <div class="site-footer__col">
-      <h3>Support</h3>
-      <a href="contact.html">Contact us</a>
-      <a href="sitemap.html">Sitemap</a>
-    </div>
-    <div class="site-footer__col">
-      <h3>Company</h3>
-      <a href="terms.html">Terms of service</a>
-      <a href="privacy.html">Privacy policy</a>
-    </div>
-  </div>
-  <div class="site-footer__bottom"><p>&copy; 2026 Playnex. All rights reserved.</p></div>
-</footer><script src="public/js/header.js"></script></body>
+<script src="public/js/admin-search.js"></script>.
+<script src="public/js/header.js"></script>
+<script src="public/js/admin-render.js"></script> <!-- ADD THIS LINE -->
+</body>
 </html>
