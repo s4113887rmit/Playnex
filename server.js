@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
-const multer = require('multer');
+const fs = require('fs');
 const crypto = require('crypto');
 
 const dns = require('dns');
@@ -21,24 +21,20 @@ app.get('/', function (req, res) {
 
 const MONGODB_URI = 'mongodb+srv://nguyenkhanhnguyen3967_db_user:NkK9r5QtMJOMJgL5@playnex.mzcuobd.mongodb.net/playnex?retryWrites=true&w=majority';
 
-const storage = multer.diskStorage({
-  destination: path.join(__dirname, 'uploads'),
-  filename: function (req, file, cb) {
-    cb(null, 'profile-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));
+function saveBase64Image(base64Data) {
+  if (!base64Data) return null;
+  var matches = base64Data.match(/^data:image\/(png|jpeg|jpg|gif|webp);base64,(.+)$/);
+  if (!matches) return null;
+  var ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+  var data = matches[2];
+  var filename = 'profile-' + Date.now() + '-' + Math.round(Math.random() * 1E9) + '.' + ext;
+  var filepath = path.join(__dirname, 'uploads', filename);
+  if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
+    fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
   }
-});
-
-const upload = multer({
-  storage: storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: function (req, file, cb) {
-    var allowed = /jpeg|jpg|png|gif|webp/;
-    var ext = allowed.test(path.extname(file.originalname).toLowerCase());
-    var mime = allowed.test(file.mimetype);
-    if (ext && mime) return cb(null, true);
-    cb(new Error('Only image files (jpeg, jpg, png, gif, webp) are allowed'));
-  }
-});
+  fs.writeFileSync(filepath, data, 'base64');
+  return 'uploads/' + filename;
+}
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -55,9 +51,9 @@ mongoose
 
 const User = require('./models/User');
 
-app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async (req, res) => {
+app.post('/api/auth/signup', authLimiter, async (req, res) => {
   try {
-    const { username, name, email, password, confirmPassword, description, subscribe } = req.body;
+    const { username, name, email, password, confirmPassword, description, subscribe, profilePicture } = req.body;
 
     if (!username || !email || !password || !confirmPassword || !description) {
       var missing = [];
@@ -84,10 +80,9 @@ app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async
       return res.status(409).json({ error: field + ' is already registered' });
     }
 
-    var profilePicture = 'uploads/default-profile.svg';
-    if (req.file) {
-      profilePicture = 'uploads/' + req.file.filename;
-    }
+    var profilePic = 'uploads/default-profile.svg';
+    var saved = saveBase64Image(profilePicture);
+    if (saved) profilePic = saved;
 
     var user = await User.create({
       username: username,
@@ -95,7 +90,7 @@ app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async
       email: email,
       password: password,
       description: description,
-      profilePicture: profilePicture,
+      profilePicture: profilePic,
       isVerified: true,
       subscribe: !!subscribe
     });
@@ -111,9 +106,6 @@ app.post('/api/auth/signup', authLimiter, upload.single('profilePicture'), async
     }
     if (err.code === 11000) {
       return res.status(409).json({ error: 'Username or email already exists' });
-    }
-    if (err.message && err.message.indexOf('image files') !== -1) {
-      return res.status(400).json({ error: 'Only image files (jpeg, jpg, png, gif, webp) are allowed' });
     }
     console.error('Signup error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
@@ -245,9 +237,9 @@ app.post('/api/auth/profile', authLimiter, async (req, res) => {
   }
 });
 
-app.put('/api/auth/profile', authLimiter, upload.single('profilePicture'), async (req, res) => {
+app.put('/api/auth/profile', authLimiter, async (req, res) => {
   try {
-    var { email, name, description } = req.body;
+    var { email, name, description, profilePicture } = req.body;
     if (!email) {
       return res.status(400).json({ error: 'Email is required' });
     }
@@ -257,8 +249,9 @@ app.put('/api/auth/profile', authLimiter, upload.single('profilePicture'), async
     }
     if (name) user.name = name;
     if (description) user.description = description;
-    if (req.file) {
-      user.profilePicture = 'uploads/' + req.file.filename;
+    if (profilePicture) {
+      var saved = saveBase64Image(profilePicture);
+      if (saved) user.profilePicture = saved;
     }
     await user.save({ validateBeforeSave: false });
     res.status(200).json({

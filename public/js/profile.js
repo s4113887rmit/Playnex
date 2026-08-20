@@ -122,19 +122,35 @@
     clearAllMessages();
     if (!currentEmail) return;
 
-    var formData = new FormData();
-    formData.append('email', currentEmail);
-    formData.append('name', nameInput.value.trim());
-    formData.append('description', descInput.value.trim());
-    if (profFileInput.files.length > 0) {
-      formData.append('profilePicture', profFileInput.files[0]);
-    }
-
     var btn = this.querySelector('button[type="submit"]');
     btn.disabled = true;
     btn.textContent = 'Saving...';
 
-    fetch('/api/auth/profile', { method: 'PUT', body: formData })
+    var file = profFileInput.files[0];
+    if (file) {
+      var reader = new FileReader();
+      reader.onload = function () {
+        sendProfileUpdate(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      sendProfileUpdate(null);
+    }
+  });
+
+  function sendProfileUpdate(pictureBase64) {
+    var payload = {
+      email: currentEmail,
+      name: nameInput.value.trim(),
+      description: descInput.value.trim(),
+      profilePicture: pictureBase64 || null
+    };
+
+    fetch('/api/auth/profile', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
       .then(function (res) { return res.json().then(function (d) { return { status: res.status, data: d }; }); })
       .then(function (result) {
         if (result.status === 200) {
@@ -154,7 +170,7 @@
         btn.disabled = false;
         btn.textContent = 'Save changes';
       });
-  });
+  }
 
   document.getElementById('form-change-email').addEventListener('submit', function (e) {
     e.preventDefault();
