@@ -54,8 +54,10 @@
   function showFieldError(id, message) {
     var el = document.getElementById(id);
     var err = document.getElementById(id + '-error');
-    if (el) el.classList.add('is-invalid');
-    if (err) err.textContent = message;
+    if (el) {
+      if (message) { el.classList.add('is-invalid'); } else { el.classList.remove('is-invalid'); }
+    }
+    if (err) err.textContent = message || '';
   }
 
   function showServerMsg(id, message, type) {
@@ -293,6 +295,48 @@
       if (nameInput.value.trim()) {
         avatarLetter.textContent = nameInput.value.trim().charAt(0);
       }
+    });
+  }
+
+  // ---- live validation on the profile forms ----
+  var newEmailInput = document.getElementById('new-email');
+  if (newEmailInput) {
+    newEmailInput.addEventListener('input', function () {
+      var v = newEmailInput.value.trim();
+      if (!v) { showFieldError('new-email', ''); return; }
+      showFieldError('new-email', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? '' : 'Enter a valid email address');
+    });
+  }
+
+  var emailPasswordInput = document.getElementById('email-password');
+  if (emailPasswordInput) {
+    emailPasswordInput.addEventListener('input', function () {
+      showFieldError('email-password', emailPasswordInput.value ? '' : 'Password is required');
+    });
+  }
+
+  var newPasswordInput = document.getElementById('new-password');
+  var confirmPasswordInput = document.getElementById('new-password-confirm');
+  function validateNewPasswords() {
+    if (!newPasswordInput || !confirmPasswordInput) return;
+    var v = newPasswordInput.value;
+    if (v && v.length < 8) { showFieldError('new-password', 'Must be at least 8 characters'); return; }
+    showFieldError('new-password', '');
+    if (v && confirmPasswordInput.value && v !== confirmPasswordInput.value) {
+      showFieldError('new-password-confirm', 'Passwords do not match');
+    } else {
+      showFieldError('new-password-confirm', '');
+    }
+  }
+  if (newPasswordInput) {
+    newPasswordInput.addEventListener('input', validateNewPasswords);
+    confirmPasswordInput.addEventListener('input', validateNewPasswords);
+  }
+
+  if (descInput) {
+    descInput.addEventListener('input', function () {
+      var len = descInput.value.trim().length;
+      showFieldError('profile-desc', len > 500 ? 'Description must be at most 500 characters' : '');
     });
   }
 

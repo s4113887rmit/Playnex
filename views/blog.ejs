@@ -87,6 +87,7 @@
            data-summary="<%= p.summary.toLowerCase() %>"
            data-tags="<%= p.tags.join(' ').toLowerCase() %>"
            data-author="<%= p.authorName.toLowerCase() %>"
+           data-content="<%= p.content.toLowerCase() %>"
            data-views="<%= p.views %>"
            data-date="<%= p.date %>">
           <div class="post-body">
@@ -205,7 +206,8 @@
       var haystack = card.getAttribute('data-title') + ' ' +
         card.getAttribute('data-summary') + ' ' +
         card.getAttribute('data-tags') + ' ' +
-        card.getAttribute('data-author');
+        card.getAttribute('data-author') + ' ' +
+        card.getAttribute('data-content');
       var matchesSearch = !q || haystack.indexOf(q) !== -1;
       var matchesTag = !tag || card.getAttribute('data-tags').split(' ').indexOf(tag) !== -1;
       return matchesSearch && matchesTag;
