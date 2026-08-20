@@ -7,7 +7,34 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" href="logo.png"><link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="Style.css">
+<style>
+  .admin-detail-layout { max-width: 1100px; margin: 0 auto; padding: 24px 40px 64px; display: grid; grid-template-columns: 300px 1fr; gap: 32px; align-items: start; }
+  
+  .profile-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 24px; text-align: center; }
+  .profile-card img { width: 120px; height: 120px; border-radius: 8px; background: var(--surface-3); margin-bottom: 16px; object-fit: cover; }
+  .profile-card h2 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .profile-card p { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 24px; }
+  
+  .content-panel { display: flex; flex-direction: column; gap: 32px; }
+  
+  .data-section h3 { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin-bottom: 16px; color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  
+  .activity-row { display: grid; grid-template-columns: auto 1fr auto; gap: 16px; align-items: center; background: var(--surface-1); padding: 12px 16px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 12px; }
+  .activity-img { width: 48px; height: 48px; background: var(--surface-2); border-radius: 4px; }
+  .activity-info h4 { font-size: 14px; font-weight: 600; }
+  .activity-info p { font-size: 12px; color: var(--text-muted); }
+  .activity-status { font-size: 13px; font-weight: 600; }
+  .status-bought { color: #2ecc71; }
+  .status-refunded { color: #e74c3c; }
+  
+  .flag-row { display: flex; justify-content: space-between; align-items: center; padding: 16px; background: rgba(231, 76, 60, 0.1); border: 1px solid rgba(231, 76, 60, 0.3); border-radius: 6px; margin-bottom: 12px; }
+  .flag-info strong { display: block; font-size: 14px; margin-bottom: 4px; color: #ff7675; }
+  .flag-info span { font-size: 12px; color: var(--text-muted); }
+  
+  .warning-box { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 24px; }
+  .warning-box textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 12px; color: var(--text); font-family: var(--font-body); font-size: 13px; min-height: 100px; resize: vertical; margin-bottom: 16px; }
+</style>
 </head>
 <body>
 <a class="skip-to-content" href="#main-content">Skip to main content</a>
@@ -118,25 +145,9 @@
   </div>
 
 </main>
-
-
-<footer class="site-footer">
-  <div class="site-footer__inner">
-    <div class="site-footer__col">
-      <a href="homepage.html" class="logo logo--footer"><img src="logo.png" alt="Playnex" class="logo__img"></a>
-      <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
-    </div>
-    <div class="site-footer__col">
-      <h3>Support</h3>
-      <a href="contact.html">Contact us</a>
-      <a href="sitemap.html">Sitemap</a>
-    </div>
-    <div class="site-footer__col">
-      <h3>Company</h3>
-      <a href="terms.html">Terms of service</a>
-      <a href="privacy.html">Privacy policy</a>
-    </div>
-  </div>
-  <div class="site-footer__bottom"><p>&copy; 2026 Playnex. All rights reserved.</p></div>
-</footer><script src="public/js/header.js"></script></body>
+<script src="public/js/header.js"></script>
+<script src="public/js/admin-detail.js"></script> <!-- ADD THIS LINE -->
+</body>
+</html>
+</body>
 </html>
