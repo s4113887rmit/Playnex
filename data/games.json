@@ -1,0 +1,229 @@
+[
+  {
+    "id": 1,
+    "name": "Elden Ring",
+    "genre": "Action RPG",
+    "releaseDate": "25/02/2022",
+    "description": "The journey on becoming the Elden Lord",
+    "longDescription": "Elden Ring blends exploration, brutal combat, and layered storytelling in a vast world shaped by ancient forces. Venture through ruined kingdoms, encounter legendary bosses, and uncover the truth behind the shattered Elden Ring.",
+    "image": "/IMG/eldenringposter.jpg",
+    "price": 59.99,
+    "oldPrice": null,
+    "platforms": ["PC", "Console"],
+    "type": "Digital",
+    "availability": "In stock",
+    "edition": "Standard edition",
+    "included": "Full game + launcher access",
+    "features": [
+      "Massive open world exploration",
+      "Challenging boss encounters",
+      "Deep RPG progression and builds",
+      "Cross-platform digital delivery"
+    ],
+    "baseRating": 5,
+    "baseCount": 36,
+    "reviews": [
+      {
+        "id": "r_1787067730449",
+        "author": "You",
+        "date": "18/8/2026 (edited)",
+        "stars": 5,
+        "title": "hehe",
+        "content": "game hay nên chơi bai baiadadada",
+        "image": ""
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Cyberpunk 2077",
+    "genre": "Action RPG",
+    "releaseDate": "10/12/2020",
+    "description": "Dystopian feature open world game",
+    "longDescription": "Step into the role of V and shape your story across Night City's crowded districts. Every mission, upgrade, and choice pushes you closer to a destiny that can either break or redefine the city around you.",
+    "image": "/IMG/cyberpunkposter.jpg",
+    "price": 20.99,
+    "oldPrice": 29.99,
+    "platforms": ["PC"],
+    "type": "Digital",
+    "availability": "In stock",
+    "edition": "Ultimate edition",
+    "included": "Digital deluxe extras",
+    "features": [
+      "Branching story decisions",
+      "High-speed vehicle chases",
+      "Character upgrades and cybernetic builds",
+      "Rich urban exploration"
+    ],
+    "baseRating": 4,
+    "baseCount": 24,
+    "reviews": []
+  },
+  {
+    "id": 3,
+    "name": "Ghost of Tsushima",
+    "genre": "Action Adventure",
+    "releaseDate": "17/07/2020",
+    "description": "An open-world adventure game set during the Mongol invasion of Japan in 1274.",
+    "longDescription": "Fight as the Ghost to defend Tsushima from the Mongol invasion. Every region offers a new landscape, a new rival, and a new reason to defend the land you love.",
+    "image": "/IMG/ghostposter.jpg",
+    "price": 34.99,
+    "oldPrice": null,
+    "platforms": ["PC", "Console"],
+    "type": "Digital",
+    "availability": "In stock",
+    "edition": "Digital deluxe",
+    "included": "Full game + bonus pack",
+    "features": [
+      "Master swordsman combat",
+      "Open-world exploration",
+      "Story-driven side quests",
+      "Stunning cinematic atmosphere"
+    ],
+    "baseRating": 4,
+    "baseCount": 20,
+    "reviews": [
+      {
+        "author": "You",
+        "date": "18/8/2026",
+        "stars": 5,
+        "title": "helllo",
+        "content": "alibaba",
+        "id": "r_17870674047101uw6rq"
+      },
+      {
+        "author": "You",
+        "date": "18/8/2026",
+        "stars": 1,
+        "title": "đă",
+        "content": "ưdad",
+        "id": "r_1787067404710ik7wdz"
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Red Dead Redemption II",
+    "genre": "Action Adventure",
+    "releaseDate": "26/10/2018",
+    "description": "A sprawling Western tale of loyalty, conviction, and the price of infamy.",
+    "longDescription": "Red Dead Redemption II follows Arthur Morgan through a breathtaking western saga, blending cinematic storytelling with legendary open-world exploration and slow-burn survival tension.",
+    "image": "/IMG/reddeadposter.jpg",
+    "price": 49.99,
+    "oldPrice": null,
+    "platforms": ["PC"],
+    "type": "Digital",
+    "availability": "In stock",
+    "edition": "Standard edition",
+    "included": "Full game + campaign",
+    "features": [
+      "Detailed open-country travel",
+      "Honor and morality choices",
+      "Story-rich missions and camp life",
+      "Immersive wildlife and scenery"
+    ],
+    "baseRating": 4,
+    "baseCount": 30,
+    "reviews": []
+  },
+  {
+    "id": 5,
+    "name": "Hades",
+    "genre": "Roguelike",
+    "releaseDate": "17/09/2020",
+    "description": "Escape Hell",
+    "longDescription": "Hades pairs fast, stylish combat with a deeply personal narrative. Every attempted escape reforms the dungeon and adds another layer to Zagreus's struggle for freedom.",
+    "image": "/IMG/hadesposter.png",
+    "price": 27.99,
+    "oldPrice": null,
+    "platforms": ["PC", "Console"],
+    "type": "Digital",
+    "availability": "In stock",
+    "edition": "Standard edition",
+    "included": "Full game + soundtrack",
+    "features": [
+      "Fast combat loops",
+      "Procedural dungeon runs",
+      "Rich mythological narrative",
+      "Endless build experimentation"
+    ],
+    "baseRating": 5,
+    "baseCount": 18,
+    "reviews": []
+  },
+  {
+    "id": 6,
+    "name": "Hollow Knight",
+    "genre": "Metroidvania",
+    "releaseDate": "24/02/2017",
+    "description": "Journey into the Insect Kingdom",
+    "longDescription": "Hollow Knight is a hall-of-fame metroidvania full of hidden paths, stealthy combat, and a haunting atmosphere. The deeper you go, the more the kingdom reveals its tragic past.",
+    "image": "/IMG/hollowposter.jpg",
+    "price": 29.99,
+    "oldPrice": null,
+    "platforms": ["PC", "Console"],
+    "type": "Digital",
+    "availability": "In stock",
+    "edition": "Standard edition",
+    "included": "Full game + bonus art pack",
+    "features": [
+      "Expansive interconnected world",
+      "Responsive precision combat",
+      "Beautiful hand-drawn art direction",
+      "Tons of secrets and upgrades"
+    ],
+    "baseRating": 4,
+    "baseCount": 22,
+    "reviews": []
+  },
+  {
+    "id": 7,
+    "name": "NieR Automata",
+    "genre": "Action RPG",
+    "releaseDate": "17/02/2017",
+    "description": "The Battle Between Robots and Androids.",
+    "longDescription": "NieR Automata blends fast combat, unforgettable music, and a philosophical sci-fi story into one of the most memorable action RPGs on the market.",
+    "image": "/IMG/nierposter.jpg",
+    "price": 39.99,
+    "oldPrice": null,
+    "platforms": ["PC", "Console"],
+    "type": "Digital",
+    "availability": "In stock",
+    "edition": "Complete edition",
+    "included": "Full game + DLC access",
+    "features": [
+      "Dynamic combat and weapons",
+      "A moving sci-fi story",
+      "Memorable soundtrack",
+      "Multiple playthrough perspectives"
+    ],
+    "baseRating": 3,
+    "baseCount": 15,
+    "reviews": []
+  },
+  {
+    "id": 8,
+    "name": "Death Stranding",
+    "genre": "Action",
+    "releaseDate": "08/11/2019",
+    "description": "The Delivery Man Reconnects America.",
+    "longDescription": "Death Stranding delivers high-speed shooting, tactical mobility, and ambient dread in a haunted future world. It rewards aggressive play, sharp reactions, and fearless exploration.",
+    "image": "/IMG/deathstandposter.jpg",
+    "price": 24.99,
+    "oldPrice": null,
+    "platforms": ["PC", "Console"],
+    "type": "Digital",
+    "availability": "In stock",
+    "edition": "Standard edition",
+    "included": "Full game + season pass",
+    "features": [
+      "Fast, responsive shooting",
+      "High-stakes survival runs",
+      "Rich environmental storytelling",
+      "Replayable challenge modes"
+    ],
+    "baseRating": 3,
+    "baseCount": 12,
+    "reviews": []
+  }
+]

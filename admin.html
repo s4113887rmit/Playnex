@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="Style.css">
 <style>
   .admin-layout { max-width: 1200px; margin: 0 auto; padding: 24px 40px 64px; }
   .admin-toolbar { display: flex; justify-content: space-between; margin-bottom: 24px; }
@@ -77,37 +77,7 @@
     <div class="admin-section-header header-normal">Normal Accounts</div>
     <div class="admin-list">
       
-      <!-- User 1 -->
-      <div class="admin-row">
-        <input type="checkbox" aria-label="Select user">
-        <div class="account-profile">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Ngyuen" alt="Avatar">
-          <div class="account-info">
-            <h4>John_A</h4>
-            <p>Joined: Jan 12, 2026 · 0 active flags</p>
-          </div>
-        </div>
-        <div class="admin-actions">
-          <a href="admin-detail.html" class="btn btn--outline btn--small">View flags/warnings</a>
-          <button class="btn btn--danger btn--small">Lock account</button>
-        </div>
-      </div>
-
-      <!-- User 2 -->
-      <div class="admin-row">
-        <input type="checkbox" aria-label="Select user">
-        <div class="account-profile">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Dang" alt="Avatar">
-          <div class="account-info">
-            <h4>jane_B</h4>
-            <p>Joined: Mar 05, 2026 · 1 resolved warning</p>
-          </div>
-        </div>
-        <div class="admin-actions">
-          <a href="admin-detail.html" class="btn btn--outline btn--small">View flags/warnings</a>
-          <button class="btn btn--danger btn--small">Lock account</button>
-        </div>
-      </div>
+      
 
     </div>
   </section>
@@ -118,28 +88,14 @@
     <div class="admin-list">
       
       <!-- Locked User 1 -->
-      <div class="admin-row">
-        <input type="checkbox" aria-label="Select user">
-        <div class="account-profile">
-          <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Spam" alt="Avatar" style="filter: grayscale(100%); opacity: 0.5;">
-          <div class="account-info">
-            <h4>spammer_99</h4>
-            <p>Locked: Jul 21, 2026 · Reason: Forum Abuse</p>
-          </div>
-        </div>
-        <div class="admin-actions">
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            <a href="admin-detail.html" class="btn btn--outline btn--small">View flags/warnings</a>
-            <a href="#" class="btn btn--outline btn--small">View appeals</a>
-          </div>
-          <button class="btn btn--success btn--small">Unlock account</button>
-        </div>
-      </div>
+      
 
     </div>
   </section>
 
 </main>
-
+<script src="public/js/admin-search.js"></script>.
+<script src="public/js/header.js"></script>
+<script src="public/js/admin-render.js"></script> <!-- ADD THIS LINE -->
 </body>
 </html>

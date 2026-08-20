@@ -6,7 +6,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="Style.css">
 <style>
   .create-layout { max-width: 800px; margin: 0 auto; padding: 24px 40px 64px; }
   .create-header { margin-bottom: 24px; }
@@ -47,7 +47,7 @@
     </a>
     <nav class="primary-nav">
       <a href="homepage.html" class="primary-nav__link">Home</a>
-      <a href="forum.html" class="primary-nav__link is-active">Community</a>
+      <a href="Forum.html" class="primary-nav__link is-active">Community</a>
     </nav>
   </div>
 </header>
@@ -57,7 +57,7 @@
     <h1>Create/Edit Thread</h1>
   </div>
 
-  <form class="create-form" action="forum.html">
+  <form class="create-form">
     <div class="form-group">
       <label for="thread-title">Thread Title</label>
       <input type="text" id="thread-title" placeholder="Enter a descriptive title for your thread" required>
@@ -100,10 +100,14 @@
     </div>
 
     <div class="form-actions">
-      <a href="forum.html" class="btn btn--ghost btn--large">Cancel</a>
+      <a href="Forum.html" class="btn btn--ghost btn--large">Cancel</a>
       <button type="submit" class="btn btn--primary btn--large">Create / Post</button>
     </div>
   </form>
 </main>
+<div class="site-footer__bottom"><p>&copy; 2026 Playnex. All rights reserved.</p></div>
+</footer>
+<script src="public/js/header.js"></script>
+<script src="public/js/forum-create.js"></script>
 </body>
 </html>

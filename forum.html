@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="Style.css">
 <style>
   /* Page-specific layout extending style.css variables */
   .forum-toolbar {
@@ -130,11 +130,11 @@
       <a href="shopping.html" class="primary-nav__link">Shopping</a>
       <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
       <a href="forum.html" class="primary-nav__link is-active">Community</a>
-      <a href="#" class="primary-nav__link">Blog</a>
+      <a href="blog.html" class="primary-nav__link">Blog</a>
     </nav>
     <div class="topbar__actions">
       <!-- Search and Icons omitted for brevity, identical to homepage.html -->
-      <a href="admin.html" class="btn btn--outline btn--small">Admin Panel</a>
+      <a href="Admin.html" class="btn btn--outline btn--small">Admin Panel</a>
       <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
     </div>
   </div>
@@ -179,71 +179,21 @@
       <div style="text-align: center;">Views</div>
       <div>Last Post</div>
     </div>
-
-    <!-- Thread 1 -->
-    <div class="forum-row">
-      <div class="forum-author">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User avatar">
-        <span>darknexus</span>
-      </div>
-      <div class="forum-thread-info">
-        <h3><a href="forum-detail.html">[Nightfall Protocol] Troubleshooting LAN connectivity for SEA players</a></h3>
-        <p class="forum-last-post">Having high latency issues connecting with friends in Indonesia. Any tips?</p>
-      </div>
-      <div><span class="forum-tag tag--support">Technical Support</span></div>
-      <div class="forum-stats">42</div>
-      <div class="forum-stats">1.2k</div>
-      <div class="forum-last-post">
-        <strong>an_admin</strong>
-        3 hours ago
-      </div>
-    </div>
-
-    <!-- Thread 2 -->
-    <div class="forum-row">
-      <div class="forum-author">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Aneka" alt="User avatar">
-        <span>cyber_fan</span>
-      </div>
-      <div class="forum-thread-info">
-        <h3><a href="forum-detail.html">[Embercrown Saga] Collector's Edition Throne Figure Review</a></h3>
-        <p class="forum-last-post">Unboxing the 28cm figure. The detailing on the crown is amazing.</p>
-      </div>
-      <div><span class="forum-tag tag--review">Merch Review</span></div>
-      <div class="forum-stats">85</div>
-      <div class="forum-stats">3.4k</div>
-      <div class="forum-last-post">
-        <strong>merch_guy</strong>
-        6 hours ago
-      </div>
-    </div>
-
-    <!-- Thread 3 -->
-    <div class="forum-row">
-      <div class="forum-author">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Jack" alt="User avatar">
-        <span>sys_hacker</span>
-      </div>
-      <div class="forum-thread-info">
-        <h3><a href="forum-detail.html">Are the firewall breach mechanics in Silt and Static realistic?</a></h3>
-        <p class="forum-last-post">Looking at the attack models used in the game compared to real-world incidents.</p>
-      </div>
-      <div><span class="forum-tag tag--general">Game Discussion</span></div>
-      <div class="forum-stats">12</div>
-      <div class="forum-stats">890</div>
-      <div class="forum-last-post">
-        <strong>sys_hacker</strong>
-        1 day ago
-      </div>
-    </div>
   </div>
+</div> 
+  
+    <div class="load-more-container">
+      <button class="btn btn--ghost btn--large">Load More Threads</button>
+    </div>
 
-  <div class="load-more-container">
-    <button class="btn btn--ghost btn--large">Load More Threads</button>
-  </div>
+  </main>
 
-</main>
+  <footer class="site-footer"> <!-- THIS OPENS THE FOOTER -->
+    <div class="site-footer__bottom"><p>&copy; 2026 Playnex. All rights reserved.</p></div>
+  </footer>
 
-<!-- SITE FOOTER omitted for brevity, paste standard footer here -->
+  <script src="public/js/forum-filter.js"></script>
+  <script src="public/js/header.js"></script>
+  <script src="public/js/forum-render.js"></script>
 </body>
 </html>

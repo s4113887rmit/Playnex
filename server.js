@@ -366,6 +366,170 @@ app.delete('/api/auth/account', authLimiter, async (req, res) => {
   }
 });
 
+// --- FORUM MODULE: IN-MEMORY DATA ---
+let forumThreads = [
+  {
+    id: 1,
+    title: "[Nightfall Protocol] Troubleshooting LAN connectivity for SEA players",
+    author: "darknexus",
+    tag: "Technical Support",
+    tagClass: "tag--support",
+    replies: 42,
+    views: 1200,
+    lastPostAuthor: "an_admin",
+    lastPostTime: "3 hours ago"
+  },
+  {
+    id: 2,
+    title: "[Embercrown Saga] Collector's Edition Throne Figure Review",
+    author: "cyber_fan",
+    tag: "Merch Review",
+    tagClass: "tag--review",
+    replies: 85,
+    views: 3400,
+    lastPostAuthor: "merch_guy",
+    lastPostTime: "6 hours ago"
+  }
+];
+
+// GET: Retrieve all forum threads
+app.get('/api/threads', (req, res) => {
+  // Send the in-memory array to the frontend as JSON
+  res.json(forumThreads);
+});
+
+// POST: Create a new forum thread
+app.post('/api/threads', (req, res) => {
+  const { title, game, category, content } = req.body;
+
+  // Server-Side Validation
+  if (!title || title.trim() === '') {
+    return res.status(400).json({ error: "Thread title is strictly required." });
+  }
+  if (!category || category.trim() === '') {
+    return res.status(400).json({ error: "A category selection is required." });
+  }
+  if (!content || content.trim() === '') {
+    return res.status(400).json({ error: "Post content cannot be empty." });
+  }
+
+  // Determine the tag class based on the category for styling
+  let tagClass = "tag--general";
+  if (category === "support") tagClass = "tag--support";
+  if (category === "review") tagClass = "tag--review";
+
+  // Create the new thread object
+  const newThread = {
+    id: forumThreads.length + 1,
+    title: title,
+    content: content,
+    // Dynamic behaviour: Pull the actual logged-in user's name if available, otherwise fallback
+    author: req.session?.user?.username || "Guest_User", 
+    tag: category,
+    tagClass: tagClass,
+    replies: 0,
+    views: 0,
+    lastPostAuthor: req.session?.user?.username || "Guest_User",
+    lastPostTime: "Just now"
+  };
+
+  // Save it to our temporary "database"
+  forumThreads.unshift(newThread); // unshift adds it to the top of the array
+
+  // Send a success response back to the client
+  res.status(201).json({ message: "Thread created successfully!", thread: newThread });
+});
+
+// ==========================================
+// ADMIN MODULE: IN-MEMORY DATA & ROUTES
+// ==========================================
+
+let adminUsers = [
+  { 
+    id: 1, 
+    username: "John_A", 
+    status: "normal", 
+    joined: "Jan 12, 2026", 
+    avatarSeed: "Ngyuen", 
+    flags: "0 active flags" 
+  },
+  { 
+    id: 2, 
+    username: "jane_B", 
+    status: "normal", 
+    joined: "Mar 05, 2026", 
+    avatarSeed: "Dang", 
+    flags: "1 resolved warning" 
+  },
+  { 
+    id: 3, 
+    username: "spammer_99", 
+    status: "locked", 
+    lockedDate: "Jul 21, 2026", 
+    avatarSeed: "Spam", 
+    reason: "Forum Abuse" 
+  }
+];
+
+// GET: Retrieve all users for the dashboard
+app.get('/api/users', (req, res) => {
+  res.json(adminUsers);
+});
+
+// POST: Toggle user lock status
+app.post('/api/users/:id/toggle-lock', (req, res) => {
+  // Grab the ID from the URL and convert it to an integer
+  const userId = parseInt(req.params.id);
+  
+  // Find the specific user in our in-memory array
+  const user = adminUsers.find(u => u.id === userId);
+
+  // Server-side validation: Make sure the user actually exists
+  if (!user) {
+    return res.status(404).json({ error: "User not found." });
+  }
+
+  // Toggle the status
+  if (user.status === 'normal') {
+    user.status = 'locked';
+    user.lockedDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    user.reason = req.body.reason || "Manual Admin Lock";
+  } else {
+    user.status = 'normal';
+    // Clean up locked properties
+    delete user.lockedDate;
+    delete user.reason;
+  }
+
+  res.json({ message: `User status successfully updated to ${user.status}`, user: user });
+});
+// GET: Retrieve a single thread by ID
+app.get('/api/threads/:id', (req, res) => {
+  const threadId = parseInt(req.params.id);
+  const thread = forumThreads.find(t => t.id === threadId);
+  
+  if (thread) {
+    res.json(thread);
+  } else {
+    res.status(404).json({ error: "Thread not found." });
+  }
+});
+
+// DELETE: Remove a forum thread
+app.delete('/api/threads/:id', (req, res) => {
+  const threadId = parseInt(req.params.id);
+  const initialLength = forumThreads.length;
+  
+  // Filter out the thread with the matching ID
+  forumThreads = forumThreads.filter(t => t.id !== threadId);
+
+  if (forumThreads.length < initialLength) {
+    res.json({ message: "Thread successfully deleted." });
+  } else {
+    res.status(404).json({ error: "Thread not found." });
+  }
+});
+
 const PORT = 3000;
 app.listen(PORT, () => {
   console.log('Playnex server running on http://localhost:' + PORT);
