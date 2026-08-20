@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 const DATA_PATH = path.join(__dirname, 'data', 'games.json');
 
@@ -52,6 +53,10 @@ app.use('/api/cart', cartRouter);
 app.use('/api/wishlist', wishlistRouter);
 app.use('/api/checkout', checkoutRouter);
 
+// Blog module (EJS pages at /blog + JSON API at /api/blogs)
+const blogsRouter = require('./routes/blogs');
+app.use('/', blogsRouter);
+
 app.get('/', function (req, res) {
   res.redirect('/homepage.html');
 });
@@ -81,14 +86,213 @@ const authLimiter = rateLimit({
   legacyHeaders: false
 });
 
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch((err) => console.error('MongoDB connection error:', err));
-
 const User = require('./models/User');
 
-app.post('/api/auth/signup', authLimiter, async (req, res) => {
+let dbReady = false;
+mongoose.connection.on('connected', () => { dbReady = true; });
+mongoose.connection.on('disconnected', () => { dbReady = false; });
+
+// In-memory user store (A2 prototype: no MongoDB required)
+const memoryUsers = require('./models/memoryUsers');
+
+function signupValidator(body) {
+  const errors = [];
+  const { username, email, password, confirmPassword, description } = body;
+  if (!username || !email || !password || !confirmPassword || !description) {
+    errors.push('All required fields must be filled in.');
+  }
+  if (username && !/^[a-zA-Z0-9_-]{3,30}$/.test(username)) {
+    errors.push('Username must be 3-30 characters: letters, numbers, hyphens, underscores.');
+  }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.push('Please provide a valid email address.');
+  }
+  if (password && password !== confirmPassword) {
+    errors.push('Passwords do not match.');
+  }
+  if (password && password.length < 8) {
+    errors.push('Password must be at least 8 characters.');
+  }
+  if (description && description.length > 500) {
+    errors.push('Description must be at most 500 characters.');
+  }
+  return errors;
+}
+
+function handleMemoryAuth(req, res, route) {
+  const { email, password, confirmPassword, username, name, description, profilePicture } = req.body || {};
+  const lowerEmail = String(email || '').toLowerCase();
+
+  if (route === 'signup') {
+    const errors = signupValidator(req.body);
+    if (errors.length) return res.status(400).json({ error: errors.join(' ') });
+    if (memoryUsers.findMemoryUser((u) => u.email === lowerEmail || u.username === username)) {
+      return res.status(409).json({ error: 'Username or email already registered.' });
+    }
+    bcrypt.hash(password, 12).then((hash) => {
+      const profilePic = saveBase64Image(profilePicture) || 'uploads/default-profile.svg';
+      const user = {
+        id: 'mem-' + Date.now(),
+        username,
+        name: name || '',
+        email: lowerEmail,
+        password: hash,
+        description,
+        profilePicture: profilePic,
+        role: 'user',
+        isLocked: false,
+        isActive: true
+      };
+      memoryUsers.addMemoryUser(user);
+      res.status(201).json({ message: 'Account created successfully. You can now log in.', user: memoryUsers.publicUser(user) });
+    });
+    return;
+  }
+
+  if (route === 'login') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (!user) return res.status(401).json({ error: 'Invalid email or password.' });
+    if (user.isLocked) return res.status(403).json({ error: 'Your account has been locked. Contact an administrator.' });
+    if (!user.isActive) return res.status(403).json({ error: 'This account has been deactivated.' });
+    bcrypt.compare(password || '', user.password).then((isMatch) => {
+      if (!isMatch) return res.status(401).json({ error: 'Invalid email or password.' });
+      res.json({
+        message: 'Logged in successfully',
+        user: {
+          id: user.id,
+          username: user.username,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
+    });
+    return;
+  }
+
+  if (route === 'profile-get') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    return res.json(memoryUsers.publicUser(user));
+  }
+
+  if (route === 'profile-put') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    if (name) user.name = name;
+    if (description) user.description = description;
+    const saved = profilePicture && saveBase64Image(profilePicture);
+    if (saved) user.profilePicture = saved;
+    return res.json({ message: 'Profile updated successfully.', user: memoryUsers.publicUser(user) });
+  }
+
+  if (route === 'change-password') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+    if (newPassword !== confirmNewPassword) return res.status(400).json({ error: 'New passwords do not match.' });
+    if (newPassword.length < 8) return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+    bcrypt.compare(currentPassword, user.password).then((isMatch) => {
+      if (!isMatch) return res.status(401).json({ error: 'Current password is incorrect.' });
+      bcrypt.hash(newPassword, 12).then((hash) => {
+        user.password = hash;
+        res.json({ message: 'Password changed successfully.' });
+      });
+    });
+    return;
+  }
+
+  if (route === 'change-email') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === String(req.body.currentEmail || '').toLowerCase());
+    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    const { newEmail, password: pwd } = req.body;
+    if (!newEmail || !pwd) return res.status(400).json({ error: 'All fields are required.' });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(newEmail))) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
+    bcrypt.compare(pwd, user.password).then((isMatch) => {
+      if (!isMatch) return res.status(401).json({ error: 'Password is incorrect.' });
+      if (memoryUsers.findMemoryUser((u) => u.email === String(newEmail).toLowerCase())) {
+        return res.status(409).json({ error: 'That email address is already in use.' });
+      }
+      user.email = String(newEmail).toLowerCase();
+      res.json({ message: 'Email address updated successfully.', email: user.email });
+    });
+    return;
+  }
+
+  if (route === 'delete-account') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    bcrypt.compare(password || '', user.password).then((isMatch) => {
+      if (!isMatch) return res.status(401).json({ error: 'Password is incorrect.' });
+      user.isActive = false;
+      user.email = user.email + '_deactivated_' + Date.now();
+      res.json({ message: 'Your account has been deactivated. We are sorry to see you go.' });
+    });
+    return;
+  }
+
+  if (route === 'forgot-password') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (user) {
+      user.passwordResetToken = crypto.randomBytes(32).toString('hex');
+      user.passwordResetExpires = Date.now() + 60 * 60 * 1000;
+      console.log('Password reset token for ' + lowerEmail + ': ' + user.passwordResetToken);
+    }
+    return res.json({ message: 'If that email is registered, a reset link has been sent.' });
+  }
+
+  if (route === 'reset-password') {
+    const { token, password: newPassword, confirmPassword } = req.body;
+    const user = memoryUsers.findMemoryUser((u) => u.passwordResetToken === token && u.passwordResetExpires > Date.now());
+    if (!user || !token || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: 'Reset token is invalid or has expired.' });
+    }
+    if (newPassword !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match.' });
+    if (newPassword.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+    bcrypt.hash(newPassword, 12).then((hash) => {
+      user.password = hash;
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      res.json({ message: 'Password has been reset successfully. You can now log in.' });
+    });
+    return;
+  }
+
+  res.status(404).json({ error: 'Unknown auth route.' });
+}
+
+function authGuard(route) {
+  return function (req, res, next) {
+    if (!dbReady) return handleMemoryAuth(req, res, route);
+    return next();
+  };
+}
+
+async function seedDemoAccounts() {
+  const demoAccounts = [
+    { username: 'admin', name: 'Playnex Admin', email: 'admin@playnex.com', password: 'admin12345', description: 'Playnex site administrator.', role: 'admin' },
+    { username: 'john', name: 'John A', email: 'john@example.com', password: 'password123', description: 'Casual gamer and community regular.', role: 'user' }
+  ];
+  for (const demo of demoAccounts) {
+    const existing = await User.findOne({ email: demo.email });
+    if (!existing) await User.create(demo);
+  }
+}
+
+mongoose
+  .connect(MONGODB_URI, { serverSelectionTimeoutMS: 8000 })
+  .then(() => {
+    console.log('Connected to MongoDB Atlas');
+    return seedDemoAccounts().catch((err) => console.log('Demo seed skipped:', err.message));
+  })
+  .catch((err) => console.log('MongoDB unreachable, using in-memory users (A2 prototype):', err.message));
+
+app.post('/api/auth/signup', authLimiter, authGuard('signup'), async (req, res) => {
   try {
     const { username, name, email, password, confirmPassword, description, subscribe, profilePicture } = req.body;
 
@@ -149,7 +353,7 @@ app.post('/api/auth/signup', authLimiter, async (req, res) => {
   }
 });
 
-app.post('/api/auth/login', authLimiter, async (req, res) => {
+app.post('/api/auth/login', authLimiter, authGuard('login'), async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -184,7 +388,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   }
 });
 
-app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
+app.post('/api/auth/forgot-password', authLimiter, authGuard('forgot-password'), async (req, res) => {
   try {
     var { email } = req.body;
     if (!email) {
@@ -210,7 +414,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
   }
 });
 
-app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
+app.post('/api/auth/reset-password', authLimiter, authGuard('reset-password'), async (req, res) => {
   try {
     var { token, password, confirmPassword } = req.body;
     if (!token || !password || !confirmPassword) {
@@ -249,7 +453,7 @@ app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
   }
 });
 
-app.post('/api/auth/profile', authLimiter, async (req, res) => {
+app.post('/api/auth/profile', authLimiter, authGuard('profile-get'), async (req, res) => {
   try {
     var { email } = req.body;
     if (!email) {
@@ -274,7 +478,7 @@ app.post('/api/auth/profile', authLimiter, async (req, res) => {
   }
 });
 
-app.put('/api/auth/profile', authLimiter, async (req, res) => {
+app.put('/api/auth/profile', authLimiter, authGuard('profile-put'), async (req, res) => {
   try {
     var { email, name, description, profilePicture } = req.body;
     if (!email) {
@@ -313,7 +517,7 @@ app.put('/api/auth/profile', authLimiter, async (req, res) => {
   }
 });
 
-app.put('/api/auth/email', authLimiter, async (req, res) => {
+app.put('/api/auth/email', authLimiter, authGuard('change-email'), async (req, res) => {
   try {
     var { currentEmail, newEmail, password } = req.body;
     if (!currentEmail || !newEmail || !password) {
@@ -346,7 +550,7 @@ app.put('/api/auth/email', authLimiter, async (req, res) => {
   }
 });
 
-app.put('/api/auth/change-password', authLimiter, async (req, res) => {
+app.put('/api/auth/change-password', authLimiter, authGuard('change-password'), async (req, res) => {
   try {
     var { email, currentPassword, newPassword, confirmNewPassword } = req.body;
     if (!email || !currentPassword || !newPassword || !confirmNewPassword) {
@@ -375,7 +579,7 @@ app.put('/api/auth/change-password', authLimiter, async (req, res) => {
   }
 });
 
-app.delete('/api/auth/account', authLimiter, async (req, res) => {
+app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async (req, res) => {
   try {
     var { email, password } = req.body;
     if (!email || !password) {

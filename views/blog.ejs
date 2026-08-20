@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="Read the latest blog posts on Playnex.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title>Blog — Playnex</title>
+<link rel="icon" href="/logo.png">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<a class="skip-to-content" href="#main-content">Skip to main content</a>
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="homepage.html" class="logo">
+      <img src="logo.png" alt="Playnex" class="logo__img">
+    </a>
+    <nav class="primary-nav">
+      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
+      <div class="primary-nav__dropdown">
+        <a href="forum.html" class="primary-nav__link is-active">Community</a>
+        <div class="primary-nav__menu">
+          <a href="forum.html" class="primary-nav__sub">Forum</a>
+          <a href="/blog" class="primary-nav__sub is-active">Blog</a>
+        </div>
+      </div>
+    </nav>
+    <div class="topbar__actions">
+      <form class="search" role="search" action="shopping.html" method="get">
+        <label for="site-search" class="visually-hidden">Search games, merch, tags</label>
+        <svg viewBox="0 0 24 24" class="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.6" y2="16.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="site-search" name="q" type="search" placeholder="Search games, merch, tags">
+        <button type="submit" class="visually-hidden">Search</button>
+      </form>
+      <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 14.9 3 8.9C3 5.9 5.4 3.5 8.4 3.5c1.7 0 3.3.8 4.3 2.1a5.3 5.3 0 0 1 4.3-2.1C20 3.5 21.5 5.9 21.5 8.9c0 6-9.5 11.6-9.5 11.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="cart.html" class="icon-btn" aria-label="Cart, 3 items">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
+      </a>
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
+    </div>
+  </div>
+</header>
+
+<main id="main-content">
+  <div class="page-header">
+    <h1>Blog</h1>
+    <a href="/blog/new" class="btn btn--primary btn--small" id="write-post-btn" hidden>Write a post</a>
+  </div>
+
+  <div class="wrap">
+    <div class="blog-toolbar">
+      <form class="searchbar" id="search-form" role="search">
+        <label for="search" class="visually-hidden">Search blog posts</label>
+        <input type="text" name="search" id="search" placeholder="Search title, summary, tag or author..." autocomplete="off">
+        <button type="submit" class="btn btn--primary btn--small">Search</button>
+      </form>
+
+      <div class="blog-toolbar__right">
+        <select id="sort-select" class="sort-select" aria-label="Sort posts">
+          <option value="recent">Most recent</option>
+          <option value="oldest">Oldest first</option>
+          <option value="popular">Most popular</option>
+          <option value="az">A to Z</option>
+        </select>
+
+        <select id="tag-filter" class="sort-select" aria-label="Filter by tag">
+          <option value="">All tags</option>
+          <% allTags.forEach(function (t) { %>
+            <option value="<%= t %>"><%= t %></option>
+          <% }) %>
+        </select>
+      </div>
+    </div>
+
+    <div class="post-list" id="post-list">
+      <% posts.forEach(function (p) { %>
+        <a class="post-card" href="/blog/<%= p.id %>"
+           data-title="<%= p.title.toLowerCase() %>"
+           data-summary="<%= p.summary.toLowerCase() %>"
+           data-tags="<%= p.tags.join(' ').toLowerCase() %>"
+           data-author="<%= p.authorName.toLowerCase() %>"
+           data-views="<%= p.views %>"
+           data-date="<%= p.date %>">
+          <div class="post-body">
+            <h2><%= p.title %></h2>
+            <p><%= p.summary %></p>
+            <div class="post-meta">
+              <span class="author"><%= p.authorName %></span>
+              <span class="date"><%= p.date %></span>
+            </div>
+            <div class="post-tags">
+              <% p.tags.forEach(function (t) { %>
+                <span class="post-tag"><%= t %></span>
+              <% }) %>
+            </div>
+          </div>
+          <% if (p.image) { %>
+            <div class="post-thumb"><img src="<%= p.image %>" alt="" loading="lazy"></div>
+          <% } else { %>
+            <div class="post-thumb orange"><div class="fill"></div></div>
+          <% } %>
+        </a>
+      <% }) %>
+    </div>
+
+    <p class="no-results" id="no-results" hidden>No posts match your search.</p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__col">
+      <a href="homepage.html" class="logo logo--footer">
+        <img src="logo.png" alt="Playnex logo" class="logo__img">
+      </a>
+      <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
+    </div>
+    <div class="site-footer__col">
+      <h3>Support</h3>
+      <a href="contact.html">Contact us</a>
+      <a href="sitemap.html">Sitemap</a>
+    </div>
+    <div class="site-footer__col">
+      <h3>Company</h3>
+      <a href="terms.html">Terms of service</a>
+      <a href="privacy.html">Privacy policy</a>
+    </div>
+  </div>
+  <div class="site-footer__bottom">
+    <p>&copy; 2026 Playnex. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var PREFS_KEY = 'playnex_blog_prefs';
+
+  var searchInput = document.getElementById('search');
+  var searchForm = document.getElementById('search-form');
+  var sortSelect = document.getElementById('sort-select');
+  var tagFilter = document.getElementById('tag-filter');
+  var list = document.getElementById('post-list');
+  var noResults = document.getElementById('no-results');
+  var cards = Array.from(list.querySelectorAll('.post-card'));
+
+  // ---- Web Storage: restore saved search / sort / tag after refresh ----
+  var prefs = {};
+  try {
+    prefs = JSON.parse(localStorage.getItem(PREFS_KEY) || '{}') || {};
+  } catch (e) {}
+  if (prefs.search) searchInput.value = prefs.search;
+  if (prefs.sort) sortSelect.value = prefs.sort;
+  if (prefs.tag) tagFilter.value = prefs.tag;
+
+  // tag links from article pages deep-link here (e.g. /blog?tag=News)
+  try {
+    var urlTag = new URLSearchParams(window.location.search).get('tag');
+    if (urlTag) tagFilter.value = urlTag;
+  } catch (e) {}
+
+  function savePrefs() {
+    try {
+      localStorage.setItem(PREFS_KEY, JSON.stringify({
+        search: searchInput.value,
+        sort: sortSelect.value,
+        tag: tagFilter.value
+      }));
+    } catch (e) {}
+  }
+
+  // ---- display dates as DD/MM/YYYY ----
+  cards.forEach(function (card) {
+    var el = card.querySelector('.date');
+    if (!el) return;
+    var iso = card.getAttribute('data-date');
+    var d = new Date(iso);
+    if (!isNaN(d.getTime())) {
+      var dd = String(d.getDate()).padStart(2, '0');
+      var mm = String(d.getMonth() + 1).padStart(2, '0');
+      el.textContent = dd + '/' + mm + '/' + d.getFullYear();
+    }
+  });
+
+  function parseIso(iso) {
+    var t = new Date(iso).getTime();
+    return isNaN(t) ? 0 : t;
+  }
+
+  // ---- client-side search, sort and filter (no back-end calls) ----
+  function applyFilter() {
+    var q = searchInput.value.trim().toLowerCase();
+    var tag = tagFilter.value.toLowerCase();
+
+    var visible = cards.filter(function (card) {
+      var haystack = card.getAttribute('data-title') + ' ' +
+        card.getAttribute('data-summary') + ' ' +
+        card.getAttribute('data-tags') + ' ' +
+        card.getAttribute('data-author');
+      var matchesSearch = !q || haystack.indexOf(q) !== -1;
+      var matchesTag = !tag || card.getAttribute('data-tags').split(' ').indexOf(tag) !== -1;
+      return matchesSearch && matchesTag;
+    });
+
+    if (sortSelect.value === 'az') {
+      visible.sort(function (a, b) {
+        return a.getAttribute('data-title').localeCompare(b.getAttribute('data-title'));
+      });
+    } else if (sortSelect.value === 'oldest') {
+      visible.sort(function (a, b) {
+        return parseIso(a.getAttribute('data-date')) - parseIso(b.getAttribute('data-date'));
+      });
+    } else if (sortSelect.value === 'popular') {
+      visible.sort(function (a, b) {
+        return parseInt(b.getAttribute('data-views'), 10) - parseInt(a.getAttribute('data-views'), 10);
+      });
+    } else {
+      visible.sort(function (a, b) {
+        return parseIso(b.getAttribute('data-date')) - parseIso(a.getAttribute('data-date'));
+      });
+    }
+
+    cards.forEach(function (card) { card.style.display = 'none'; });
+    visible.forEach(function (card) {
+      card.style.display = '';
+      list.appendChild(card);
+    });
+
+    noResults.hidden = visible.length !== 0;
+    savePrefs();
+  }
+
+  searchInput.addEventListener('input', applyFilter);
+  sortSelect.addEventListener('change', applyFilter);
+  tagFilter.addEventListener('change', applyFilter);
+  searchForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    applyFilter();
+  });
+
+  // ---- logged-in behaviour: show the write button ----
+  if (localStorage.getItem('playnex_user')) {
+    document.getElementById('write-post-btn').hidden = false;
+  }
+
+  applyFilter();
+})();
+</script>
+<script src="/public/js/header.js"></script>
+</body>
+</html>

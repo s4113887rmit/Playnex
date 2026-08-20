@@ -5,41 +5,53 @@
     var page = window.location.pathname.split('/').pop() || 'homepage.html';
     if (page === 'Login.html' || page === 'Profile.html') return;
 
-    var user = localStorage.getItem('playnex_user');
     var wrapper = document.querySelector('.topbar__actions');
+    if (!wrapper || wrapper.getAttribute('data-auth-synced') === 'true') return;
 
-    if (!wrapper) return;
+    var user = null;
+    try {
+      var raw = localStorage.getItem('playnex_user');
+      if (raw) user = JSON.parse(raw);
+    } catch (e) {}
 
-    var existingProfile = wrapper.querySelector('a[href="Profile.html"]');
-    if (existingProfile || wrapper.getAttribute('data-auth-synced') === 'true') return;
-
-    if (user) {
-      wrapper.setAttribute('data-auth-synced', 'true');
-
-      var loginBtn = wrapper.querySelector('.btn--ghost');
-      var signupBtn = wrapper.querySelector('.btn--primary.btn--small');
-
-      if (loginBtn) loginBtn.remove();
-      if (signupBtn) signupBtn.remove();
-
-      var profileLink = document.createElement('a');
-      profileLink.href = 'Profile.html';
-      profileLink.className = 'icon-btn';
-      profileLink.setAttribute('aria-label', 'Profile');
-      profileLink.title = 'Profile';
-
-      try {
-        var userData = JSON.parse(user);
-        var letter = (userData.name || userData.username || 'U').charAt(0).toUpperCase();
-        profileLink.innerHTML = '<span class="profile-icon__letter">' + letter + '</span>';
-      } catch (e) {
-        profileLink.innerHTML = '<span class="profile-icon__letter">U</span>';
-      }
-
-      wrapper.insertBefore(profileLink, wrapper.firstElementChild);
-    } else {
+    if (!user) {
       localStorage.removeItem('playnex_user');
+      wrapper.setAttribute('data-auth-synced', 'true');
+      return;
     }
+
+    wrapper.setAttribute('data-auth-synced', 'true');
+
+    var loginBtn = wrapper.querySelector('.btn--ghost');
+    var signupBtn = wrapper.querySelector('.btn--primary.btn--small');
+    var hardcoded = wrapper.querySelector('.profile-icon, a[data-auth-logout]');
+
+    if (loginBtn) loginBtn.remove();
+    if (signupBtn) signupBtn.remove();
+    if (hardcoded) hardcoded.remove();
+
+    var profileLink = document.createElement('a');
+    profileLink.href = 'Profile.html';
+    profileLink.className = 'icon-btn profile-icon';
+    profileLink.setAttribute('aria-label', 'Profile');
+    profileLink.title = 'Profile';
+
+    var letter = ((user.name || user.username || 'U') + '').charAt(0).toUpperCase();
+    profileLink.innerHTML = '<span class="profile-icon__letter">' + letter + '</span>';
+
+    var logoutBtn = document.createElement('a');
+    logoutBtn.href = 'Login.html';
+    logoutBtn.className = 'btn btn--ghost btn--small';
+    logoutBtn.setAttribute('data-auth-logout', 'true');
+    logoutBtn.textContent = 'Log out';
+    logoutBtn.addEventListener('click', function (e) {
+      e.preventDefault();
+      localStorage.removeItem('playnex_user');
+      window.location.href = 'Login.html';
+    });
+
+    wrapper.insertBefore(logoutBtn, wrapper.firstElementChild);
+    wrapper.insertBefore(profileLink, wrapper.firstElementChild);
   }
 
   if (document.readyState === 'loading') {
