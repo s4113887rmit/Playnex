@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-
+const BLOG_DATA_PATH = path.join(__dirname, 'data', 'blogs.json');
 const DATA_PATH = path.join(__dirname, 'data', 'games.json');
 
 (function loadEnv() {
@@ -1026,4 +1026,22 @@ app.get("/listing/:id", renderListing);
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('Playnex server running on http://localhost:' + PORT);
+});
+
+// Sitemap
+app.get('/sitemap', (req, res) => {
+  try {
+    const games = JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'));
+    const blogPosts = JSON.parse(fs.readFileSync(BLOG_DATA_PATH, 'utf-8'));
+    const threads = forumThreads;
+
+    res.render('sitemap', {
+      games: games.map(g => ({ id: g.id, name: g.name })),
+      blogPosts: blogPosts.map(p => ({ id: p.id, title: p.title })),
+      threads: threads.map(t => ({ id: t.id, title: t.title })) 
+    });
+  } catch (err) {
+    console.error('Error rendering sitemap:', err);
+    res.status(500).send('Failed to load sitemap');
+  }
 });
