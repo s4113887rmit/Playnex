@@ -1019,7 +1019,7 @@ img {
 .wishlist-summary {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 40px 24px;
+  padding: 20px 40px 24px;
   display: flex;
   gap: 32px;
   font-size: 13px;
@@ -4069,6 +4069,7 @@ a.btn.is-disabled {
 
 /* Empty shelf & list state */
 .shelf-empty {
+  grid-column: 1 / -1;
   padding: 36px 20px;
   text-align: center;
   color: var(--text-muted, #8b8ea8);
@@ -4300,4 +4301,12 @@ a.btn.is-disabled {
 
 .fa-star.checked {
   color: var(--accent);
+}
+
+/* align filter buttons and sort dropdown in store toolbars */
+.shop-toolbar .btn--small,
+.shop-toolbar .sort-select {
+  height: 38px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
