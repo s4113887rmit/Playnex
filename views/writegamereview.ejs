@@ -74,6 +74,7 @@
   <% } %>
 
   <form class="new-thread-form" method="POST" action="/game/<%= game.id %>/review" id="reviewForm" novalidate>
+    <input type="hidden" name="userId" id="review-user-id" value="">
     <% if (review) { %>
       <input type="hidden" name="reviewId" value="<%= review.id %>">
     <% } %>
@@ -119,6 +120,12 @@
   const imageInput = document.getElementById('reviewImage');
   const imagePreview = document.getElementById('imagePreview');
   const DRAFT_KEY = 'reviewDraft_<%= game.id %>_<%= review ? review.id : "new" %>';
+
+  // send the logged-in user id so the server can set the review author
+  try {
+    const user = JSON.parse(localStorage.getItem('playnex_user') || 'null');
+    if (user) document.getElementById('review-user-id').value = user.id || '';
+  } catch (e) {}
 
   function validateTitle() {
     const err = document.getElementById('titleError');

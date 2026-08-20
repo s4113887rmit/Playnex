@@ -110,8 +110,8 @@
           <span class="author"><%= r.author %></span>
           <span class="date"><%= r.date %></span>
           <a href="/game/<%= game.id %>/review?edit=<%= r.id %>" class="comment-action">Edit</a>
-          <form method="POST" action="/game/<%= game.id %>/review/<%= r.id %>/delete"
-                class="delete-review-form" style="display:inline">
+          <form method="POST" action="/game/<%= game.id %>/review/<%= r.id %>/delete" class="delete-review-form" style="display:inline">
+              <input type="hidden" name="userId" class="review-delete-user-id" value="">
             <button type="submit" class="comment-action comment-action--danger">Delete</button>
           </form>
         </div>
@@ -188,6 +188,15 @@
 <script>
   let formToSubmit = null;
   const modal = document.getElementById('confirmModal');
+
+  try {
+    const user = JSON.parse(localStorage.getItem('playnex_user') || 'null');
+    if (user) {
+      document.querySelectorAll('.review-delete-user-id').forEach((el) => {
+        el.value = user.id || '';
+      });
+    }
+  } catch (e) {}
 
   document.querySelectorAll('.delete-review-form').forEach((form) => {
     form.addEventListener('submit', (e) => {

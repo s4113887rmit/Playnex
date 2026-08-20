@@ -178,6 +178,7 @@
                 <a href="/game/<%= game.id %>/review?edit=<%= r.id %>" class="comment-action">Edit</a>
                 <form method="POST" action="/game/<%= game.id %>/review/<%= r.id %>/delete"
                       class="delete-review-form" style="display:inline">
+                  <input type="hidden" name="userId" class="review-delete-user-id" value="">
                   <button type="submit" class="comment-action comment-action--danger">Delete</button>
                 </form>
               </div>
@@ -264,6 +265,15 @@
     <script>
       (function () {
         'use strict';
+
+        try {
+          var user = JSON.parse(localStorage.getItem('playnex_user') || 'null');
+          if (user) {
+            document.querySelectorAll('.review-delete-user-id').forEach(function (el) {
+              el.value = user.id || '';
+            });
+          }
+        } catch (e) {}
 
         var formToSubmit = null;
         var modal = document.getElementById('confirmModal');

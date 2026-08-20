@@ -273,6 +273,28 @@ function authGuard(route) {
   };
 }
 
+// Resolve the logged-in user for modules that need ownership (blog, reviews)
+async function resolveCurrentUser(req) {
+  const userId = (req.body && req.body.userId) || req.userId || req.header('x-user-id') || '';
+  if (!userId || userId === 'guest-user') return null;
+
+  const mem = memoryUsers.findMemoryUser((u) => u.id === userId);
+  if (mem) {
+    if (mem.isLocked || !mem.isActive) return null;
+    return mem;
+  }
+
+  if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(userId)) {
+    try {
+      const user = await User.findById(userId);
+      if (user && !user.isLocked && user.isActive) return user;
+    } catch (err) {
+      return null;
+    }
+  }
+  return null;
+}
+
 async function seedDemoAccounts() {
   const demoAccounts = [
     { username: 'admin', name: 'Playnex Admin', email: 'admin@playnex.com', password: 'admin12345', description: 'Playnex site administrator.', role: 'admin' },
@@ -881,10 +903,12 @@ app.get("/game/:id/review", (req, res) => {
 });
 
 
-app.post("/game/:id/review", (req, res) => {
+app.post("/game/:id/review", async (req, res) => {
   const games = readGames();
   const game = games.find((g) => g.id === parseInt(req.params.id));
   if (!game) return res.status(404).send("Game not found");
+
+  const user = await resolveCurrentUser(req);
 
   const { title, content, rating, image, reviewId } = req.body;
   const errors = validateReviewInput(title, content, rating);
@@ -895,9 +919,14 @@ app.post("/game/:id/review", (req, res) => {
   }
 
   if (reviewId) {
-    // update already exist review
+    // update already existing review
     const review = game.reviews.find((r) => r.id === reviewId);
     if (!review) return res.status(404).send("Review not found");
+    const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
+    const isAdmin = user && user.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).send("You can only edit your own reviews");
+    }
     review.title = title.trim();
     review.content = content.trim();
     review.stars = parseInt(rating);
@@ -907,7 +936,8 @@ app.post("/game/:id/review", (req, res) => {
     // create new review
     game.reviews.push({
       id: "r_" + Date.now(),
-      author: "You", // TODO: replace by req.session.user.username after have login
+      author: user ? (user.name || user.username) : "Guest",
+      authorId: user ? String(user.id) : null,
       date: new Date().toLocaleDateString("vi-VN"),
       stars: parseInt(rating),
       title: title.trim(),
@@ -921,15 +951,20 @@ app.post("/game/:id/review", (req, res) => {
 });
 
 // delete review
-app.post("/game/:id/review/:reviewId/delete", (req, res) => {
+app.post("/game/:id/review/:reviewId/delete", async (req, res) => {
   const games = readGames();
   const game = games.find((g) => g.id === parseInt(req.params.id));
   if (!game) return res.status(404).send("Game not found");
 
-  const exists = game.reviews.some((r) => r.id === req.params.reviewId);
-  if (!exists) return res.status(404).send("Review not found");
+  const review = game.reviews.find((r) => r.id === req.params.reviewId);
+  if (!review) return res.status(404).send("Review not found");
 
-  // if have login: check review.userId === req.session.user.id before
+  const user = await resolveCurrentUser(req);
+  const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
+  const isAdmin = user && user.role === 'admin';
+  if (!isOwner && !isAdmin) {
+    return res.status(403).send("You can only delete your own reviews");
+  }
 
   game.reviews = game.reviews.filter((r) => r.id !== req.params.reviewId);
   writeGames(games);
