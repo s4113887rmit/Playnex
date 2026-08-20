@@ -3789,44 +3789,6 @@ header {
   }
 }
 /* ----site map------ */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: "Inter", sans-serif;
-  background: #0f1020;
-  color: white;
-  min-height: 100vh;
-  padding-bottom: 80px;
-}
-
-h1,
-h2,
-h3,
-.brand {
-  font-family: "Poppins", sans-serif;
-}
-
-/*  Page intro  */
-.page-intro {
-  max-width: 1100px;
-  margin: 64px auto 10px;
-  padding: 0 24px;
-  text-align: center;
-}
-.page-intro h1 {
-  font-size: 38px;
-  font-weight: 800;
-  background: white;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/*  Sitemap tree  */
 .sitemap-wrap {
   width: 100%;
   max-width: 100%;
@@ -3864,6 +3826,38 @@ h3,
   position: relative;
 }
 
+.node-group-wrap {
+  position: relative;
+  padding-top: 28px;
+  display: flex;
+  justify-content: center;
+}
+
+.node-group-wrap::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 28px;
+  border-left: 2px solid #3d3f78;
+}
+
+.node-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 12px;
+  border: 1px solid #2c2e5c;  
+  border-radius: 14px;
+  padding: 18px;
+  background: rgba(30, 32, 68, 0.15);
+}
+
+.node-group .node {
+  width: 100%;
+  min-width: 0;
+}
 /*  Connecting lines  */
 .tree li::before,
 .tree li::after {
