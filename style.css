@@ -2952,7 +2952,7 @@ body {
   padding: 0;
   background: #070712;
   color: white;
-  font-family: "Cinzel";
+  font-family: var(--font-body);
 }
 
 a {
@@ -3326,11 +3326,11 @@ body {
 }
 .top h1 {
   display: block;
-  font-family: "Cinzel";
+  font-family: var(--font-display);
 }
 .writetop {
   display: block;
-  font-family: "Cinzel";
+  font-family: var(--font-display);
   margin: 70px 70px 20px 70px;
 }
 header {
@@ -4285,4 +4285,19 @@ a.btn.is-disabled {
   height: 38px;
   padding-top: 0;
   padding-bottom: 0;
+}
+
+/* inline star icons (no external CDN) */
+.fa-star::before {
+  content: "\2605";
+}
+
+.fa-star {
+  color: #4a4959;
+  font-style: normal;
+  font-family: inherit;
+}
+
+.fa-star.checked {
+  color: var(--accent);
 }
