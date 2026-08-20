@@ -6,10 +6,13 @@
     "releaseDate": "25/02/2022",
     "description": "The journey on becoming the Elden Lord",
     "longDescription": "Elden Ring blends exploration, brutal combat, and layered storytelling in a vast world shaped by ancient forces. Venture through ruined kingdoms, encounter legendary bosses, and uncover the truth behind the shattered Elden Ring.",
-    "image": "/IMG/eldenringposter.jpg",
+    "image": "/img/eldenringposter.jpg",
     "price": 59.99,
     "oldPrice": null,
-    "platforms": ["PC", "Console"],
+    "platforms": [
+      "PC",
+      "Console"
+    ],
     "type": "Digital",
     "availability": "In stock",
     "edition": "Standard edition",
@@ -31,6 +34,15 @@
         "title": "hehe",
         "content": "game hay nên chơi bai baiadadada",
         "image": ""
+      },
+      {
+        "id": "r_1787229855426",
+        "author": "You",
+        "date": "20/8/2026",
+        "stars": 5,
+        "title": "Great game",
+        "content": "This is a really long review content that passes the minimum length requirement.",
+        "image": ""
       }
     ]
   },
@@ -41,10 +53,12 @@
     "releaseDate": "10/12/2020",
     "description": "Dystopian feature open world game",
     "longDescription": "Step into the role of V and shape your story across Night City's crowded districts. Every mission, upgrade, and choice pushes you closer to a destiny that can either break or redefine the city around you.",
-    "image": "/IMG/cyberpunkposter.jpg",
+    "image": "/img/cyberpunkposter.jpg",
     "price": 20.99,
     "oldPrice": 29.99,
-    "platforms": ["PC"],
+    "platforms": [
+      "PC"
+    ],
     "type": "Digital",
     "availability": "In stock",
     "edition": "Ultimate edition",
@@ -66,10 +80,13 @@
     "releaseDate": "17/07/2020",
     "description": "An open-world adventure game set during the Mongol invasion of Japan in 1274.",
     "longDescription": "Fight as the Ghost to defend Tsushima from the Mongol invasion. Every region offers a new landscape, a new rival, and a new reason to defend the land you love.",
-    "image": "/IMG/ghostposter.jpg",
+    "image": "/img/ghostposter.jpg",
     "price": 34.99,
     "oldPrice": null,
-    "platforms": ["PC", "Console"],
+    "platforms": [
+      "PC",
+      "Console"
+    ],
     "type": "Digital",
     "availability": "In stock",
     "edition": "Digital deluxe",
@@ -108,10 +125,12 @@
     "releaseDate": "26/10/2018",
     "description": "A sprawling Western tale of loyalty, conviction, and the price of infamy.",
     "longDescription": "Red Dead Redemption II follows Arthur Morgan through a breathtaking western saga, blending cinematic storytelling with legendary open-world exploration and slow-burn survival tension.",
-    "image": "/IMG/reddeadposter.jpg",
+    "image": "/img/reddeadposter.jpg",
     "price": 49.99,
     "oldPrice": null,
-    "platforms": ["PC"],
+    "platforms": [
+      "PC"
+    ],
     "type": "Digital",
     "availability": "In stock",
     "edition": "Standard edition",
@@ -133,10 +152,13 @@
     "releaseDate": "17/09/2020",
     "description": "Escape Hell",
     "longDescription": "Hades pairs fast, stylish combat with a deeply personal narrative. Every attempted escape reforms the dungeon and adds another layer to Zagreus's struggle for freedom.",
-    "image": "/IMG/hadesposter.png",
+    "image": "/img/hadesposter.png",
     "price": 27.99,
     "oldPrice": null,
-    "platforms": ["PC", "Console"],
+    "platforms": [
+      "PC",
+      "Console"
+    ],
     "type": "Digital",
     "availability": "In stock",
     "edition": "Standard edition",
@@ -158,10 +180,13 @@
     "releaseDate": "24/02/2017",
     "description": "Journey into the Insect Kingdom",
     "longDescription": "Hollow Knight is a hall-of-fame metroidvania full of hidden paths, stealthy combat, and a haunting atmosphere. The deeper you go, the more the kingdom reveals its tragic past.",
-    "image": "/IMG/hollowposter.jpg",
+    "image": "/img/hollowposter.jpg",
     "price": 29.99,
     "oldPrice": null,
-    "platforms": ["PC", "Console"],
+    "platforms": [
+      "PC",
+      "Console"
+    ],
     "type": "Digital",
     "availability": "In stock",
     "edition": "Standard edition",
@@ -183,10 +208,13 @@
     "releaseDate": "17/02/2017",
     "description": "The Battle Between Robots and Androids.",
     "longDescription": "NieR Automata blends fast combat, unforgettable music, and a philosophical sci-fi story into one of the most memorable action RPGs on the market.",
-    "image": "/IMG/nierposter.jpg",
+    "image": "/img/nierposter.jpg",
     "price": 39.99,
     "oldPrice": null,
-    "platforms": ["PC", "Console"],
+    "platforms": [
+      "PC",
+      "Console"
+    ],
     "type": "Digital",
     "availability": "In stock",
     "edition": "Complete edition",
@@ -208,10 +236,13 @@
     "releaseDate": "08/11/2019",
     "description": "The Delivery Man Reconnects America.",
     "longDescription": "Death Stranding delivers high-speed shooting, tactical mobility, and ambient dread in a haunted future world. It rewards aggressive play, sharp reactions, and fearless exploration.",
-    "image": "/IMG/deathstandposter.jpg",
+    "image": "/img/deathstandposter.jpg",
     "price": 24.99,
     "oldPrice": null,
-    "platforms": ["PC", "Console"],
+    "platforms": [
+      "PC",
+      "Console"
+    ],
     "type": "Digital",
     "availability": "In stock",
     "edition": "Standard edition",
@@ -233,10 +264,13 @@
     "releaseDate": "19/05/2015",
     "description": "Hunt monsters as Geralt of Rivia in a vast open world.",
     "longDescription": "Step into the boots of Geralt of Rivia, a professional monster hunter, and track down the Child of Prophecy across war-torn lands. Every choice carves the story, every hunt sharpens your legend.",
-    "image": "/IMG/witcherposter.jpg",
+    "image": "/img/witcherposter.jpg",
     "price": 14.99,
     "oldPrice": 39.99,
-    "platforms": ["PC", "Console"],
+    "platforms": [
+      "PC",
+      "Console"
+    ],
     "type": "Digital",
     "availability": "In stock",
     "edition": "Game of the Year edition",
