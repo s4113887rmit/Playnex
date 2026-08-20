@@ -1,6 +1,8 @@
 (function () {
   'use strict';
 
+  localStorage.removeItem('playnex_user');
+
   var tabs = document.querySelectorAll('.auth-tab');
   var loginForm = document.getElementById('login-form');
   var forgotForm = document.getElementById('forgot-form');
@@ -183,12 +185,6 @@
       .then(function (result) {
         if (result.status === 201) {
           showServerMsg('signup', result.data.message, 'success');
-          localStorage.setItem('playnex_user', JSON.stringify({
-            id: result.data.user.id,
-            username: result.data.user.username,
-            email: result.data.user.email,
-            name: result.data.user.name
-          }));
           signupForm.reset();
           charCount.textContent = '0';
           fileName.textContent = 'No file chosen';
@@ -197,10 +193,12 @@
             switchToTab(0);
           }, 1500);
         } else {
+          localStorage.removeItem('playnex_user');
           showServerMsg('signup', result.data.error, 'error');
         }
       })
       .catch(function () {
+        localStorage.removeItem('playnex_user');
         showServerMsg('signup', 'Network error. Please check your connection.', 'error');
       })
       .finally(function () {
@@ -219,6 +217,8 @@
       password: document.getElementById('login-password').value
     };
 
+    localStorage.removeItem('playnex_user');
+
     var btn = loginForm.querySelector('button[type="submit"]');
     btn.disabled = true;
     btn.textContent = 'Logging in...';
@@ -231,6 +231,7 @@
       .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
       .then(function (result) {
         if (result.status === 200) {
+          localStorage.removeItem('playnex_user');
           localStorage.setItem('playnex_user', JSON.stringify({
             id: result.data.user.id,
             username: result.data.user.username,
@@ -238,13 +239,15 @@
             name: result.data.user.name,
             role: result.data.user.role
           }));
-          showServerMsg('login', result.data.message, 'success');
+          showServerMsg('login', 'Welcome, ' + (result.data.user.name || result.data.user.username) + '! Logged in successfully.', 'success');
           setTimeout(function () { window.location.href = 'homepage.html'; }, 1000);
         } else {
+          localStorage.removeItem('playnex_user');
           showServerMsg('login', result.data.error, 'error');
         }
       })
       .catch(function () {
+        localStorage.removeItem('playnex_user');
         showServerMsg('login', 'Network error. Please check your connection.', 'error');
       })
       .finally(function () {

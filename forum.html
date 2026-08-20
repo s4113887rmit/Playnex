@@ -118,6 +118,7 @@
 </style>
 </head>
 <body>
+<a class="skip-to-content" href="#main-content">Skip to main content</a>
 
 <!-- SITE HEADER -->
 <header class="topbar">
@@ -136,6 +137,7 @@
       <!-- Search and Icons omitted for brevity, identical to homepage.html -->
       <a href="Admin.html" class="btn btn--outline btn--small">Admin Panel</a>
       <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
   </div>
 </header>
@@ -144,7 +146,7 @@
   <h1>COMMUNITY FORUM</h1>
 </div>
 
-<main style="max-width: 1400px; margin: 0 auto; padding: 24px 40px 64px;">
+<main id="main-content" class="forum-main">
   
   <div class="forum-toolbar">
     <input type="text" class="forum-toolbar__search" placeholder="Search threads...">
@@ -175,8 +177,8 @@
       <div>Author</div>
       <div>Thread Title</div>
       <div>Category Tag</div>
-      <div style="text-align: center;">Replies</div>
-      <div style="text-align: center;">Views</div>
+      <div class="forum-header-cell">Replies</div>
+      <div class="forum-header-cell">Views</div>
       <div>Last Post</div>
     </div>
   </div>

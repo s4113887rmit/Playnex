@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="description" content="View user details, flags, warnings, and purchase history.">
 <title>Account Administration — Playnex</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,64 +37,78 @@
 </style>
 </head>
 <body>
+<a class="skip-to-content" href="#main-content">Skip to main content</a>
 
 <header class="topbar">
   <div class="topbar__inner">
     <a href="homepage.html" class="logo">
       <img src="logo.png" alt="Playnex" class="logo__img">
     </a>
-    <div class="topbar__actions" style="margin-left: auto;">
-      <span style="font-size: 13px; color: var(--text-muted); margin-right: 16px;">Logged in as Admin: <strong>AdminUser</strong></span>
-      <a href="admin.html" class="btn btn--ghost btn--small">Back to Dashboard</a>
+
+    <nav class="primary-nav">
+      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
+      <a href="forum.html" class="primary-nav__link">Community</a>
+      <a href="blog.html" class="primary-nav__link">Blog</a>
+    </nav>
+
+    <div class="topbar__actions">
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
   </div>
 </header>
 
-<main class="admin-detail-layout">
+<div class="page-header">
+  <h1>Account Administration</h1>
+</div>
+
+<main id="main-content" class="admin-detail-layout">
   
-  <aside class="profile-card">
+  <aside class="admin-profile-card">
     <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=BotDev" alt="User avatar">
     <h2>bot_configurator</h2>
     <p>Joined: Feb 14, 2026<br>User ID: #PLX-99812</p>
-    <p style="text-align: left;"><strong>Bio:</strong> I manage Discord communities and set up advanced bot configurations using Carl-bot, Dyno, and YAGPDB. Video editing in CapCut.</p>
-    <button class="btn btn--danger btn--large" style="width: 100%; margin-top: 16px;">Lock Account</button>
+    <p class="admin-profile-bio"><strong>Bio:</strong> I manage Discord communities and set up advanced bot configurations using Carl-bot, Dyno, and YAGPDB. Video editing in CapCut.</p>
+    <button class="btn btn--danger btn--large admin-profile-lock-btn">Lock Account</button>
   </aside>
 
   <div class="content-panel">
     
     <section class="data-section">
-      <h3>Purchasing Activity</h3>
+      <h2>Purchasing Activity</h2>
       <div class="activity-row">
-        <div class="activity-img" style="background: linear-gradient(160deg, #3c2320, #14142a);"></div>
+        <div class="activity-img purchase-art-1"></div>
         <div class="activity-info">
-          <h4>Embercrown Saga</h4>
+          <h3>Embercrown Saga</h3>
           <p>Order #PLX-44122</p>
         </div>
-        <div style="text-align: right;">
+        <div class="purchase-meta">
           <span class="activity-status status-bought">Bought</span>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Jul 12, 2026</p>
+          <p class="purchase-date">Jul 12, 2026</p>
         </div>
       </div>
       
       <div class="activity-row">
-        <div class="activity-img" style="background: linear-gradient(160deg, #1f2e3c, #14142a);"></div>
+        <div class="activity-img purchase-art-2"></div>
         <div class="activity-info">
-          <h4>Hollow Cartographer</h4>
+          <h3>Hollow Cartographer</h3>
           <p>Order #PLX-32101</p>
         </div>
-        <div style="text-align: right;">
+        <div class="purchase-meta">
           <span class="activity-status status-refunded">Refunded</span>
-          <p style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Jun 04, 2026</p>
+          <p class="purchase-date">Jun 04, 2026</p>
         </div>
       </div>
       
-      <div style="text-align: center; margin-top: 16px;">
+      <div class="show-more-link">
         <a href="#" class="text-link">Show more</a>
       </div>
     </section>
 
     <section class="data-section">
-      <h3>Flags & Previous Warnings</h3>
+      <h2>Flags & Previous Warnings</h2>
       
       <div class="flag-row">
         <div class="flag-info">
@@ -103,9 +118,9 @@
         <button class="btn btn--outline btn--small">Mark as resolved</button>
       </div>
 
-      <div class="flag-row" style="background: var(--surface-2); border-color: var(--border);">
+      <div class="flag-row flag-resolved">
         <div class="flag-info">
-          <strong style="color: var(--text-muted);">Warning 1: Inappropriate Language</strong>
+          <strong class="flag-resolved-title">Warning 1: Inappropriate Language</strong>
           <span>Resolved on Jun 15, 2026</span>
         </div>
         <button class="btn btn--ghost btn--small" disabled>Resolved</button>
@@ -113,11 +128,11 @@
     </section>
 
     <section class="data-section">
-      <h3>Write a Warning</h3>
+      <h2>Write a Warning</h2>
       <div class="warning-box">
         <textarea placeholder="Write a formal warning to the user regarding their account activity..."></textarea>
-        <div style="text-align: right;">
-          <button class="btn btn--primary btn--large" style="background: #e74c3c; color: white;">Finalize Warning</button>
+        <div class="warning-btn-row">
+          <button class="btn btn--primary btn--large btn--warning-finalize">Finalize Warning</button>
         </div>
       </div>
     </section>

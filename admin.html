@@ -48,6 +48,7 @@
 </style>
 </head>
 <body>
+<a class="skip-to-content" href="#main-content">Skip to main content</a>
 
 <!-- SITE HEADER -->
 <header class="topbar">
@@ -55,9 +56,18 @@
     <a href="homepage.html" class="logo">
       <img src="logo.png" alt="Playnex" class="logo__img">
     </a>
-    <div class="topbar__actions" style="margin-left: auto;">
-      <span style="font-size: 13px; color: var(--text-muted); margin-right: 16px;">Logged in as <strong>Admin</strong></span>
-      <a href="Login.html" class="btn btn--ghost btn--small">Log out</a>
+
+    <nav class="primary-nav">
+      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
+      <a href="forum.html" class="primary-nav__link">Community</a>
+      <a href="blog.html" class="primary-nav__link">Blog</a>
+    </nav>
+
+    <div class="topbar__actions">
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
   </div>
 </header>
@@ -66,7 +76,7 @@
   <h1>System Administration</h1>
 </div>
 
-<main class="admin-layout">
+<main id="main-content" class="admin-layout">
   
   <div class="admin-toolbar">
     <input type="text" placeholder="Search users by username or email...">
@@ -74,7 +84,7 @@
 
   <!-- Normal Accounts Section -->
   <section class="admin-section">
-    <div class="admin-section-header header-normal">Normal Accounts</div>
+    <h2 class="admin-section-header header-normal">Normal Accounts</h2>
     <div class="admin-list">
       
       
@@ -84,7 +94,7 @@
 
   <!-- Locked Accounts Section -->
   <section class="admin-section">
-    <div class="admin-section-header header-locked">Locked Accounts</div>
+    <h2 class="admin-section-header header-locked">Locked Accounts</h2>
     <div class="admin-list">
       
       <!-- Locked User 1 -->

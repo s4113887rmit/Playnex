@@ -7,9 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+<link rel="icon" href="logo.png"><link rel="stylesheet" href="style.css">
 </head>
 <body>
+<a class="skip-to-content" href="#main-content">Skip to main content</a>
 
 
 <!-- ============ SITE HEADER ============ -->
@@ -22,8 +23,8 @@
       <a href="homepage.html" class="primary-nav__link">Home</a>
       <a href="shopping.html" class="primary-nav__link">Shopping</a>
       <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
-      <a href="#" class="primary-nav__link">Community</a>
-      <a href="#" class="primary-nav__link">Blog</a>
+      <a href="forum.html" class="primary-nav__link">Community</a>
+      <a href="blog.html" class="primary-nav__link">Blog</a>
     </nav>
     <div class="topbar__actions">
       <a href="Profile.html" class="icon-btn profile-icon" aria-label="Profile">
@@ -35,10 +36,20 @@
       <a href="Login.html" class="btn btn--ghost btn--small" id="logout-btn">Log out</a>
     </div>
   </div>
+
+  <nav class="subnav">
+    <a href="shopping.html" class="subnav__link">All</a>
+    <a href="shopping.html?cat=digital" class="subnav__link">Digital games</a>
+    <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
+    <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
+    <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
+    <a href="rating.html" class="subnav__link">Reviews</a>
+    <a href="forum.html" class="subnav__link">Forums</a>
+  </nav>
 </header>
 
 
-<main>
+<main id="main-content">
   <div class="profile-layout">
 
     <!-- ========== PROFILE HEADER ========== -->
@@ -50,42 +61,31 @@
         </label>
       </div>
       <div class="profile-header__info">
-        <h1 id="profile-display-name">Your Name</h1>
+        <h1 id="profile-display-name">Profile</h1>
         <p class="profile-header__username" id="profile-username">@username</p>
         <p class="profile-header__email" id="profile-email-display">email@example.com</p>
-        <p class="profile-header__desc" id="profile-description">Your short description goes here.</p>
+        <p class="profile-header__desc" id="profile-description">Hardcore RPG fan and indie game enthusiast. Always hunting for the next big adventure.</p>
       </div>
     </div>
 
-    <!-- ========== TABS + CONTENT ========== -->
-    <div class="profile-body">
-
-      <nav class="profile-tabs">
-        <button class="profile-tab is-active" data-section="edit-profile">Edit Profile</button>
-        <button class="profile-tab" data-section="achievements">Achievements</button>
-        <button class="profile-tab" data-section="change-email">Change Email</button>
-        <button class="profile-tab" data-section="change-password">Change Password</button>
-        <button class="profile-tab" data-section="delete-account">Delete Account</button>
-      </nav>
+    <!-- ========== PROFILE SECTIONS (stacked for static display) ========== -->
+    <div class="profile-body-static">
 
       <div class="profile-content">
 
         <!-- EDIT PROFILE -->
-        <section class="profile-section" id="section-edit-profile">
+        <section class="profile-section">
           <h2>Edit your profile</h2>
           <p class="profile-section__hint">These details are visible to other users on your public profile.</p>
 
-          <form id="form-edit-profile" class="profile-form" enctype="multipart/form-data" novalidate>
+          <form class="profile-form" id="form-edit-profile" action="#" method="post">
             <div class="form-group">
               <label for="profile-name">Display name</label>
-              <input id="profile-name" type="text" name="name" placeholder="Your name" maxlength="100" autocomplete="name">
-              <span class="form-group__error" id="profile-name-error"></span>
+              <input id="profile-name" type="text" name="name" value="" maxlength="100" autocomplete="name">
             </div>
             <div class="form-group">
               <label for="profile-desc">Short description</label>
-              <textarea id="profile-desc" name="description" placeholder="Tell others a bit about yourself" maxlength="500" rows="4"></textarea>
-              <span class="form-group__char-count"><span id="prof-desc-char-count">0</span>/500</span>
-              <span class="form-group__error" id="profile-desc-error"></span>
+              <textarea id="profile-desc" name="description" maxlength="500" rows="4">Hardcore RPG fan and indie game enthusiast. Always hunting for the next big adventure.</textarea>
             </div>
             <div class="form-group">
               <label for="profile-picture-upload">Profile picture</label>
@@ -95,91 +95,91 @@
                   <svg viewBox="0 0 24 24" aria-hidden="true" class="file-upload__icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   <span>Choose an image</span>
                 </label>
-                <span class="file-upload__name" id="prof-file-name">No file chosen</span>
+                <span class="file-upload__name">No file chosen</span>
               </div>
-              <span class="form-group__error" id="profile-picture-upload-error"></span>
             </div>
             <button type="submit" class="btn btn--primary">Save changes</button>
             <p class="auth-server-msg" id="profile-edit-msg"></p>
           </form>
         </section>
 
+        <hr class="profile-divider">
+
         <!-- CHANGE EMAIL -->
-        <section class="profile-section is-hidden" id="section-change-email">
+        <section class="profile-section">
           <h2>Change email address</h2>
           <p class="profile-section__hint">Your email is used for login and notifications.</p>
 
-          <form id="form-change-email" class="profile-form" novalidate>
+          <form class="profile-form" id="form-change-email" action="#" method="post">
             <div class="form-group">
               <label for="current-email">Current email</label>
-              <input id="current-email" type="email" name="currentEmail" placeholder="Your current email" required autocomplete="email" readonly>
+              <input id="current-email" type="email" name="currentEmail" value="" readonly>
             </div>
             <div class="form-group">
               <label for="new-email">New email address</label>
               <input id="new-email" type="email" name="newEmail" placeholder="new@example.com" required autocomplete="email">
-              <span class="form-group__error" id="new-email-error"></span>
             </div>
             <div class="form-group">
               <label for="email-password">Current password (required to confirm)</label>
               <input id="email-password" type="password" name="password" placeholder="Enter current password" required autocomplete="current-password">
-              <span class="form-group__error" id="email-password-error"></span>
             </div>
             <button type="submit" class="btn btn--primary">Update email</button>
             <p class="auth-server-msg" id="email-msg"></p>
           </form>
         </section>
 
+        <hr class="profile-divider">
+
         <!-- CHANGE PASSWORD -->
-        <section class="profile-section is-hidden" id="section-change-password">
+        <section class="profile-section">
           <h2>Change password</h2>
           <p class="profile-section__hint">Choose a strong password you haven't used before.</p>
 
-          <form id="form-change-password" class="profile-form" novalidate>
+          <form class="profile-form" id="form-change-password" action="#" method="post">
             <div class="form-group">
               <label for="current-password">Current password</label>
               <input id="current-password" type="password" name="currentPassword" placeholder="Enter current password" required autocomplete="current-password">
-              <span class="form-group__error" id="current-password-error"></span>
             </div>
             <div class="form-group">
               <label for="new-password">New password</label>
               <input id="new-password" type="password" name="newPassword" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
-              <span class="form-group__error" id="new-password-error"></span>
             </div>
             <div class="form-group">
               <label for="new-password-confirm">Confirm new password</label>
               <input id="new-password-confirm" type="password" name="confirmNewPassword" placeholder="Re-enter new password" required autocomplete="new-password">
-              <span class="form-group__error" id="new-password-confirm-error"></span>
             </div>
             <button type="submit" class="btn btn--primary">Update password</button>
             <p class="auth-server-msg" id="password-msg"></p>
           </form>
         </section>
 
+        <hr class="profile-divider">
+
         <!-- DELETE ACCOUNT -->
-        <section class="profile-section is-hidden" id="section-delete-account">
+        <section class="profile-section">
           <h2>Delete your account</h2>
           <p class="profile-section__hint profile-section__hint--danger">This action is permanent. Your profile, wishlist, posts, and all associated data will be removed. This cannot be undone.</p>
 
-          <form id="form-delete-account" class="profile-form" novalidate>
+          <form class="profile-form" id="form-delete-account" action="#" method="post">
             <div class="form-group">
-              <label class="checkbox-label">
+              <label class="checkbox-label" for="confirm-delete">
                 <input type="checkbox" name="confirmDelete" id="confirm-delete" required>
                 <span>I understand that deleting my account is permanent and cannot be undone</span>
               </label>
-              <span class="form-group__error" id="confirm-delete-error"></span>
             </div>
             <div class="form-group">
               <label for="delete-password">Current password (required to confirm)</label>
               <input id="delete-password" type="password" name="password" placeholder="Enter your password to confirm" required autocomplete="current-password">
-              <span class="form-group__error" id="delete-password-error"></span>
             </div>
             <button type="submit" class="btn btn--danger">Delete my account</button>
             <p class="auth-server-msg" id="delete-msg"></p>
           </form>
         </section>
 
+        <hr class="profile-divider">
+
         <!-- ACHIEVEMENTS -->
-        <section class="profile-section is-hidden" id="section-achievements">
+        <section class="profile-section">
           <h2>Achievement Board</h2>
           <p class="profile-section__hint">Your rewards, progress, and daily missions</p>
 
@@ -260,21 +260,24 @@
 <footer class="site-footer">
   <div class="site-footer__inner">
     <div class="site-footer__col">
-      <a href="#" class="logo logo--footer">
+      <a href="homepage.html" class="logo logo--footer">
         <img src="logo.png" alt="Playnex" class="logo__img">
       </a>
       <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
     </div>
-    <div class="site-footer__col"><h3>Store</h3><a href="#">Digital games</a><a href="#">Physical merch</a><a href="#">Deals</a><a href="#">Free this week</a></div>
-    <div class="site-footer__col"><h3>Community</h3><a href="#">Forums</a><a href="#">Blog</a><a href="#">Reviews</a><a href="#">Wishlist</a></div>
-    <div class="site-footer__col"><h3>Support</h3><a href="#">Help center</a><a href="#">Order status</a><a href="#">Returns</a><a href="#">Contact us</a></div>
-    <div class="site-footer__col"><h3>Company</h3><a href="#">About Playnex</a><a href="#">Careers</a><a href="#">Terms of service</a><a href="#">Privacy policy</a></div>
+    <div class="site-footer__col">
+      <h3>Support</h3>
+      <a href="contact.html">Contact us</a>
+      <a href="sitemap.html">Sitemap</a>
+    </div>
+    <div class="site-footer__col">
+      <h3>Company</h3>
+      <a href="terms.html">Terms of service</a>
+      <a href="privacy.html">Privacy policy</a>
+    </div>
   </div>
   <div class="site-footer__bottom">
     <p>&copy; 2026 Playnex. All rights reserved.</p>
   </div>
-</footer>
-
-<script src="public/js/profile.js"></script>
-<script src="public/js/header.js"></script></body>
+</footer><script src="public/js/profile.js"></script><script src="public/js/header.js"></script></body>
 </html>

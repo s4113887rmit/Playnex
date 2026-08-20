@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your wishlist — Playnex</title>
+<meta name="description" content="Saved games and merch on Playnex.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+
+<!-- ============ SITE HEADER: logo, primary nav, search, account/cart icons ============ -->
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="homepage.html" class="logo">
+      <img src="logo.png" alt="Playnex" class="logo__img">
+    </a>
+
+    <nav class="primary-nav">
+      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link is-active">Wishlist</a>
+      <a href="forum.html" class="primary-nav__link">Community</a>
+      <a href="blog.html" class="primary-nav__link">Blog</a>
+    </nav>
+
+    <div class="topbar__actions">
+      <form class="search" role="search" action="shopping.html" method="get">
+        <label for="site-search" class="visually-hidden">Search games, merch, tags</label>
+        <svg viewBox="0 0 24 24" class="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.6" y2="16.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="site-search" name="q" type="search" placeholder="Search games, merch, tags">
+        <button type="submit" class="visually-hidden">Search</button>
+      </form>
+
+      <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 14.9 3 8.9C3 5.9 5.4 3.5 8.4 3.5c1.7 0 3.3.8 4.3 2.1a5.3 5.3 0 0 1 4.3-2.1C20 3.5 21.5 5.9 21.5 8.9c0 6-9.5 11.6-9.5 11.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="cart.html" class="icon-btn" aria-label="Cart, 3 items">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
+      </a>
+      
+      <a href="Profile.html" class="icon-btn profile-icon" aria-label="Profile" title="Profile"><span class="profile-icon__letter">N</span></a><a href="Login.html" class="btn btn--ghost btn--small">Log out</a>
+    </div>
+  </div>
+
+  <nav class="subnav">
+    <a href="shopping.html" class="subnav__link is-active">All</a>
+    <a href="shopping.html?cat=digital" class="subnav__link">Digital games</a>
+    <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
+    <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
+    <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
+    <a href="rating.html" class="subnav__link">Reviews</a>
+    <a href="forum.html" class="subnav__link">Forums</a>
+  </nav>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="homepage.html">Home</a><span>/</span><span aria-current="page">Wishlist</span>
+</nav>
+
+<div class="page-header">
+  <h1>Your wishlist</h1>
+  <span class="page-header__count">6 saved · 1 purchased</span>
+</div>
+
+<div class="wishlist-summary">
+  <span><strong>0</strong> items saved</span>
+  <span><strong>$0.00</strong> total value</span>
+  <span><strong>0</strong> already purchased</span>
+</div>
+
+<!-- ============ MAIN CONTENT ============ -->
+<main>
+
+  <div class="shop-toolbar" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    <div class="wishlist-filter-tabs" style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <button type="button" class="btn btn--ghost btn--small is-active" data-wishlist-filter="all">All items</button>
+      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="digital">Digital games</button>
+      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="physical">Physical merch</button>
+      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="purchased">Purchased</button>
+    </div>
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <label for="wishlist-sort" class="visually-hidden">Sort wishlist</label>
+      <select id="wishlist-sort" class="sort-select" aria-label="Sort wishlist">
+        <option value="default">Sort: Recently Added</option>
+        <option value="title">Sort: Title (A–Z)</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+      </select>
+    </div>
+  </div>
+
+  <ul class="wishlist-grid list-reset">
+    <li>
+      <article class="wishlist-card">
+        <div class="card__art card__art--1 wishlist-card__art">
+          <a href="listing.html?game=elden-ring" aria-label="View Elden Ring detail page">
+            <img src="webprogram-COMMU/IMG/eldenringposter.jpg" alt="Elden Ring poster">
+          </a>
+          <span class="card__badge">Digital</span>
+        </div>
+        <div class="wishlist-card__body">
+          <p class="wishlist-card__meta">Added 3 days ago</p>
+          <h3 class="wishlist-card__title"><a href="listing.html?game=elden-ring">Elden Ring</a></h3>
+          <p class="wishlist-card__price">$59.99</p>
+          <div class="wishlist-card__actions">
+            <a href="cart.html" class="btn btn--primary">Move to cart</a>
+            <button type="button" class="btn btn--ghost">Remove</button>
+          </div>
+        </div>
+      </article>
+    </li>
+
+    <li>
+      <article class="wishlist-card">
+        <div class="card__art card__art--3 wishlist-card__art">
+          <a href="listing.html?game=cyberpunk-2077" aria-label="View Cyberpunk detail page">
+            <img src="webprogram-COMMU/IMG/cyberpunkposter.jpg" alt="Cyberpunk poster">
+          </a>
+          <span class="card__badge">Digital</span>
+        </div>
+        <div class="wishlist-card__body">
+          <p class="wishlist-card__meta">Added 6 days ago</p>
+          <h3 class="wishlist-card__title"><a href="listing.html?game=cyberpunk-2077">Cyberpunk</a></h3>
+          <p class="wishlist-card__price">$20.99</p>
+          <div class="wishlist-card__actions">
+            <a href="cart.html" class="btn btn--primary">Move to cart</a>
+            <button type="button" class="btn btn--ghost">Remove</button>
+          </div>
+        </div>
+      </article>
+    </li>
+
+    <li>
+      <article class="wishlist-card">
+        <div class="card__art card__art--3 wishlist-card__art">
+          <a href="listing.html?game=ghost-of-tsushima" aria-label="View Ghost of Tsushima detail page">
+            <img src="webprogram-COMMU/IMG/ghostposter.jpg" alt="Ghost of Tsushima poster">
+          </a>
+          <span class="card__badge">Digital</span>
+        </div>
+        <div class="wishlist-card__body">
+          <p class="wishlist-card__meta">Added 1 week ago</p>
+          <h3 class="wishlist-card__title"><a href="listing.html?game=ghost-of-tsushima">Ghost of Tsushima</a></h3>
+          <p class="wishlist-card__price">$34.99</p>
+          <div class="wishlist-card__actions">
+            <a href="cart.html" class="btn btn--primary">Move to cart</a>
+            <button type="button" class="btn btn--ghost">Remove</button>
+          </div>
+        </div>
+      </article>
+    </li>
+
+    <li>
+      <article class="wishlist-card">
+        <div class="card__art card__art--4 wishlist-card__art">
+          <a href="listing.html?game=red-dead-redemption-2" aria-label="View Red Dead Redemption II detail page">
+            <img src="webprogram-COMMU/IMG/reddeadposter.jpg" alt="Red Dead Redemption II poster">
+          </a>
+          <span class="card__badge card__badge--new">New</span>
+        </div>
+        <div class="wishlist-card__body">
+          <p class="wishlist-card__meta">Added 1 week ago</p>
+          <h3 class="wishlist-card__title"><a href="listing.html?game=red-dead-redemption-2">Red Dead Redemption II</a></h3>
+          <p class="wishlist-card__price">$49.99</p>
+          <div class="wishlist-card__actions">
+            <a href="cart.html" class="btn btn--primary">Move to cart</a>
+            <button type="button" class="btn btn--ghost">Remove</button>
+          </div>
+        </div>
+      </article>
+    </li>
+
+    <li>
+      <article class="wishlist-card">
+        <div class="card__art card__art--5 wishlist-card__art">
+          <a href="listing.html?game=hades" aria-label="View Hades detail page">
+            <img src="webprogram-COMMU/IMG/hadesposter.png" alt="Hades poster">
+          </a>
+          <span class="card__badge">Digital</span>
+        </div>
+        <div class="wishlist-card__body">
+          <p class="wishlist-card__meta">Added 2 weeks ago</p>
+          <h3 class="wishlist-card__title"><a href="listing.html?game=hades">Hades</a></h3>
+          <p class="wishlist-card__price">$27.99</p>
+          <div class="wishlist-card__actions">
+            <a href="cart.html" class="btn btn--primary">Move to cart</a>
+            <button type="button" class="btn btn--ghost">Remove</button>
+          </div>
+        </div>
+      </article>
+    </li>
+
+    <li>
+      <article class="wishlist-card is-purchased">
+        <div class="card__art card__art--5 wishlist-card__art">
+          <a href="listing.html?game=hollow-knight" aria-label="View Hollow Knight detail page">
+            <img src="webprogram-COMMU/IMG/hollowposter.jpg" alt="Hollow Knight poster">
+          </a>
+          <span class="wishlist-card__purchased-tag">Purchased</span>
+        </div>
+        <div class="wishlist-card__body">
+          <p class="wishlist-card__meta">Added 3 weeks ago</p>
+          <h3 class="wishlist-card__title"><a href="listing.html?game=hollow-knight">Hollow Knight</a></h3>
+        <p class="wishlist-card__price">$27.99</p>
+        <div class="wishlist-card__actions">
+          <button type="button" class="btn btn--ghost">Buy again</button>
+          <button type="button" class="btn btn--ghost">Remove</button>
+        </div>
+      </div>
+    </article>
+      </li>
+
+  
+    </ul>
+
+  <div class="section-title">
+    <h2>Recommended for you</h2>
+    <p>Based on games and merch already in your wishlist.</p>
+  </div>
+
+  <section class="shelf">
+    <ul class="shelf__row list-reset">
+
+      <li>
+<article class="card">
+        <div class="card__art card__art--2">
+          <span class="card__badge">-30%</span>
+          <button class="card__wishlist" aria-label="Add Hollow Cartographer to wishlist">&hearts;</button>
+        </div>
+        <div class="card__body">
+          <h3 class="card__title">Hollow Cartographer</h3>
+          <p class="card__meta">Puzzle adventure · PC</p>
+          <div class="card__price">
+            <span class="card__price-old">$29.99</span>
+            <span class="card__price-now">$20.99</span>
+          </div>
+        </div>
+      </article>
+      </li>
+
+      <li>
+<article class="card">
+        <div class="card__art card__art--merch-1">
+          <span class="card__badge card__badge--merch">Physical</span>
+          <button class="card__wishlist" aria-label="Add Embercrown throne figure to wishlist">&hearts;</button>
+        </div>
+        <div class="card__body">
+          <h3 class="card__title">Embercrown throne figure</h3>
+          <p class="card__meta">Collectible · 28cm</p>
+          <div class="card__price"><span class="card__price-now">$64.00</span></div>
+        </div>
+      </article>
+      </li>
+
+      <li>
+<article class="card">
+        <div class="card__art card__art--merch-3">
+          <span class="card__badge card__badge--merch">Physical</span>
+          <button class="card__wishlist" aria-label="Add Ruinport Chronicles vinyl to wishlist">&hearts;</button>
+        </div>
+        <div class="card__body">
+          <h3 class="card__title">Ruinport Chronicles vinyl</h3>
+          <p class="card__meta">Soundtrack · 2xLP</p>
+          <div class="card__price"><span class="card__price-now">$38.00</span></div>
+        </div>
+      </article>
+      </li>
+
+      <li>
+<article class="card">
+        <div class="card__art card__art--merch-5">
+          <span class="card__badge card__badge--merch">Physical</span>
+          <button class="card__wishlist" aria-label="Add Emberkeep Tactics art book to wishlist">&hearts;</button>
+        </div>
+        <div class="card__body">
+          <h3 class="card__title">Emberkeep Tactics art book</h3>
+          <p class="card__meta">Hardcover · 180 pages</p>
+          <div class="card__price"><span class="card__price-now">$34.00</span></div>
+        </div>
+      </article>
+      </li>
+
+      <li>
+<article class="card">
+        <div class="card__art card__art--6">
+          <button class="card__wishlist" aria-label="Add Ruinport Chronicles to wishlist">&hearts;</button>
+        </div>
+        <div class="card__body">
+          <h3 class="card__title">Ruinport Chronicles</h3>
+          <p class="card__meta">Open world · PC</p>
+          <div class="card__price"><span class="card__price-now">$0.00</span></div>
+        </div>
+      </article>
+      </li>
+
+    
+    </ul>
+  </section>
+
+</main>
+
+
+<!-- ============ SITE FOOTER: sitemap-style link columns ============ -->
+<footer class="site-footer">
+  <div class="site-footer__inner">
+
+    <div class="site-footer__col">
+      <a href="homepage.html" class="logo logo--footer">
+        <img src="logo.png" alt="Playnex" class="logo__img">
+      </a>
+      <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
+    </div>
+
+    <div class="site-footer__col">
+      <h3>Support</h3>
+      <a href="contact.html">Contact us</a>
+      <a href="sitemap.html">Sitemap</a>
+    </div>
+
+    <div class="site-footer__col">
+      <h3>Company</h3>
+      <a href="terms.html">Terms of service</a>
+      <a href="privacy.html">Privacy policy</a>
+    </div>
+
+  </div>
+
+  <div class="site-footer__bottom">
+    <p>&copy; 2026 Playnex. All rights reserved.</p>
+  </div>
+</footer>
+<script src="public/js/current-user.js"></script>
+<script src="public/js/api.js"></script>
+<script src="public/js/header.js"></script>
+<script src="public/js/wishlist.js"></script>
+</body>
+</html>

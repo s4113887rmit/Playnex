@@ -6,14 +6,51 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 
+const DATA_PATH = path.join(__dirname, 'data', 'games.json');
+
+(function loadEnv() {
+  var envPath = path.join(__dirname, '.env');
+  if (!fs.existsSync(envPath)) return;
+  var lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+    if (!line || line[0] === '#') continue;
+    var eq = line.indexOf('=');
+    if (eq === -1) continue;
+    var key = line.substring(0, eq).trim();
+    var value = line.substring(eq + 1).trim();
+    if (value[0] === '"' && value[value.length - 1] === '"') value = value.slice(1, -1);
+    if (value[0] === "'" && value[value.length - 1] === "'") value = value.slice(1, -1);
+    if (!process.env[key]) process.env[key] = value;
+  }
+})();
+
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '1.1.1.1']);
 
 const app = express();
 
+app.set("view engine", "ejs");
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname)));
+
+// Current User middleware
+const currentUser = require('./middleware/currentUser');
+app.use(currentUser);
+
+// Store / Shopping Cart / Wishlist / Checkout routes
+const productsRouter = require('./routes/products');
+const cartRouter = require('./routes/cart');
+const wishlistRouter = require('./routes/wishlist');
+const checkoutRouter = require('./routes/checkout');
+
+app.use('/api/products', productsRouter);
+app.use('/api/cart', cartRouter);
+app.use('/api/wishlist', wishlistRouter);
+app.use('/api/checkout', checkoutRouter);
 
 app.get('/', function (req, res) {
   res.redirect('/homepage.html');
@@ -293,6 +330,9 @@ app.put('/api/auth/email', authLimiter, async (req, res) => {
     var existing = await User.findOne({ email: newEmail.toLowerCase() });
     if (existing) {
       return res.status(409).json({ error: 'That email address is already in use' });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      return res.status(400).json({ error: 'Please provide a valid email address' });
     }
     user.email = newEmail;
     await user.save({ validateBeforeSave: false });
