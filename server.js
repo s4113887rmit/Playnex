@@ -5,6 +5,7 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const bcrypt = require('bcryptjs');
 
 const DATA_PATH = path.join(__dirname, 'data', 'games.json');
 
@@ -52,11 +53,15 @@ app.use('/api/cart', cartRouter);
 app.use('/api/wishlist', wishlistRouter);
 app.use('/api/checkout', checkoutRouter);
 
+// Blog module (EJS pages at /blog + JSON API at /api/blogs)
+const blogsRouter = require('./routes/blogs');
+app.use('/', blogsRouter);
+
 app.get('/', function (req, res) {
   res.redirect('/homepage.html');
 });
 
-const MONGODB_URI = 'mongodb+srv://nguyenkhanhnguyen3967_db_user:NkK9r5QtMJOMJgL5@playnex.mzcuobd.mongodb.net/playnex?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI;
 
 function saveBase64Image(base64Data) {
   if (!base64Data) return null;
@@ -81,14 +86,239 @@ const authLimiter = rateLimit({
   legacyHeaders: false
 });
 
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
-  .catch((err) => console.error('MongoDB connection error:', err));
-
 const User = require('./models/User');
 
-app.post('/api/auth/signup', authLimiter, async (req, res) => {
+let dbReady = false;
+mongoose.connection.on('connected', () => { dbReady = true; });
+mongoose.connection.on('disconnected', () => { dbReady = false; });
+
+// In-memory user store (A2 prototype: no MongoDB required)
+const memoryUsers = require('./models/memoryUsers');
+
+function signupValidator(body) {
+  const errors = [];
+  const { username, email, password, confirmPassword, description } = body;
+  if (!username || !email || !password || !confirmPassword || !description) {
+    errors.push('All required fields must be filled in.');
+  }
+  if (username && !/^[a-zA-Z0-9_-]{3,30}$/.test(username)) {
+    errors.push('Username must be 3-30 characters: letters, numbers, hyphens, underscores.');
+  }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.push('Please provide a valid email address.');
+  }
+  if (password && password !== confirmPassword) {
+    errors.push('Passwords do not match.');
+  }
+  if (password && password.length < 8) {
+    errors.push('Password must be at least 8 characters.');
+  }
+  if (description && description.length > 500) {
+    errors.push('Description must be at most 500 characters.');
+  }
+  return errors;
+}
+
+function handleMemoryAuth(req, res, route) {
+  const { email, password, confirmPassword, username, name, description, profilePicture } = req.body || {};
+  const lowerEmail = String(email || '').toLowerCase();
+
+  if (route === 'signup') {
+    const errors = signupValidator(req.body);
+    if (errors.length) return res.status(400).json({ error: errors.join(' ') });
+    if (memoryUsers.findMemoryUser((u) => u.email === lowerEmail || u.username === username)) {
+      return res.status(409).json({ error: 'Username or email already registered.' });
+    }
+    bcrypt.hash(password, 12).then((hash) => {
+      const profilePic = saveBase64Image(profilePicture) || 'uploads/default-profile.svg';
+      const user = {
+        id: 'mem-' + Date.now(),
+        username,
+        name: name || '',
+        email: lowerEmail,
+        password: hash,
+        description,
+        profilePicture: profilePic,
+        role: 'user',
+        isLocked: false,
+        isActive: true
+      };
+      memoryUsers.addMemoryUser(user);
+      res.status(201).json({ message: 'Account created successfully. You can now log in.', user: memoryUsers.publicUser(user) });
+    });
+    return;
+  }
+
+  if (route === 'login') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (!user) return res.status(401).json({ error: 'Invalid email or password.' });
+    if (user.isLocked) return res.status(403).json({ error: 'Your account has been locked. Contact an administrator.' });
+    if (!user.isActive) return res.status(403).json({ error: 'This account has been deactivated.' });
+    bcrypt.compare(password || '', user.password).then((isMatch) => {
+      if (!isMatch) return res.status(401).json({ error: 'Invalid email or password.' });
+      res.json({
+        message: 'Logged in successfully',
+        user: {
+          id: user.id,
+          username: user.username,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
+    });
+    return;
+  }
+
+  if (route === 'profile-get') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    return res.json(memoryUsers.publicUser(user));
+  }
+
+  if (route === 'profile-put') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (!user) return res.status(404).json({ error: 'User not found.' });
+    if (name) user.name = name;
+    if (description) user.description = description;
+    const saved = profilePicture && saveBase64Image(profilePicture);
+    if (saved) user.profilePicture = saved;
+    return res.json({ message: 'Profile updated successfully.', user: memoryUsers.publicUser(user) });
+  }
+
+  if (route === 'change-password') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    const { currentPassword, newPassword, confirmNewPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+      return res.status(400).json({ error: 'All fields are required.' });
+    }
+    if (newPassword !== confirmNewPassword) return res.status(400).json({ error: 'New passwords do not match.' });
+    if (newPassword.length < 8) return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+    bcrypt.compare(currentPassword, user.password).then((isMatch) => {
+      if (!isMatch) return res.status(401).json({ error: 'Current password is incorrect.' });
+      bcrypt.hash(newPassword, 12).then((hash) => {
+        user.password = hash;
+        res.json({ message: 'Password changed successfully.' });
+      });
+    });
+    return;
+  }
+
+  if (route === 'change-email') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === String(req.body.currentEmail || '').toLowerCase());
+    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    const { newEmail, password: pwd } = req.body;
+    if (!newEmail || !pwd) return res.status(400).json({ error: 'All fields are required.' });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(newEmail))) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
+    bcrypt.compare(pwd, user.password).then((isMatch) => {
+      if (!isMatch) return res.status(401).json({ error: 'Password is incorrect.' });
+      if (memoryUsers.findMemoryUser((u) => u.email === String(newEmail).toLowerCase())) {
+        return res.status(409).json({ error: 'That email address is already in use.' });
+      }
+      user.email = String(newEmail).toLowerCase();
+      res.json({ message: 'Email address updated successfully.', email: user.email });
+    });
+    return;
+  }
+
+  if (route === 'delete-account') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    bcrypt.compare(password || '', user.password).then((isMatch) => {
+      if (!isMatch) return res.status(401).json({ error: 'Password is incorrect.' });
+      user.isActive = false;
+      user.email = user.email + '_deactivated_' + Date.now();
+      res.json({ message: 'Your account has been deactivated. We are sorry to see you go.' });
+    });
+    return;
+  }
+
+  if (route === 'forgot-password') {
+    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
+    if (user) {
+      user.passwordResetToken = crypto.randomBytes(32).toString('hex');
+      user.passwordResetExpires = Date.now() + 60 * 60 * 1000;
+      console.log('Password reset token for ' + lowerEmail + ': ' + user.passwordResetToken);
+    }
+    return res.json({ message: 'If that email is registered, a reset link has been sent.' });
+  }
+
+  if (route === 'reset-password') {
+    const { token, password: newPassword, confirmPassword } = req.body;
+    const user = memoryUsers.findMemoryUser((u) => u.passwordResetToken === token && u.passwordResetExpires > Date.now());
+    if (!user || !token || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: 'Reset token is invalid or has expired.' });
+    }
+    if (newPassword !== confirmPassword) return res.status(400).json({ error: 'Passwords do not match.' });
+    if (newPassword.length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters.' });
+    bcrypt.hash(newPassword, 12).then((hash) => {
+      user.password = hash;
+      user.passwordResetToken = undefined;
+      user.passwordResetExpires = undefined;
+      res.json({ message: 'Password has been reset successfully. You can now log in.' });
+    });
+    return;
+  }
+
+  res.status(404).json({ error: 'Unknown auth route.' });
+}
+
+function authGuard(route) {
+  return function (req, res, next) {
+    if (!dbReady) return handleMemoryAuth(req, res, route);
+    return next();
+  };
+}
+
+// Resolve the logged-in user for modules that need ownership (blog, reviews)
+async function resolveCurrentUser(req) {
+  const userId = (req.body && req.body.userId) || req.userId || req.header('x-user-id') || '';
+  if (!userId || userId === 'guest-user') return null;
+
+  const mem = memoryUsers.findMemoryUser((u) => u.id === userId);
+  if (mem) {
+    if (mem.isLocked || !mem.isActive) return null;
+    return mem;
+  }
+
+  if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(userId)) {
+    try {
+      const user = await User.findById(userId);
+      if (user && !user.isLocked && user.isActive) return user;
+    } catch (err) {
+      return null;
+    }
+  }
+  return null;
+}
+
+async function seedDemoAccounts() {
+  const demoAccounts = [
+    { username: 'admin', name: 'Playnex Admin', email: 'admin@playnex.com', password: 'admin12345', description: 'Playnex site administrator.', role: 'admin' },
+    { username: 'john', name: 'John A', email: 'john@example.com', password: 'password123', description: 'Casual gamer and community regular.', role: 'user' }
+  ];
+  for (const demo of demoAccounts) {
+    const existing = await User.findOne({ email: demo.email });
+    if (!existing) await User.create(demo);
+  }
+}
+
+if (MONGODB_URI) {
+  mongoose
+    .connect(MONGODB_URI, { serverSelectionTimeoutMS: 8000 })
+    .then(() => {
+      console.log('Connected to MongoDB Atlas');
+      return seedDemoAccounts().catch((err) => console.log('Demo seed skipped:', err.message));
+    })
+    .catch((err) => console.log('MongoDB unreachable, using in-memory users (A2 prototype):', err.message));
+} else {
+  console.log('MONGODB_URI not set; running with in-memory users (A2 prototype)');
+}
+
+app.post('/api/auth/signup', authLimiter, authGuard('signup'), async (req, res) => {
   try {
     const { username, name, email, password, confirmPassword, description, subscribe, profilePicture } = req.body;
 
@@ -149,7 +379,7 @@ app.post('/api/auth/signup', authLimiter, async (req, res) => {
   }
 });
 
-app.post('/api/auth/login', authLimiter, async (req, res) => {
+app.post('/api/auth/login', authLimiter, authGuard('login'), async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -184,7 +414,7 @@ app.post('/api/auth/login', authLimiter, async (req, res) => {
   }
 });
 
-app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
+app.post('/api/auth/forgot-password', authLimiter, authGuard('forgot-password'), async (req, res) => {
   try {
     var { email } = req.body;
     if (!email) {
@@ -210,7 +440,7 @@ app.post('/api/auth/forgot-password', authLimiter, async (req, res) => {
   }
 });
 
-app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
+app.post('/api/auth/reset-password', authLimiter, authGuard('reset-password'), async (req, res) => {
   try {
     var { token, password, confirmPassword } = req.body;
     if (!token || !password || !confirmPassword) {
@@ -249,7 +479,7 @@ app.post('/api/auth/reset-password', authLimiter, async (req, res) => {
   }
 });
 
-app.post('/api/auth/profile', authLimiter, async (req, res) => {
+app.post('/api/auth/profile', authLimiter, authGuard('profile-get'), async (req, res) => {
   try {
     var { email } = req.body;
     if (!email) {
@@ -274,7 +504,7 @@ app.post('/api/auth/profile', authLimiter, async (req, res) => {
   }
 });
 
-app.put('/api/auth/profile', authLimiter, async (req, res) => {
+app.put('/api/auth/profile', authLimiter, authGuard('profile-put'), async (req, res) => {
   try {
     var { email, name, description, profilePicture } = req.body;
     if (!email) {
@@ -313,7 +543,7 @@ app.put('/api/auth/profile', authLimiter, async (req, res) => {
   }
 });
 
-app.put('/api/auth/email', authLimiter, async (req, res) => {
+app.put('/api/auth/email', authLimiter, authGuard('change-email'), async (req, res) => {
   try {
     var { currentEmail, newEmail, password } = req.body;
     if (!currentEmail || !newEmail || !password) {
@@ -346,7 +576,7 @@ app.put('/api/auth/email', authLimiter, async (req, res) => {
   }
 });
 
-app.put('/api/auth/change-password', authLimiter, async (req, res) => {
+app.put('/api/auth/change-password', authLimiter, authGuard('change-password'), async (req, res) => {
   try {
     var { email, currentPassword, newPassword, confirmNewPassword } = req.body;
     if (!email || !currentPassword || !newPassword || !confirmNewPassword) {
@@ -375,7 +605,7 @@ app.put('/api/auth/change-password', authLimiter, async (req, res) => {
   }
 });
 
-app.delete('/api/auth/account', authLimiter, async (req, res) => {
+app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async (req, res) => {
   try {
     var { email, password } = req.body;
     if (!email || !password) {
@@ -399,7 +629,170 @@ app.delete('/api/auth/account', authLimiter, async (req, res) => {
   }
 });
 
-// Game rating
+// --- FORUM MODULE: IN-MEMORY DATA ---
+let forumThreads = [
+  {
+    id: 1,
+    title: "[Nightfall Protocol] Troubleshooting LAN connectivity for SEA players",
+    author: "darknexus",
+    tag: "Technical Support",
+    tagClass: "tag--support",
+    replies: 42,
+    views: 1200,
+    lastPostAuthor: "an_admin",
+    lastPostTime: "3 hours ago"
+  },
+  {
+    id: 2,
+    title: "[Embercrown Saga] Collector's Edition Throne Figure Review",
+    author: "cyber_fan",
+    tag: "Merch Review",
+    tagClass: "tag--review",
+    replies: 85,
+    views: 3400,
+    lastPostAuthor: "merch_guy",
+    lastPostTime: "6 hours ago"
+  }
+];
+
+// GET: Retrieve all forum threads
+app.get('/api/threads', (req, res) => {
+  // Send the in-memory array to the frontend as JSON
+  res.json(forumThreads);
+});
+
+// POST: Create a new forum thread
+app.post('/api/threads', (req, res) => {
+  const { title, game, category, content } = req.body;
+
+  // Server-Side Validation
+  if (!title || title.trim() === '') {
+    return res.status(400).json({ error: "Thread title is strictly required." });
+  }
+  if (!category || category.trim() === '') {
+    return res.status(400).json({ error: "A category selection is required." });
+  }
+  if (!content || content.trim() === '') {
+    return res.status(400).json({ error: "Post content cannot be empty." });
+  }
+
+  // Determine the tag class based on the category for styling
+  let tagClass = "tag--general";
+  if (category === "support") tagClass = "tag--support";
+  if (category === "review") tagClass = "tag--review";
+
+  // Create the new thread object
+  const newThread = {
+    id: forumThreads.length + 1,
+    title: title,
+    content: content,
+    // Dynamic behaviour: Pull the actual logged-in user's name if available, otherwise fallback
+    author: req.session?.user?.username || "Guest_User", 
+    tag: category,
+    tagClass: tagClass,
+    replies: 0,
+    views: 0,
+    lastPostAuthor: req.session?.user?.username || "Guest_User",
+    lastPostTime: "Just now"
+  };
+
+  // Save it to our temporary "database"
+  forumThreads.unshift(newThread); // unshift adds it to the top of the array
+
+  // Send a success response back to the client
+  res.status(201).json({ message: "Thread created successfully!", thread: newThread });
+});
+
+// ==========================================
+// ADMIN MODULE: IN-MEMORY DATA & ROUTES
+// ==========================================
+
+let adminUsers = [
+  { 
+    id: 1, 
+    username: "John_A", 
+    status: "normal", 
+    joined: "Jan 12, 2026", 
+    avatarSeed: "Ngyuen", 
+    flags: "0 active flags" 
+  },
+  { 
+    id: 2, 
+    username: "jane_B", 
+    status: "normal", 
+    joined: "Mar 05, 2026", 
+    avatarSeed: "Dang", 
+    flags: "1 resolved warning" 
+  },
+  { 
+    id: 3, 
+    username: "spammer_99", 
+    status: "locked", 
+    lockedDate: "Jul 21, 2026", 
+    avatarSeed: "Spam", 
+    reason: "Forum Abuse" 
+  }
+];
+
+// GET: Retrieve all users for the dashboard
+app.get('/api/users', (req, res) => {
+  res.json(adminUsers);
+});
+
+// POST: Toggle user lock status
+app.post('/api/users/:id/toggle-lock', (req, res) => {
+  // Grab the ID from the URL and convert it to an integer
+  const userId = parseInt(req.params.id);
+  
+  // Find the specific user in our in-memory array
+  const user = adminUsers.find(u => u.id === userId);
+
+  // Server-side validation: Make sure the user actually exists
+  if (!user) {
+    return res.status(404).json({ error: "User not found." });
+  }
+
+  // Toggle the status
+  if (user.status === 'normal') {
+    user.status = 'locked';
+    user.lockedDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    user.reason = req.body.reason || "Manual Admin Lock";
+  } else {
+    user.status = 'normal';
+    // Clean up locked properties
+    delete user.lockedDate;
+    delete user.reason;
+  }
+
+  res.json({ message: `User status successfully updated to ${user.status}`, user: user });
+});
+// GET: Retrieve a single thread by ID
+app.get('/api/threads/:id', (req, res) => {
+  const threadId = parseInt(req.params.id);
+  const thread = forumThreads.find(t => t.id === threadId);
+  
+  if (thread) {
+    res.json(thread);
+  } else {
+    res.status(404).json({ error: "Thread not found." });
+  }
+});
+
+// DELETE: Remove a forum thread
+app.delete('/api/threads/:id', (req, res) => {
+  const threadId = parseInt(req.params.id);
+  const initialLength = forumThreads.length;
+  
+  // Filter out the thread with the matching ID
+  forumThreads = forumThreads.filter(t => t.id !== threadId);
+
+  if (forumThreads.length < initialLength) {
+    res.json({ message: "Thread successfully deleted." });
+  } else {
+    res.status(404).json({ error: "Thread not found." });
+  }
+});
+
 function readGames() {
   const games = JSON.parse(fs.readFileSync(DATA_PATH, "utf-8"));
   let changed = false;
@@ -510,10 +903,12 @@ app.get("/game/:id/review", (req, res) => {
 });
 
 
-app.post("/game/:id/review", (req, res) => {
+app.post("/game/:id/review", async (req, res) => {
   const games = readGames();
   const game = games.find((g) => g.id === parseInt(req.params.id));
   if (!game) return res.status(404).send("Game not found");
+
+  const user = await resolveCurrentUser(req);
 
   const { title, content, rating, image, reviewId } = req.body;
   const errors = validateReviewInput(title, content, rating);
@@ -524,9 +919,14 @@ app.post("/game/:id/review", (req, res) => {
   }
 
   if (reviewId) {
-    // update already exist review
+    // update already existing review
     const review = game.reviews.find((r) => r.id === reviewId);
     if (!review) return res.status(404).send("Review not found");
+    const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
+    const isAdmin = user && user.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).send("You can only edit your own reviews");
+    }
     review.title = title.trim();
     review.content = content.trim();
     review.stars = parseInt(rating);
@@ -536,7 +936,8 @@ app.post("/game/:id/review", (req, res) => {
     // create new review
     game.reviews.push({
       id: "r_" + Date.now(),
-      author: "You", // TODO: replace by req.session.user.username after have login
+      author: user ? (user.name || user.username) : "Guest",
+      authorId: user ? String(user.id) : null,
       date: new Date().toLocaleDateString("vi-VN"),
       stars: parseInt(rating),
       title: title.trim(),
@@ -550,23 +951,79 @@ app.post("/game/:id/review", (req, res) => {
 });
 
 // delete review
-app.post("/game/:id/review/:reviewId/delete", (req, res) => {
+app.post("/game/:id/review/:reviewId/delete", async (req, res) => {
   const games = readGames();
   const game = games.find((g) => g.id === parseInt(req.params.id));
   if (!game) return res.status(404).send("Game not found");
 
-  const exists = game.reviews.some((r) => r.id === req.params.reviewId);
-  if (!exists) return res.status(404).send("Review not found");
+  const review = game.reviews.find((r) => r.id === req.params.reviewId);
+  if (!review) return res.status(404).send("Review not found");
 
-  // if have login: check review.userId === req.session.user.id before
+  const user = await resolveCurrentUser(req);
+  const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
+  const isAdmin = user && user.role === 'admin';
+  if (!isOwner && !isAdmin) {
+    return res.status(403).send("You can only delete your own reviews");
+  }
 
   game.reviews = game.reviews.filter((r) => r.id !== req.params.reviewId);
   writeGames(games);
   res.redirect("/game/" + game.id);
 });
+// Game listing (detail page)
+// Linked from the store pages as listing.html?game=<slug> and /listing/:id
+function slugifyGame(name) {
+  return String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+const GAME_SLUG_ALIASES = {
+  "red-dead-redemption-2": 4,
+  "death-standing": 8,
+  "cyberpunk": 2,
+  "witcher-3": 9
+};
+
+function findGameBySlug(games, slug) {
+  const normalized = String(slug || "").toLowerCase().trim();
+  if (!normalized) return null;
+  const byName = games.find((g) => slugifyGame(g.name) === normalized);
+  if (byName) return byName;
+  const aliasId = GAME_SLUG_ALIASES[normalized];
+  if (aliasId) return games.find((g) => g.id === aliasId);
+  return null;
+}
+
+function renderListing(req, res) {
+  const games = readGames();
+  let game = null;
+  let slug = "";
+
+  if (req.params.id) {
+    game = games.find((g) => g.id === parseInt(req.params.id));
+  } else if (req.query.game) {
+    game = findGameBySlug(games, req.query.game);
+    slug = String(req.query.game);
+  } else if (req.query.id) {
+    game = games.find((g) => g.id === parseInt(req.query.id));
+  }
+
+  if (!game) return res.status(404).send("Game not found");
+
+  slug = slug || slugifyGame(game.name);
+  const { avg, count } = getAvgRating(game);
+  const distribution = getDistribution(game);
+  const related = games.filter((g) => g.id !== game.id).slice(0, 4);
+
+  res.render("listing", { game, avg, count, distribution, related, slug });
+}
+
+app.get("/listing.html", renderListing);
+app.get("/listing/:id", renderListing);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('Playnex server running on http://localhost:' + PORT);
 });
-

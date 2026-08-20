@@ -23,8 +23,13 @@
       <a href="homepage.html" class="primary-nav__link is-active">Home</a>
       <a href="shopping.html" class="primary-nav__link">Shopping</a>
       <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
-      <a href="forum.html" class="primary-nav__link">Community</a>
-      <a href="blog.html" class="primary-nav__link">Blog</a>
+      <div class="primary-nav__dropdown">
+        <a href="forum.html" class="primary-nav__link">Community</a>
+        <div class="primary-nav__menu">
+          <a href="forum.html" class="primary-nav__sub">Forum</a>
+          <a href="/blog" class="primary-nav__sub">Blog</a>
+        </div>
+      </div>
     </nav>
 
     <div class="topbar__actions">
@@ -42,7 +47,8 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
       </a>
       
-      <a href="Profile.html" class="icon-btn profile-icon" aria-label="Profile" title="Profile"><span class="profile-icon__letter">N</span></a><a href="Login.html" class="btn btn--ghost btn--small">Log out</a>
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
   </div>
 
@@ -52,7 +58,7 @@
     <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
     <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
     <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
-    <a href="rating.html" class="subnav__link">Reviews</a>
+    <a href="/rating" class="subnav__link">Reviews</a>
     <a href="forum.html" class="subnav__link">Forums</a>
   </nav>
 </header>
@@ -89,7 +95,7 @@
       <li>
         <article class="cart-item">
           <a href="listing.html?game=elden-ring" class="cart-item__art cart-item__art--1" aria-label="View Elden Ring detail page">
-            <img src="webprogram-COMMU/IMG/eldenringposter.jpg" alt="Elden Ring poster">
+            <img src="/img/eldenringposter.jpg" alt="Elden Ring poster">
           </a>
           <div>
             <h3 class="cart-item__title"><a href="listing.html?game=elden-ring">Elden Ring</a></h3>
@@ -107,7 +113,7 @@
       <li>
         <article class="cart-item">
           <a href="listing.html?game=cyberpunk-2077" class="cart-item__art cart-item__art--1" aria-label="View Cyberpunk detail page">
-            <img src="webprogram-COMMU/IMG/cyberpunkposter.jpg" alt="Cyberpunk poster">
+            <img src="/img/cyberpunkposter.jpg" alt="Cyberpunk poster">
           </a>
           <div>
             <h3 class="cart-item__title"><a href="listing.html?game=cyberpunk-2077">Cyberpunk</a></h3>
@@ -125,7 +131,7 @@
       <li>
         <article class="cart-item">
           <a href="listing.html?game=ghost-of-tsushima" class="cart-item__art cart-item__art--1" aria-label="View Ghost of Tsushima detail page">
-            <img src="webprogram-COMMU/IMG/ghostposter.jpg" alt="Ghost of Tsushima poster">
+            <img src="/img/ghostposter.jpg" alt="Ghost of Tsushima poster">
           </a>
           <div>
             <h3 class="cart-item__title"><a href="listing.html?game=ghost-of-tsushima">Ghost of Tsushima</a></h3>

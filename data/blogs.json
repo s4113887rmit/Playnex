@@ -1,0 +1,118 @@
+[
+  {
+    "id": "post-embercrown-saga",
+    "title": "Behind the Design of Embercrown Saga",
+    "summary": "Our art team breaks down the visual development process behind this year's most anticipated RPG.",
+    "content": "## Point 1\n\nThe iconic solo pirate adventure returns with Assassin's Creed Black Flag Resynced, launching on July 9, 2026. Sail the Caribbean as Edward Kenway during the Golden Age of Piracy in this faithfully enhanced remake featuring stunning visuals, upgraded gameplay, and new content.\n\nAssassin's Creed Black Flag Resynced (a title with 0 colons in it anywhere, apparently) has only been out for a day, and it's already sold two million copies. That's real good! We learned this today via an Ubisoft press release that also highlights its critical and streaming success. Seems like folks like this game, and want to play it! Cool! I wonder if it's any more or less popular than other Assassin's Creed titles?\n\n## Point 2\n\nAssassin's Creed Mirage is in a similar boat, with Ubisoft reporting that it had surpassed 10 million players following its Valley of Memory update, but that again doesn't tell us how many copies it actually sold given its availability on Ubisoft+.\n\nAssassin's Creed Valhalla had the best launch sales of any Assassin's Creed game up to that point according to Ubisoft, but we don't know how many that was because we don't know how many copies any of the others sold over the same period Ubisoft is counting here.\n\n## Conclusion\n\nBlack Flag Resynced sold two million copies in a day. That sounds pretty impressive, and it probably is if Ubisoft is owning up to a certain amount of unit sales for the first time in over a decade. But I think the only real conclusion I can draw from it is that people really like Black Flag, and always have.",
+    "tags": [
+      "Design",
+      "RPG",
+      "News"
+    ],
+    "image": "/img/eldenringposter.jpg",
+    "authorName": "Khanh Nguyen",
+    "authorId": null,
+    "date": "2026-07-14T09:00:00.000Z",
+    "views": 323,
+    "comments": [
+      {
+        "id": "comment-1",
+        "authorName": "Quang Dang",
+        "authorId": null,
+        "content": "The art direction in this game is absolutely stunning. Great write-up!",
+        "date": "2026-07-15T09:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "post-nightfall-protocol",
+    "title": "Nightfall Protocol: What We Learned from the Beta",
+    "summary": "Community feedback shaped the final release in ways we never expected. Here is the full story.",
+    "content": "## Beta by the numbers\n\nOur closed beta ran for three weeks and drew more than forty thousand players. The response was humbling and, frankly, a little overwhelming. We tracked every crash report, every balance complaint and every gushing fan letter.\n\n## What changed\n\nThe biggest surprise was the stealth takedown system. We expected players to struggle with the timing window, but the data showed the opposite problem: it was too forgiving, and players could chain takedowns without consequence. We tightened the window and added a detection cooldown.\n\n## Going forward\n\nLaunch is only a few weeks away. Every change we shipped in response to the beta has been through a full QA pass, and we cannot wait to see how the community reacts to the final build.",
+    "tags": [
+      "Beta",
+      "Strategy",
+      "News"
+    ],
+    "image": "/img/ghostposter.jpg",
+    "authorName": "Gia Bao",
+    "authorId": null,
+    "date": "2026-07-12T09:00:00.000Z",
+    "views": 254,
+    "comments": []
+  },
+  {
+    "id": "post-top5-indie",
+    "title": "Top 5 Indie Games You Missed This Month",
+    "summary": "From roguelike deckbuilders to atmospheric puzzlers, these hidden gems deserve your attention.",
+    "content": "## 1. Hollow Cartographer\n\nA map-drawing roguelike where every dungeon floor is generated from the notes you take. Forgetting to mark a trap door means falling into it, literally and mechanically. One of the most inventive ideas we have played this year.\n\n## 2. Signal Drift\n\nAn atmospheric puzzler set on a derelict radio station floating in the Pacific. The sound design alone is worth the price of admission.\n\n## 3. Tiny Kingdom Diplomacy\n\nA four-player negotiation game where you settle wars by writing actual letters to other players. Surprisingly touching.\n\n## 4. Graveyard Shift\n\nYou play the night guard at a monster-run convenience store. Stock shelves, survive the witching hour, and try not to sell expired potions.\n\n## 5. Paper Star\n\nA hand-animated platformer about a paper crane travelling through origami worlds. Gorgeous and heartfelt.",
+    "tags": [
+      "Indie",
+      "Top 5",
+      "Guide"
+    ],
+    "image": "/img/hollowposter.jpg",
+    "authorName": "Quang Dang",
+    "authorId": null,
+    "date": "2026-07-10T09:00:00.000Z",
+    "views": 198,
+    "comments": [
+      {
+        "id": "comment-3",
+        "authorName": "Binh An",
+        "authorId": null,
+        "content": "Hollow Cartographer is my new obsession, thanks for the recommendation!",
+        "date": "2026-07-11T09:00:00.000Z"
+      }
+    ]
+  },
+  {
+    "id": "post-budget-setup",
+    "title": "Building the Ultimate Gaming Setup on a Budget",
+    "summary": "You do not need to spend a fortune to get a great experience. Here is our curated guide.",
+    "content": "## Start with the monitor\n\nA good panel will outlive every other component in your build. Look for a 144Hz IPS display in the mid-range bracket and wait for a sale.\n\n## Prioritise the GPU, then everything else\n\nThe graphics card is where most of your budget should go, but do not buy last year's flagship when this year's mid-range card beats it at half the price.\n\n## Do not sleep on refurbished\n\nRefurbished mechanical keyboards and mice are often indistinguishable from new units. Save the difference for your next game.\n\n## The chair matters\n\nBack pain is the real endgame boss. Invest in an ergonomic chair before you invest in RGB anything.",
+    "tags": [
+      "Hardware",
+      "Guide"
+    ],
+    "image": null,
+    "authorName": "Binh An",
+    "authorId": null,
+    "date": "2026-07-08T09:00:00.000Z",
+    "views": 167,
+    "comments": []
+  },
+  {
+    "id": "post-hollow-knight",
+    "title": "Why Hollow Knight Still Rules the Metroidvania Genre",
+    "summary": "Almost a decade later, Hollow Knight remains the gold standard for atmospheric exploration.",
+    "content": "Hollow Knight's success is not just about tight combat and a haunting soundtrack. It is the way the map slowly unfolds, rewarding curiosity at every turn. Every shortcut you unlock feels earned, and every optional area hides a piece of the kingdom's tragic history.\n\nFor new developers studying level design, Hollow Knight is a masterclass in environmental storytelling and player-driven pacing.",
+    "tags": [
+      "Metroidvania",
+      "Retrospective"
+    ],
+    "image": "/img/hollowposter.jpg",
+    "authorName": "Khanh Nguyen",
+    "authorId": null,
+    "date": "2026-07-05T09:00:00.000Z",
+    "views": 289,
+    "comments": []
+  },
+  {
+    "id": "post-classic-coop",
+    "title": "The Return of Classic Co-Op: What Players Want",
+    "summary": "Split-screen is making a comeback, and players are here for it. We dig into why.",
+    "content": "For years, local co-op felt like a relic of a bygone era. But recent releases have proven there is still huge demand for sharing a screen with friends on the same couch.\n\nThe numbers back it up: co-op titles consistently outperform their solo-only counterparts in first-week retention. Developers are taking notice, and the upcoming slate is packed with cooperative experiences built around communication and shared problem-solving.",
+    "tags": [
+      "Co-Op",
+      "Multiplayer",
+      "Trends"
+    ],
+    "image": "/img/nierposter.jpg",
+    "authorName": "Quang Dang",
+    "authorId": null,
+    "date": "2026-07-01T09:00:00.000Z",
+    "views": 143,
+    "comments": []
+  }
+]

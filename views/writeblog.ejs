@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="description" content="Write or edit a blog post on Playnex.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<title><%= isEdit ? 'Edit post' : 'Write a post' %> — Playnex</title>
+<link rel="icon" href="/logo.png">
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<a class="skip-to-content" href="#main-content">Skip to main content</a>
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="homepage.html" class="logo">
+      <img src="logo.png" alt="Playnex" class="logo__img">
+    </a>
+    <nav class="primary-nav">
+      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
+      <div class="primary-nav__dropdown">
+        <a href="forum.html" class="primary-nav__link is-active">Community</a>
+        <div class="primary-nav__menu">
+          <a href="forum.html" class="primary-nav__sub">Forum</a>
+          <a href="/blog" class="primary-nav__sub is-active">Blog</a>
+        </div>
+      </div>
+    </nav>
+    <div class="topbar__actions">
+      <form class="search" role="search" action="shopping.html" method="get">
+        <label for="site-search" class="visually-hidden">Search games, merch, tags</label>
+        <svg viewBox="0 0 24 24" class="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.6" y2="16.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="site-search" name="q" type="search" placeholder="Search games, merch, tags">
+        <button type="submit" class="visually-hidden">Search</button>
+      </form>
+      <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 14.9 3 8.9C3 5.9 5.4 3.5 8.4 3.5c1.7 0 3.3.8 4.3 2.1a5.3 5.3 0 0 1 4.3-2.1C20 3.5 21.5 5.9 21.5 8.9c0 6-9.5 11.6-9.5 11.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="cart.html" class="icon-btn" aria-label="Cart, 3 items">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
+      </a>
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
+    </div>
+  </div>
+</header>
+
+<main id="main-content">
+  <div class="page-header">
+    <h1><%= isEdit ? 'Edit post' : 'Write a post' %></h1>
+  </div>
+
+  <div class="new-thread-wrap">
+    <% if (typeof errors !== 'undefined' && errors.length) { %>
+      <ul class="form-errors">
+        <% errors.forEach(function (err) { %><li><%= err %></li><% }) %>
+      </ul>
+    <% } %>
+
+    <div class="form-errors" id="login-notice" hidden>
+      <li>You must be logged in to write a post. <a href="Login.html" class="text-link">Log in</a> or <a href="Login.html" class="text-link">sign up</a>.</li>
+    </div>
+
+    <form class="new-thread-form" method="POST"
+          action="<%= isEdit ? '/blog/' + post.id + '/update' : '/blog/create' %>"
+          id="blog-form" novalidate>
+
+      <input type="hidden" name="userId" id="user-id-field" value="">
+
+      <div class="field">
+        <label for="title">Title</label>
+        <input type="text" id="title" name="title" maxlength="120"
+               value="<%= values.title || (post && post.title) || '' %>" placeholder="Write your title...">
+        <span class="char-count"><span id="title-count">0</span>/120</span>
+        <span class="field-error" id="title-error"></span>
+      </div>
+
+      <div class="field">
+        <label for="summary">Summary</label>
+        <textarea id="summary" name="summary" rows="2" maxlength="300"
+                  placeholder="A short preview shown on the blog list..."><%= values.summary || (post && post.summary) || '' %></textarea>
+        <span class="char-count"><span id="summary-count">0</span>/300</span>
+        <span class="field-error" id="summary-error"></span>
+      </div>
+
+      <div class="field">
+        <label for="tags">Tags (comma separated, 1-5)</label>
+        <input type="text" id="tags" name="tags" maxlength="200"
+               value="<%= values.tags || (post && post.tags.join(', ')) || '' %>" placeholder="e.g. RPG, Design, Review">
+        <span class="char-count" id="tags-count">0 tags</span>
+        <span class="field-error" id="tags-error"></span>
+      </div>
+
+      <div class="field">
+        <label for="content">Content</label>
+        <textarea id="content" name="content" rows="12" maxlength="20000"
+                  placeholder="Write your post... (## Heading creates a section heading)"><%= values.content || (post && post.content) || '' %></textarea>
+        <span class="char-count"><span id="content-count">0</span>/20000</span>
+        <span class="field-error" id="content-error"></span>
+      </div>
+
+      <div class="field">
+        <label for="image">Cover image (URL or local path, optional)</label>
+        <input type="text" id="image" name="image"
+               value="<%= values.image || (post && post.image) || '' %>" placeholder="https://... or /img/poster.jpg">
+        <img id="image-preview" src="" alt="Cover image preview" style="display:none;">
+      </div>
+
+      <button type="submit" class="btn btn--primary"><%= isEdit ? 'Update post' : 'Publish post' %></button>
+      <a href="<%= isEdit ? '/blog/' + post.id : '/blog' %>" class="btn btn--ghost">Cancel</a>
+    </form>
+  </div>
+</main>
+
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__col">
+      <a href="homepage.html" class="logo logo--footer">
+        <img src="logo.png" alt="Playnex logo" class="logo__img">
+      </a>
+      <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
+    </div>
+    <div class="site-footer__col">
+      <h3>Support</h3>
+      <a href="contact.html">Contact us</a>
+      <a href="sitemap.html">Sitemap</a>
+    </div>
+    <div class="site-footer__col">
+      <h3>Company</h3>
+      <a href="terms.html">Terms of service</a>
+      <a href="privacy.html">Privacy policy</a>
+    </div>
+  </div>
+  <div class="site-footer__bottom">
+    <p>&copy; 2026 Playnex. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  var form = document.getElementById('blog-form');
+  var titleInput = document.getElementById('title');
+  var summaryInput = document.getElementById('summary');
+  var tagsInput = document.getElementById('tags');
+  var contentInput = document.getElementById('content');
+  var imageInput = document.getElementById('image');
+  var imagePreview = document.getElementById('image-preview');
+  var userIdField = document.getElementById('user-id-field');
+  var DRAFT_KEY = 'playnex_blog_draft_<%= post ? post.id : 'new' %>';
+  var isEdit = <%= isEdit ? 'true' : 'false' %>;
+  var postAuthorId = "<%= post ? (post.authorId || '') : '' %>";
+
+  // ---- logged-in check ----
+  var user = null;
+  try {
+    user = JSON.parse(localStorage.getItem('playnex_user') || 'null');
+  } catch (e) {}
+
+  if (!user) {
+    document.getElementById('login-notice').hidden = false;
+    form.querySelectorAll('input, textarea, button').forEach(function (el) { el.disabled = true; });
+    return;
+  }
+
+  if (isEdit && postAuthorId && String(user.id) !== postAuthorId) {
+    var notice = document.getElementById('login-notice');
+    notice.innerHTML = '<li>You can only edit your own posts. <a href="/blog" class="text-link">Back to blog</a>.</li>';
+    notice.hidden = false;
+    form.querySelectorAll('input, textarea, button').forEach(function (el) { el.disabled = true; });
+    return;
+  }
+
+  userIdField.value = user.id || '';
+
+  // ---- char counters ----
+  function updateCounters() {
+    document.getElementById('title-count').textContent = titleInput.value.length;
+    document.getElementById('summary-count').textContent = summaryInput.value.length;
+    document.getElementById('content-count').textContent = contentInput.value.length;
+    var tagCount = tagsInput.value.split(',').map(function (t) { return t.trim(); }).filter(Boolean).length;
+    document.getElementById('tags-count').textContent = tagCount + (tagCount === 1 ? ' tag' : ' tags');
+  }
+  updateCounters();
+
+  // ---- live validation (mirrors the server rules) ----
+  function validateTitle() {
+    var err = document.getElementById('title-error');
+    var v = titleInput.value.trim();
+    if (!v) { err.textContent = 'Title is required.'; return false; }
+    if (v.length < 3) { err.textContent = 'Title must be at least 3 characters.'; return false; }
+    err.textContent = '';
+    return true;
+  }
+
+  function validateSummary() {
+    var err = document.getElementById('summary-error');
+    var v = summaryInput.value.trim();
+    if (!v) { err.textContent = 'Summary is required.'; return false; }
+    if (v.length < 10) { err.textContent = 'Summary must be at least 10 characters. (now ' + v.length + ')'; return false; }
+    err.textContent = '';
+    return true;
+  }
+
+  function validateTags() {
+    var err = document.getElementById('tags-error');
+    var tags = tagsInput.value.split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+    if (!tags.length) { err.textContent = 'Add at least one tag.'; return false; }
+    if (tags.length > 5) { err.textContent = 'Maximum 5 tags.'; return false; }
+    if (tags.some(function (t) { return t.length > 30; })) { err.textContent = 'Each tag must be 30 characters or fewer.'; return false; }
+    err.textContent = '';
+    return true;
+  }
+
+  function validateContent() {
+    var err = document.getElementById('content-error');
+    var len = contentInput.value.trim().length;
+    if (len < 20) { err.textContent = 'Content must be at least 20 characters long. (now ' + len + ')'; return false; }
+    err.textContent = '';
+    return true;
+  }
+
+  function validateImage() {
+    var v = imageInput.value.trim();
+    if (!v) return true;
+    var ok = /^https?:\/\/.+$/.test(v) || /^\/?[a-zA-Z0-9_\-/]+\.(png|jpe?g|gif|webp)$/i.test(v);
+    if (!ok) {
+      imagePreview.style.display = 'none';
+      return false;
+    }
+    return true;
+  }
+
+  // ---- Web Storage: autosave draft, restore after refresh ----
+  function saveDraft() {
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({
+        title: titleInput.value,
+        summary: summaryInput.value,
+        tags: tagsInput.value,
+        content: contentInput.value,
+        image: imageInput.value
+      }));
+    } catch (e) {}
+  }
+
+  function loadDraft() {
+    var raw = null;
+    try { raw = localStorage.getItem(DRAFT_KEY); } catch (e) {}
+    if (!raw) return;
+    try {
+      var d = JSON.parse(raw);
+      if (d.title !== undefined && d.title !== titleInput.value) titleInput.value = d.title;
+      if (d.summary !== undefined && d.summary !== summaryInput.value) summaryInput.value = d.summary;
+      if (d.tags !== undefined && d.tags !== tagsInput.value) tagsInput.value = d.tags;
+      if (d.content !== undefined && d.content !== contentInput.value) contentInput.value = d.content;
+      if (d.image !== undefined && d.image !== imageInput.value) imageInput.value = d.image;
+      imageInput.dispatchEvent(new Event('input'));
+      updateCounters();
+    } catch (e) {}
+  }
+
+  [titleInput, summaryInput, tagsInput, contentInput].forEach(function (el) {
+    el.addEventListener('input', function () {
+      updateCounters();
+      saveDraft();
+    });
+    el.addEventListener('blur', function () {
+      if (el === titleInput) validateTitle();
+      else if (el === summaryInput) validateSummary();
+      else if (el === tagsInput) validateTags();
+      else validateContent();
+    });
+    el.addEventListener('input', function () {
+      if (el === titleInput) validateTitle();
+      else if (el === summaryInput) validateSummary();
+      else if (el === tagsInput) validateTags();
+      else validateContent();
+    });
+  });
+
+  imageInput.addEventListener('input', function () {
+    if (validateImage()) {
+      imagePreview.src = imageInput.value;
+      imagePreview.style.display = 'block';
+      imagePreview.onerror = function () { imagePreview.style.display = 'none'; };
+    }
+    saveDraft();
+  });
+
+  form.addEventListener('submit', function (e) {
+    var okTitle = validateTitle();
+    var okSummary = validateSummary();
+    var okTags = validateTags();
+    var okContent = validateContent();
+    if (!okTitle || !okSummary || !okTags || !okContent) {
+      e.preventDefault();
+      return;
+    }
+    try { localStorage.removeItem(DRAFT_KEY); } catch (err) {}
+  });
+
+  loadDraft();
+})();
+</script>
+<script src="/public/js/header.js"></script>
+</body>
+</html>
