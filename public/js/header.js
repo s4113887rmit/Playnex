@@ -52,6 +52,13 @@
 
     wrapper.insertBefore(logoutBtn, wrapper.firstElementChild);
     wrapper.insertBefore(profileLink, wrapper.firstElementChild);
+
+    // reveal admin-only UI (e.g. Admin Panel button) for administrators
+    if (user.role === 'admin') {
+      document.querySelectorAll('[data-admin-only]').forEach(function (el) {
+        el.hidden = false;
+      });
+    }
   }
 
   if (document.readyState === 'loading') {
