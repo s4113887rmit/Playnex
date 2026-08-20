@@ -3,10 +3,10 @@
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game details — Playnex</title>
+    <title><%= game.name %> — Playnex</title>
     <meta name="description" content="View the selected Playnex game listing and discover similar titles.">
+    <link rel="icon" href="/logo.png">
     <link rel="stylesheet" href="/style.css">
-    <script src="js/playnex-store.js" defer></script>
   </head>
   <body>
     <header class="topbar">
@@ -42,8 +42,8 @@
           <a href="cart.html" class="icon-btn" aria-label="Cart">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
           </a>
-          <a href="Profile.html" class="icon-btn profile-icon" aria-label="Profile" title="Profile"><span class="profile-icon__letter">N</span></a>
-          <a href="Login.html" class="btn btn--ghost btn--small">Log out</a>
+          <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+          <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
         </div>
       </div>
 
@@ -62,40 +62,44 @@
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="homepage.html">Home</a><span>/</span>
         <a href="shopping.html">Shopping</a><span>/</span>
-        <span id="breadcrumb-game" aria-current="page">Game</span>
+        <span id="breadcrumb-game" aria-current="page"><%= game.name %></span>
       </nav>
 
       <section class="listing-hero">
         <div class="listing-hero__media">
-          <img id="listing-image" src="" alt="">
+          <img id="listing-image" src="<%= game.image %>" alt="<%= game.name %> poster">
         </div>
 
         <div class="listing-hero__content">
           <span class="eyebrow">Featured title</span>
-          <h1 id="listing-title">Game title</h1>
+          <h1 id="listing-title"><%= game.name %></h1>
           <div class="listing-hero__meta">
-            <span id="listing-genre">Genre</span>
+            <span id="listing-genre"><%= game.genre %></span>
             <span class="listing-hero__dot">•</span>
-            <span id="listing-platforms">Platform</span>
+            <span id="listing-platforms"><%= (game.platforms || []).join(", ") %></span>
           </div>
 
           <div class="listing-hero__pricing">
-            <span id="listing-price" class="listing-price">$0.00</span>
-            <span id="listing-old-price" class="listing-price listing-price--old"></span>
+            <span id="listing-price" class="listing-price">$<%= Number(game.price).toFixed(2) %></span>
+            <% if (game.oldPrice) { %>
+              <span id="listing-old-price" class="listing-price listing-price--old">$<%= Number(game.oldPrice).toFixed(2) %></span>
+            <% } else { %>
+              <span id="listing-old-price" class="listing-price listing-price--old"></span>
+            <% } %>
           </div>
 
-          <p id="listing-description" class="listing-hero__description"></p>
+          <p id="listing-description" class="listing-hero__description"><%= game.description %></p>
 
           <div class="listing-hero__actions">
-            <button id="listing-add-cart" type="button" class="btn btn--primary btn--large">Add to cart</button>
-            <button id="listing-add-wishlist" type="button" class="btn btn--outline btn--large">Add to wishlist</button>
+            <button id="listing-add-cart" type="button" class="btn btn--primary btn--large" data-game-slug="<%= slug %>">Add to cart</button>
+            <button id="listing-add-wishlist" type="button" class="btn btn--outline btn--large" data-game-slug="<%= slug %>">Add to wishlist</button>
             <a id="listing-buy-now" href="checkout.html" class="btn btn--ghost btn--large">Buy now</a>
           </div>
 
           <ul class="listing-hero__facts">
-            <li><span>Type</span><strong id="listing-type">Digital</strong></li>
-            <li><span>Availability</span><strong id="listing-availability">In stock</strong></li>
-            <li><span>Release</span><strong id="listing-release">2026</strong></li>
+            <li><span>Type</span><strong id="listing-type"><%= game.type %></strong></li>
+            <li><span>Availability</span><strong id="listing-availability"><%= game.availability %></strong></li>
+            <li><span>Release</span><strong id="listing-release"><%= game.releaseDate %></strong></li>
           </ul>
         </div>
       </section>
@@ -107,8 +111,12 @@
 
         <div class="listing-section__grid">
           <div class="listing-copy">
-            <p id="listing-long-description"></p>
-            <ul id="listing-features" class="listing-features"></ul>
+            <p id="listing-long-description"><%= game.longDescription %></p>
+            <ul id="listing-features" class="listing-features">
+              <% (game.features || []).forEach(function (feature) { %>
+                <li><%= feature %></li>
+              <% }) %>
+            </ul>
           </div>
 
           <aside class="listing-aside">
@@ -116,107 +124,109 @@
             <dl class="listing-details">
               <div>
                 <dt>Genre</dt>
-                <dd id="detail-genre">—</dd>
+                <dd id="detail-genre"><%= game.genre %></dd>
               </div>
               <div>
                 <dt>Platform</dt>
-                <dd id="detail-platforms">—</dd>
+                <dd id="detail-platforms"><%= (game.platforms || []).join(", ") %></dd>
               </div>
               <div>
                 <dt>Edition</dt>
-                <dd id="detail-edition">Digital</dd>
+                <dd id="detail-edition"><%= game.edition %></dd>
               </div>
               <div>
                 <dt>Included</dt>
-                <dd id="detail-included">Full game</dd>
+                <dd id="detail-included"><%= game.included %></dd>
               </div>
             </dl>
           </aside>
         </div>
       </section>
-      <div class="detailreview">
-  <div class="revieweva">
-    <h2><%= avg.toFixed(1) %></h2>
-    <div class="detail-star">
-      <% for (let i = 1; i <= 5; i++) { %>
-        <span class="fa fa-star <%= i <= Math.round(avg) ? 'checked' : '' %>"></span>
-      <% } %>
-    </div>
-    <h3><%= count %> user review</h3>
-    <a href="/game/<%= game.id %>/review" class="review-sum-btn">Write review</a>
-  </div>
-  <div class="rating-bars">
-    <% for (let star = 5; star >= 1; star--) { %>
-      <div class="rating-row">
-        <span class="rating-label"><%= star %></span>
-        <div class="bar-track">
-          <div class="bar-fill" style="--fill: <%= distribution[star] %>%"></div>
-        </div>
-      </div>
-    <% } %>
-  </div>
-</div>
 
-<div class="comments">
-  <h3><%= game.reviews.length %> Comments</h3>
-  <% game.reviews.slice().reverse().forEach(r => { %>
-    <div class="comment">
-      <div class="comment-avatar"></div>
-      <div class="comment-content">
-        <div class="comment-meta">
-          <span class="author"><%= r.author %></span>
-          <span class="date"><%= r.date %></span>
-          <a href="/game/<%= game.id %>/review?edit=<%= r.id %>" class="comment-action">Edit</a>
-          <form method="POST" action="/game/<%= game.id %>/review/<%= r.id %>/delete"
-                class="delete-review-form" style="display:inline">
-            <button type="submit" class="comment-action comment-action--danger">Delete</button>
-          </form>
+      <div class="detailreview">
+        <div class="revieweva">
+          <h2><%= avg.toFixed(1) %></h2>
+          <div class="detail-star">
+            <% for (var i = 1; i <= 5; i++) { %>
+              <span class="fa fa-star <%= i <= Math.round(avg) ? 'checked' : '' %>"></span>
+            <% } %>
+          </div>
+          <h3><%= count %> user reviews</h3>
+          <a href="/game/<%= game.id %>/review" class="review-sum-btn">Write review</a>
         </div>
-        <div class="sum-star">
-          <% for (let i = 1; i <= 5; i++) { %>
-            <span class="fa fa-star <%= i <= r.stars ? 'checked' : '' %>"></span>
+        <div class="rating-bars">
+          <% for (var star = 5; star >= 1; star--) { %>
+            <div class="rating-row">
+              <span class="rating-label"><%= star %></span>
+              <div class="bar-track">
+                <div class="bar-fill" style="--fill: <%= distribution[star] %>%"></div>
+              </div>
+            </div>
           <% } %>
         </div>
-        <p><strong><%= r.title %></strong><br><%= r.content %></p>
-        <% if (r.image) { %>
-          <img src="<%= r.image %>" alt="review image" class="comment-image">
-        <% } %>
       </div>
-    </div>
-  <% }) %>
-</div>
-<div id="confirmModal" class="modal-overlay" style="display:none;">
-  <div class="modal-box">
-    <p>Delete this review?</p>
-    <div class="modal-actions">
-      <button id="modalCancel" class="btn btn--ghost btn--small">Cancel</button>
-      <button id="modalConfirm" class="btn btn--danger btn--small">Delete</button>
-    </div>
-  </div>
-</div>
+
+      <div class="comments">
+        <h3><%= game.reviews.length %> Comments</h3>
+        <% game.reviews.slice().reverse().forEach(function (r) { %>
+          <div class="comment">
+            <div class="comment-avatar"></div>
+            <div class="comment-content">
+              <div class="comment-meta">
+                <span class="author"><%= r.author %></span>
+                <span class="date"><%= r.date %></span>
+                <a href="/game/<%= game.id %>/review?edit=<%= r.id %>" class="comment-action">Edit</a>
+                <form method="POST" action="/game/<%= game.id %>/review/<%= r.id %>/delete"
+                      class="delete-review-form" style="display:inline">
+                  <button type="submit" class="comment-action comment-action--danger">Delete</button>
+                </form>
+              </div>
+              <div class="sum-star">
+                <% for (var j = 1; j <= 5; j++) { %>
+                  <span class="fa fa-star <%= j <= r.stars ? 'checked' : '' %>"></span>
+                <% } %>
+              </div>
+              <p><strong><%= r.title %></strong><br><%= r.content %></p>
+              <% if (r.image) { %>
+                <img src="<%= r.image %>" alt="review image" class="comment-image">
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+
+      <div id="confirmModal" class="modal-overlay" style="display:none;">
+        <div class="modal-box">
+          <p>Delete this review?</p>
+          <div class="modal-actions">
+            <button id="modalCancel" class="btn btn--ghost btn--small">Cancel</button>
+            <button id="modalConfirm" class="btn btn--danger btn--small">Delete</button>
+          </div>
+        </div>
+      </div>
 
       <section class="listing-section">
         <div class="listing-section__heading">
           <h2>Games you may like</h2>
         </div>
         <ul id="related-list" class="listing-related list-reset">
-  <% related.forEach(item => { %>
-    <li>
-      <article class="listing-related__card">
-        <a href="/listing/<%= item.id %>" class="listing-related__art" aria-label="View <%= item.name %>">
-          <img src="<%= item.image %>" alt="<%= item.name %> poster">
-        </a>
-        <div class="listing-related__body">
-          <h3><a href="/listing/<%= item.id %>"><%= item.name %></a></h3>
-          <p><%= item.genre %></p>
-          <div class="listing-related__price-row">
-            <span>$<%= item.price.toFixed(2) %></span>
-          </div>
-        </div>
-      </article>
-    </li>
-  <% }) %>
-</ul>
+          <% related.forEach(function (item) { %>
+            <li>
+              <article class="listing-related__card">
+                <a href="/listing/<%= item.id %>" class="listing-related__art" aria-label="View <%= item.name %>">
+                  <img src="<%= item.image %>" alt="<%= item.name %> poster">
+                </a>
+                <div class="listing-related__body">
+                  <h3><a href="/listing/<%= item.id %>"><%= item.name %></a></h3>
+                  <p><%= item.genre %></p>
+                  <div class="listing-related__price-row">
+                    <span>$<%= Number(item.price).toFixed(2) %></span>
+                  </div>
+                </div>
+              </article>
+            </li>
+          <% }) %>
+        </ul>
       </section>
     </main>
 
@@ -224,7 +234,7 @@
       <div class="site-footer__inner">
         <div class="site-footer__col">
           <a href="homepage.html" class="logo logo--footer">
-            <img src="logo.png" alt="Playnex" class="logo__img">
+            <img src="logo.png" alt="Playnex logo" class="logo__img">
           </a>
           <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
         </div>
@@ -252,67 +262,37 @@
     </footer>
 
     <script>
-  const currentGame = <%- JSON.stringify(game) %>;
+      (function () {
+        'use strict';
 
-  function money(value) {
-    return `$${Number(value).toFixed(2)}`;
-  }
+        var formToSubmit = null;
+        var modal = document.getElementById('confirmModal');
 
-  function renderGame(game) {
-    document.title = `${game.name} — Playnex`;
-    document.getElementById("breadcrumb-game").textContent = game.name;
-    document.getElementById("listing-image").src = game.image;
-    document.getElementById("listing-image").alt = `${game.name} poster`;
-    document.getElementById("listing-title").textContent = game.name;
-    document.getElementById("listing-genre").textContent = game.genre;
-    document.getElementById("listing-platforms").textContent = (game.platforms || []).join(", ");
-    document.getElementById("listing-price").textContent = money(game.price);
-    document.getElementById("listing-old-price").textContent = game.oldPrice ? money(game.oldPrice) : "";
-    document.getElementById("listing-description").textContent = game.description;
-    document.getElementById("listing-long-description").textContent = game.longDescription || "";
-    document.getElementById("listing-release").textContent = game.releaseDate;
-    document.getElementById("listing-type").textContent = game.type;
-    document.getElementById("listing-availability").textContent = game.availability;
-    document.getElementById("detail-genre").textContent = game.genre;
-    document.getElementById("detail-platforms").textContent = (game.platforms || []).join(", ");
-    document.getElementById("detail-edition").textContent = game.edition;
-    document.getElementById("detail-included").textContent = game.included;
+        document.querySelectorAll('.delete-review-form').forEach(function (form) {
+          form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            formToSubmit = form;
+            modal.style.display = 'flex';
+          });
+        });
 
-    const featureList = document.getElementById("listing-features");
-    featureList.innerHTML = "";
-    (game.features || []).forEach((feature) => {
-      const item = document.createElement("li");
-      item.textContent = feature;
-      featureList.appendChild(item);
-    });
-  }
+        document.getElementById('modalCancel').addEventListener('click', function () {
+          formToSubmit = null;
+          modal.style.display = 'none';
+        });
 
-  renderGame(currentGame);
+        document.getElementById('modalConfirm').addEventListener('click', function () {
+          if (formToSubmit) formToSubmit.submit();
+        });
 
-  // Xác nhận xoá review bằng modal (không liên quan gì đến % rating)
-  let formToSubmit = null;
-  const modal = document.getElementById('confirmModal');
-
-  document.querySelectorAll('.delete-review-form').forEach((form) => {
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      formToSubmit = form;
-      modal.style.display = 'flex';
-    });
-  });
-
-  document.getElementById('modalCancel').addEventListener('click', () => {
-    formToSubmit = null;
-    modal.style.display = 'none';
-  });
-
-  document.getElementById('modalConfirm').addEventListener('click', () => {
-    if (formToSubmit) formToSubmit.submit();
-  });
-
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.style.display = 'none';
-  });
-</script>
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) modal.style.display = 'none';
+        });
+      })();
+    </script>
+    <script src="/public/js/current-user.js"></script>
+    <script src="/public/js/api.js"></script>
+    <script src="/public/js/listing.js"></script>
+    <script src="/public/js/header.js"></script>
   </body>
 </html>

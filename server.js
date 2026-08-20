@@ -773,6 +773,59 @@ app.post("/game/:id/review/:reviewId/delete", (req, res) => {
   res.redirect("/game/" + game.id);
 });
 
+// Game listing (detail page)
+// Linked from the store pages as listing.html?game=<slug> and /listing/:id
+function slugifyGame(name) {
+  return String(name)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+const GAME_SLUG_ALIASES = {
+  "red-dead-redemption-2": 4,
+  "death-standing": 8,
+  "cyberpunk": 2,
+  "witcher-3": 9
+};
+
+function findGameBySlug(games, slug) {
+  const normalized = String(slug || "").toLowerCase().trim();
+  if (!normalized) return null;
+  const byName = games.find((g) => slugifyGame(g.name) === normalized);
+  if (byName) return byName;
+  const aliasId = GAME_SLUG_ALIASES[normalized];
+  if (aliasId) return games.find((g) => g.id === aliasId);
+  return null;
+}
+
+function renderListing(req, res) {
+  const games = readGames();
+  let game = null;
+  let slug = "";
+
+  if (req.params.id) {
+    game = games.find((g) => g.id === parseInt(req.params.id));
+  } else if (req.query.game) {
+    game = findGameBySlug(games, req.query.game);
+    slug = String(req.query.game);
+  } else if (req.query.id) {
+    game = games.find((g) => g.id === parseInt(req.query.id));
+  }
+
+  if (!game) return res.status(404).send("Game not found");
+
+  slug = slug || slugifyGame(game.name);
+  const { avg, count } = getAvgRating(game);
+  const distribution = getDistribution(game);
+  const related = games.filter((g) => g.id !== game.id).slice(0, 4);
+
+  res.render("listing", { game, avg, count, distribution, related, slug });
+}
+
+app.get("/listing.html", renderListing);
+app.get("/listing/:id", renderListing);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('Playnex server running on http://localhost:' + PORT);

@@ -225,5 +225,30 @@
     "baseRating": 3,
     "baseCount": 12,
     "reviews": []
+  },
+  {
+    "id": 9,
+    "name": "The Witcher 3",
+    "genre": "Action RPG",
+    "releaseDate": "19/05/2015",
+    "description": "Hunt monsters as Geralt of Rivia in a vast open world.",
+    "longDescription": "Step into the boots of Geralt of Rivia, a professional monster hunter, and track down the Child of Prophecy across war-torn lands. Every choice carves the story, every hunt sharpens your legend.",
+    "image": "/IMG/witcherposter.jpg",
+    "price": 14.99,
+    "oldPrice": 39.99,
+    "platforms": ["PC", "Console"],
+    "type": "Digital",
+    "availability": "In stock",
+    "edition": "Game of the Year edition",
+    "included": "Base game + both expansions",
+    "features": [
+      "Gripping branching narrative",
+      "Massive open world with two expansions",
+      "Deep character builds and alchemy",
+      "Meaningful choices and consequences"
+    ],
+    "baseRating": 5,
+    "baseCount": 42,
+    "reviews": []
   }
 ]
