@@ -1,13 +1,101 @@
 document.addEventListener('DOMContentLoaded', () => {
-  // Grab the textarea and the finalize button using the classes in your HTML
+  const getAuthHeaders = () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('playnex_user') || 'null');
+      return user && user.id ? { 'x-user-id': String(user.id) } : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
+  // Read which user we are viewing from the URL (?id=...)
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get('id');
+
+  const avatarEl = document.getElementById('admin-profile-avatar');
+  const nameEl = document.getElementById('admin-profile-name');
+  const metaEl = document.getElementById('admin-profile-meta');
+  const bioEl = document.getElementById('admin-profile-bio');
+  const bioTextEl = document.getElementById('admin-profile-bio-text');
+  const lockBtn = document.getElementById('admin-profile-lock-btn');
+
+  const updateLockButton = (user) => {
+    lockBtn.style.display = '';
+    lockBtn.dataset.id = user.id;
+    if (user.status === 'locked') {
+      lockBtn.textContent = 'Unlock Account';
+      lockBtn.classList.remove('btn--danger');
+      lockBtn.classList.add('btn--success');
+    } else {
+      lockBtn.textContent = 'Lock Account';
+      lockBtn.classList.remove('btn--success');
+      lockBtn.classList.add('btn--danger');
+    }
+  };
+
+  const renderUser = (user) => {
+    avatarEl.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}`;
+    nameEl.textContent = user.username;
+    const joined = user.joined || user.lockedDate || 'Unknown';
+    metaEl.innerHTML = `Joined: ${joined}<br>User ID: #PLX-${String(user.id).padStart(5, '0')}`;
+    if (user.bio) {
+      bioTextEl.textContent = user.bio;
+      bioEl.style.display = 'block';
+    } else {
+      bioEl.style.display = 'none';
+    }
+    updateLockButton(user);
+  };
+
+  const loadUser = async () => {
+    if (!userId) {
+      nameEl.textContent = 'No user selected';
+      metaEl.innerHTML = 'Return to the admin dashboard and choose a user.';
+      lockBtn.style.display = 'none';
+      return;
+    }
+    try {
+      const response = await fetch(`/api/users/${userId}`, { headers: getAuthHeaders() });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        nameEl.textContent = 'User not found';
+        metaEl.textContent = err.error || 'Could not load this user.';
+        lockBtn.style.display = 'none';
+        return;
+      }
+      renderUser(await response.json());
+    } catch (error) {
+      console.error('Failed to load user', error);
+      nameEl.textContent = 'Error';
+      metaEl.textContent = 'Could not load this user.';
+    }
+  };
+
+  // Lock / unlock the account shown on this page
+  lockBtn.addEventListener('click', async () => {
+    const id = lockBtn.dataset.id;
+    if (!id) return;
+    const res = await fetch(`/api/users/${id}/toggle-lock`, {
+      method: 'POST',
+      headers: getAuthHeaders()
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.error || 'Action failed.');
+      return;
+    }
+    const data = await res.json();
+    updateLockButton(data.user);
+    alert(`User status successfully updated to ${data.user.status}.`);
+  });
+
+  // ---- Warning form logic (unchanged) ----
   const warningInput = document.querySelector('.warning-box textarea');
   const submitBtn = document.querySelector('.btn--warning-finalize');
 
-  // Live Form Validation Logic
   const validateWarning = () => {
     let errorSpan = warningInput.nextElementSibling;
-    
-    // Create the error message span if it doesn't exist yet
+
     if (!errorSpan || !errorSpan.classList.contains('error-msg')) {
       errorSpan = document.createElement('span');
       errorSpan.classList.add('error-msg');
@@ -18,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
       warningInput.parentNode.insertBefore(errorSpan, warningInput.nextSibling);
     }
 
-    // Check if the input is empty
     if (warningInput.value.trim() === '') {
       warningInput.style.borderColor = '#e74c3c';
       errorSpan.textContent = 'Warning message cannot be empty.';
@@ -30,20 +117,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
-  // Trigger the validation every time the admin types a character
   warningInput.addEventListener('input', validateWarning);
 
-  // Prevent submission if invalid
   submitBtn.addEventListener('click', (e) => {
-    e.preventDefault(); // Stop default button behavior
-
-    const isValid = validateWarning();
-
-    if (isValid) {
-      // If valid, you would normally send a POST request to your backend here.
-      // For the prototype UI, we will clear the box and show a success alert.
+    e.preventDefault();
+    if (validateWarning()) {
       alert('Warning finalized and sent to user.');
-      warningInput.value = ''; 
+      warningInput.value = '';
     }
   });
+
+  loadUser();
 });
