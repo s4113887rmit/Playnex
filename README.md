@@ -37,6 +37,10 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 - `forum-create.html` - Form to create or edit a discussion post
 - `admin.html` - Administrator dashboard for managing locked/normal accounts
 - `admin-detail.html` - Detailed user moderation view with flags and purchase history
+- `public/js/forum-render.js` - Dynamically fetches and renders threads, handles thread deletion
+- `public/js/forum-detail.js` - Retrieves URL parameters to load specific single-thread data
+- `public/js/admin-render.js` - Connects the admin dashboard to the backend for toggling user locks
+- `server.js` (Forum & Admin segments) - In-memory data arrays and REST API endpoints (GET, POST, DELETE)
 
 ### Nguyen Khanh Nguyen (S4197203) - Blog + User Account
 Blog module:
@@ -88,6 +92,12 @@ The A2 prototype does not require MongoDB. If the MongoDB Atlas connection is un
 - The write form validates live, counts characters, and autosaves a draft in localStorage (restored after a page refresh)
 - Logged-in users can edit and delete only their own posts; comment forms validate before posting
 - JSON API: `GET /api/blogs`, `GET /api/blogs/:id`, `POST /api/blogs`, `PUT /api/blogs/:id`, `DELETE /api/blogs/:id`, `POST /api/blogs/:id/comments`
+
+### Testing the Forum and Admin modules
+- **Admin Dashboard:** Log in with the Admin demo account and navigate to `/admin.html`. Click "Lock account" or "Unlock account" to dynamically update user statuses via the backend API.
+- **Forum Threads:** Navigate to `/forum.html` to view the dynamic thread list fetched from the server.
+- **Single Thread:** Click on any thread title to view its specific data, loaded dynamically via URL parameters on `/forum-detail.html`.
+- **Create & Delete:** Create a new thread using the "Create Thread" form, and test the delete button on the main forum list to trigger the server's DELETE route.
 
 ## Technical Stack
 
