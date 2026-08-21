@@ -110,6 +110,7 @@ function listPayload(blogs) {
     id: blog.id,
     title: blog.title,
     summary: blog.summary,
+    content: blog.content,
     tags: blog.tags,
     image: blog.image,
     authorName: blog.authorName,

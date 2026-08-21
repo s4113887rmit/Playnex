@@ -26,7 +26,8 @@
         <a href="forum.html" class="primary-nav__link is-active">Community</a>
         <div class="primary-nav__menu">
           <a href="forum.html" class="primary-nav__sub">Forum</a>
-          <a href="/blog" class="primary-nav__sub is-active">Blog</a>
+          <a href="/rating" class="primary-nav__sub">Reviews</a>
+<a href="/blog" class="primary-nav__sub is-active">Blog</a>
         </div>
       </div>
     </nav>
@@ -47,6 +48,11 @@
       <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
   </div>
+<nav class="subnav">
+  <a href="forum.html" class="subnav__link">Forum</a>
+  <a href="/rating" class="subnav__link">Reviews</a>
+  <a href="/blog" class="subnav__link is-active">Blog</a>
+</nav>
 </header>
 
 <main id="main-content">
@@ -87,6 +93,7 @@
            data-summary="<%= p.summary.toLowerCase() %>"
            data-tags="<%= p.tags.join(' ').toLowerCase() %>"
            data-author="<%= p.authorName.toLowerCase() %>"
+           data-content="<%= p.content.toLowerCase() %>"
            data-views="<%= p.views %>"
            data-date="<%= p.date %>">
           <div class="post-body">
@@ -126,7 +133,7 @@
     <div class="site-footer__col">
       <h3>Support</h3>
       <a href="contact.html">Contact us</a>
-      <a href="sitemap.html">Sitemap</a>
+      <a href="/sitemap">Sitemap</a>
     </div>
     <div class="site-footer__col">
       <h3>Company</h3>
@@ -205,7 +212,8 @@
       var haystack = card.getAttribute('data-title') + ' ' +
         card.getAttribute('data-summary') + ' ' +
         card.getAttribute('data-tags') + ' ' +
-        card.getAttribute('data-author');
+        card.getAttribute('data-author') + ' ' +
+        card.getAttribute('data-content');
       var matchesSearch = !q || haystack.indexOf(q) !== -1;
       var matchesTag = !tag || card.getAttribute('data-tags').split(' ').indexOf(tag) !== -1;
       return matchesSearch && matchesTag;

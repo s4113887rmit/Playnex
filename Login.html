@@ -28,7 +28,8 @@
         <a href="forum.html" class="primary-nav__link">Community</a>
         <div class="primary-nav__menu">
           <a href="forum.html" class="primary-nav__sub">Forum</a>
-          <a href="/blog" class="primary-nav__sub">Blog</a>
+          <a href="/rating" class="primary-nav__sub">Reviews</a>
+<a href="/blog" class="primary-nav__sub">Blog</a>
         </div>
       </div>
     </nav>
@@ -92,7 +93,7 @@
       </form>
 
       <form id="forgot-form" class="auth-form is-hidden" novalidate>
-        <p class="auth-form__hint">Enter your email address and we'll send you a link to reset your password.</p>
+        <p class="auth-form__hint">Enter your email address and we'll send you a link to reset your password. In this prototype the reset code is printed in the server console.</p>
         <div class="form-group">
           <label for="forgot-email">Email address</label>
           <input id="forgot-email" type="email" name="email" placeholder="you@example.com" required autocomplete="email">
@@ -100,7 +101,30 @@
         </div>
         <button type="submit" class="btn btn--primary btn--auth">Send reset link</button>
         <p class="auth-server-msg" id="forgot-server-msg"></p>
+        <a href="#" class="auth-back" id="show-reset">&rarr; I already have a reset code</a>
         <a href="#" class="auth-back" id="back-to-login">&larr; Back to log in</a>
+      </form>
+
+      <form id="reset-form" class="auth-form is-hidden" novalidate>
+        <p class="auth-form__hint">Enter the reset code from the server console and choose a new password.</p>
+        <div class="form-group">
+          <label for="reset-token">Reset code</label>
+          <input id="reset-token" type="text" name="token" placeholder="Paste the reset code" required autocomplete="off">
+          <span class="form-group__error" role="alert" id="reset-token-error"></span>
+        </div>
+        <div class="form-group">
+          <label for="reset-password">New password</label>
+          <input id="reset-password" type="password" name="password" placeholder="At least 8 characters" required autocomplete="new-password" minlength="8">
+          <span class="form-group__error" role="alert" id="reset-password-error"></span>
+        </div>
+        <div class="form-group">
+          <label for="reset-confirm">Confirm new password</label>
+          <input id="reset-confirm" type="password" name="confirmPassword" placeholder="Re-enter your password" required autocomplete="new-password">
+          <span class="form-group__error" role="alert" id="reset-confirm-error"></span>
+        </div>
+        <button type="submit" class="btn btn--primary btn--auth">Reset password</button>
+        <p class="auth-server-msg" id="reset-server-msg"></p>
+        <a href="#" class="auth-back" id="back-to-login-2">&larr; Back to log in</a>
       </form>
 
       <form id="signup-form" class="auth-form is-hidden" enctype="multipart/form-data" novalidate>
@@ -178,7 +202,7 @@
     <div class="site-footer__col">
       <h3>Support</h3>
       <a href="contact.html">Contact us</a>
-      <a href="sitemap.html">Sitemap</a>
+      <a href="/sitemap">Sitemap</a>
     </div>
 
     <div class="site-footer__col">

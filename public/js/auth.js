@@ -6,13 +6,16 @@
   var tabs = document.querySelectorAll('.auth-tab');
   var loginForm = document.getElementById('login-form');
   var forgotForm = document.getElementById('forgot-form');
+  var resetForm = document.getElementById('reset-form');
   var signupForm = document.getElementById('signup-form');
   var descField = document.getElementById('signup-description');
   var charCount = document.getElementById('desc-char-count');
   var fileInput = document.getElementById('signup-picture');
   var fileName = document.getElementById('file-name');
   var showForgot = document.getElementById('show-forgot');
+  var showReset = document.getElementById('show-reset');
   var backToLogin = document.getElementById('back-to-login');
+  var backToLogin2 = document.getElementById('back-to-login-2');
 
   descField.addEventListener('input', function () {
     charCount.textContent = descField.value.length;
@@ -23,7 +26,7 @@
   });
 
   function showForm(form) {
-    [loginForm, forgotForm, signupForm].forEach(function (f) { f.classList.add('is-hidden'); });
+    [loginForm, forgotForm, resetForm, signupForm].forEach(function (f) { f.classList.add('is-hidden'); });
     form.classList.remove('is-hidden');
     clearMessages();
     clearErrors();
@@ -54,6 +57,18 @@
     e.preventDefault();
     switchToTab(0);
     showForm(loginForm);
+  });
+
+  backToLogin2.addEventListener('click', function (e) {
+    e.preventDefault();
+    switchToTab(0);
+    showForm(loginForm);
+  });
+
+  showReset.addEventListener('click', function (e) {
+    e.preventDefault();
+    switchToTab(-1);
+    showForm(resetForm);
   });
 
   function clearMessages() {
@@ -143,6 +158,26 @@
     }
     return true;
   }
+
+  function validateReset() {
+    clearErrors();
+    var valid = true;
+    var token = document.getElementById('reset-token').value.trim();
+    var password = document.getElementById('reset-password').value;
+    var confirm = document.getElementById('reset-confirm').value;
+    if (!token) { showFieldError('reset-token', 'Reset code is required'); valid = false; }
+    if (!password || password.length < 8) { showFieldError('reset-password', 'Password must be at least 8 characters'); valid = false; }
+    if (password !== confirm) { showFieldError('reset-confirm', 'Passwords do not match'); valid = false; }
+    return valid;
+  }
+
+  ['reset-token', 'reset-password', 'reset-confirm'].forEach(function (id) {
+    document.getElementById(id).addEventListener('input', function () {
+      if (id === 'reset-confirm' || document.getElementById('reset-token').value.trim() || document.getElementById('reset-password').value) {
+        validateReset();
+      }
+    });
+  });
 
   signupForm.addEventListener('submit', function (e) {
     e.preventDefault();
@@ -282,6 +317,47 @@
       .finally(function () {
         btn.disabled = false;
         btn.textContent = 'Send reset link';
+      });
+  });
+
+  resetForm.addEventListener('submit', function (e) {
+    e.preventDefault();
+    clearMessages();
+    if (!validateReset()) return;
+
+    var payload = {
+      token: document.getElementById('reset-token').value.trim(),
+      password: document.getElementById('reset-password').value,
+      confirmPassword: document.getElementById('reset-confirm').value
+    };
+    var btn = resetForm.querySelector('button[type="submit"]');
+    btn.disabled = true;
+    btn.textContent = 'Resetting...';
+
+    fetch('/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+      .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
+      .then(function (result) {
+        if (result.status === 200) {
+          showServerMsg('reset', result.data.message, 'success');
+          resetForm.reset();
+          setTimeout(function () {
+            showForm(loginForm);
+            switchToTab(0);
+          }, 1500);
+        } else {
+          showServerMsg('reset', result.data.error, 'error');
+        }
+      })
+      .catch(function () {
+        showServerMsg('reset', 'Network error. Please check your connection.', 'error');
+      })
+      .finally(function () {
+        btn.disabled = false;
+        btn.textContent = 'Reset password';
       });
   });
 })();

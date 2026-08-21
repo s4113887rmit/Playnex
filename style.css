@@ -1385,7 +1385,7 @@ img {
 .wishlist-summary {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 40px 24px;
+  padding: 20px 40px 24px;
   display: flex;
   gap: 32px;
   font-size: 13px;
@@ -3468,7 +3468,7 @@ body {
   padding: 0;
   background: #070712;
   color: white;
-  font-family: "Cinzel";
+  font-family: var(--font-body);
 }
 
 a {
@@ -3842,11 +3842,11 @@ body {
 }
 .top h1 {
   display: block;
-  font-family: "Cinzel";
+  font-family: var(--font-display);
 }
 .writetop {
   display: block;
-  font-family: "Cinzel";
+  font-family: var(--font-display);
   margin: 70px 70px 20px 70px;
 }
 header {
@@ -4305,44 +4305,6 @@ header {
   }
 }
 /* ----site map------ */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: "Inter", sans-serif;
-  background: #0f1020;
-  color: white;
-  min-height: 100vh;
-  padding-bottom: 80px;
-}
-
-h1,
-h2,
-h3,
-.brand {
-  font-family: "Poppins", sans-serif;
-}
-
-/*  Page intro  */
-.page-intro {
-  max-width: 1100px;
-  margin: 64px auto 10px;
-  padding: 0 24px;
-  text-align: center;
-}
-.page-intro h1 {
-  font-size: 38px;
-  font-weight: 800;
-  background: white;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/*  Sitemap tree  */
 .sitemap-wrap {
   width: 100%;
   max-width: 100%;
@@ -4380,6 +4342,38 @@ h3,
   position: relative;
 }
 
+.node-group-wrap {
+  position: relative;
+  padding-top: 28px;
+  display: flex;
+  justify-content: center;
+}
+
+.node-group-wrap::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 28px;
+  border-left: 2px solid #3d3f78;
+}
+
+.node-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 12px;
+  border: 1px solid #2c2e5c;  
+  border-radius: 14px;
+  padding: 18px;
+  background: rgba(30, 32, 68, 0.15);
+}
+
+.node-group .node {
+  width: 100%;
+  min-width: 0;
+}
 /*  Connecting lines  */
 .tree li::before,
 .tree li::after {
@@ -4603,6 +4597,7 @@ a.btn.is-disabled {
 
 /* Empty shelf & list state */
 .shelf-empty {
+  grid-column: 1 / -1;
   padding: 36px 20px;
   text-align: center;
   color: var(--text-muted, #8b8ea8);
@@ -4817,6 +4812,29 @@ a.btn.is-disabled {
 }
 
 .topbar .btn--small {
+  height: 38px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+/* inline star icons (no external CDN) */
+.fa-star::before {
+  content: "\2605";
+}
+
+.fa-star {
+  color: #4a4959;
+  font-style: normal;
+  font-family: inherit;
+}
+
+.fa-star.checked {
+  color: var(--accent);
+}
+
+/* align filter buttons and sort dropdown in store toolbars */
+.shop-toolbar .btn--small,
+.shop-toolbar .sort-select {
   height: 38px;
   padding-top: 0;
   padding-bottom: 0;

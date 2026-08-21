@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= game.name %> — Playnex</title>
     <meta name="description" content="View the selected Playnex game listing and discover similar titles.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="icon" href="/logo.png">
     <link rel="stylesheet" href="/style.css">
   </head>
   <body>
+<a class="skip-to-content" href="#main-content">Skip to main content</a>
     <header class="topbar">
       <div class="topbar__inner">
         <a href="homepage.html" class="logo" aria-label="Playnex home">
@@ -23,7 +27,8 @@
             <a href="forum.html" class="primary-nav__link">Community</a>
             <div class="primary-nav__menu">
               <a href="forum.html" class="primary-nav__sub">Forum</a>
-              <a href="/blog" class="primary-nav__sub">Blog</a>
+              <a href="/rating" class="primary-nav__sub">Reviews</a>
+<a href="/blog" class="primary-nav__sub">Blog</a>
             </div>
           </div>
         </nav>
@@ -53,12 +58,11 @@
         <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
         <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
         <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
-        <a href="/rating" class="subnav__link">Reviews</a>
         <a href="forum.html" class="subnav__link">Forums</a>
       </nav>
     </header>
 
-    <main class="listing-page">
+    <main id="main-content" class="listing-page">
       <nav class="breadcrumb" aria-label="Breadcrumb">
         <a href="homepage.html">Home</a><span>/</span>
         <a href="shopping.html">Shopping</a><span>/</span>
@@ -253,7 +257,7 @@
           <a href="forum.html">Forums</a>
           <a href="/rating">Reviews</a>
           <a href="/blog">Blog</a>
-          <a href="sitemap.html">Sitemap</a>
+          <a href="/sitemap">Sitemap</a>
         </div>
       </div>
 

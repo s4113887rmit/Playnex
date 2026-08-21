@@ -26,7 +26,8 @@
         <a href="forum.html" class="primary-nav__link">Community</a>
         <div class="primary-nav__menu">
           <a href="forum.html" class="primary-nav__sub">Forum</a>
-          <a href="/blog" class="primary-nav__sub">Blog</a>
+          <a href="/rating" class="primary-nav__sub">Reviews</a>
+<a href="/blog" class="primary-nav__sub">Blog</a>
         </div>
       </div>
     </nav>
@@ -44,7 +45,6 @@
     <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
     <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
     <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
-    <a href="/rating" class="subnav__link">Reviews</a>
     <a href="forum.html" class="subnav__link">Forums</a>
   </nav>
 </header>
@@ -70,44 +70,41 @@
               <div class="node module"><span class="title"><a href="forum.html">Community</a></span></div>
               <ul>
                 <!-- FORUM -->
-                <li>
-                  <div class="node page"><span class="title"><a href="forum.html">Forum</a></span></div>
-                  <ul>
-                    <li>
-                      <div class="node detail"><span class="title"><a href="forum-detail.html">Thread Detail</a></span></div>
-                    </li>
-                    <li>
-                      <div class="node detail"><span class="title"><a href="forum-create.html">Create Thread</a></span></div>
-                    </li>
-                  </ul>
-                </li>
+<li>
+  <div class="node page"><span class="title"><a href="forum.html">Forum</a></span></div>
+  <div class="node-group-wrap">
+    <div class="node-group">
+      <% threads.forEach(function(thread) { %>
+        <div class="node detail"><span class="title">
+          <a href="forum-detail.html?id=<%= thread.id %>"><%= thread.title %></a>
+        </span></div>
+      <% }); %>
+    </div>
+  </div>
+</li>
 
                 <!-- GAME RATING -->
-                <li>
-                  <div class="node page"><span class="title"><a href="/rating">Game Rating</a></span></div>
-                  <ul>
-                    <li>
-                      <div class="node detail"><span class="title"><a href="/game/1">Rating Detail</a></span></div>
-                      <ul>
-                        <li>
-                          <div class="node detail"><span class="title"><a href="/game/1/review">Write Rating</a></span></div>
-                        </li>
-                      </ul>
-                    </li>
-                  </ul>
-                </li>
-
-                <!-- BLOG -->
-                <li>
-                  <div class="node page"><span class="title"><a href="/blog">Blog</a></span></div>
-                  <ul>
-                    <li>
-                      <div class="node detail"><span class="title"><a href="/blog/post-embercrown-saga">Blog Detail</a></span></div>
-                    </li>
-                  </ul>
-                </li>
-              </ul>
-            </li>
+<li>
+  <div class="node page"><span class="title"><a href="/rating">Game Rating</a></span></div>
+  <div class="node-group-wrap">
+    <div class="node-group">
+      <% games.forEach(function(game) { %>
+        <div class="node detail"><span class="title"><a href="/game/<%= game.id %>"><%= game.name %></a></span></div>
+      <% }); %>
+    </div>
+  </div>
+</li>
+<!-- BLOG -->
+<li>
+  <div class="node page"><span class="title"><a href="/blog">Blog</a></span></div>
+  <div class="node-group-wrap">
+    <div class="node-group">
+      <% blogPosts.forEach(function(post) { %>
+        <div class="node detail"><span class="title"><a href="/blog/<%= post.id %>"><%= post.title %></a></span></div>
+      <% }); %>
+    </div>
+  </div>
+</li>
 
             <!-- SHOPPING -->
             <li>
@@ -136,22 +133,15 @@
 
             <!-- PROFILE -->
             <li>
-              <div class="node module"><span class="title"><a href="Profile.html">User Profile</a></span></div>
-              <ul>
-                <li>
-                  <div class="node page"><span class="title"><a href="login.html">Login</a></span></div>
-                </li>
-                <li>
-                  <div class="node page"><span class="title"><a href="login.html">Sign Up</a></span></div>
-                </li>
-                <li>
-                  <div class="node page"><span class="title"><a href="login.html">Forgot Password</a></span></div>
-                </li>
-              </ul>
-            </li>
-
-          </ul>
-        </li>
+  <div class="node module"><span class="title"><a href="Profile.html">User Profile</a></span></div>
+  <div class="node-group-wrap">
+    <div class="node-group">
+      <div class="node page"><span class="title"><a href="Login.html">Login</a></span></div>
+      <div class="node page"><span class="title"><a href="Login.html">Sign Up</a></span></div>
+      <div class="node page"><span class="title"><a href="Login.html">Forgot Password</a></span></div>
+    </div>
+  </div>
+</li>
 
         <!-- ADMIN BRANCH -->
         <li>
@@ -178,7 +168,7 @@
     <div class="site-footer__col">
       <h3>Support</h3>
       <a href="contact.html">Contact us</a>
-      <a href="sitemap.html">Sitemap</a>
+      <a href="/sitemap">Sitemap</a>
     </div>
     <div class="site-footer__col">
       <h3>Company</h3>
@@ -189,5 +179,6 @@
   <div class="site-footer__bottom"><p>&copy; 2026 Playnex. All rights reserved.</p></div>
 </footer>
 
-<script src="public/js/header.js"></script></body>
+<script src="public/js/header.js"></script>
+</body>
 </html>
