@@ -1087,18 +1087,15 @@ function writeGames(games) {
 
 // Calculate avarage rating//
 function getAvgRating(game) {
-  const totalCount = game.baseCount + game.reviews.length;
-  const totalScore =
-    game.baseRating * game.baseCount +
-    game.reviews.reduce((sum, r) => sum + r.stars, 0);
-  const avg = totalCount ? totalScore / totalCount : 0;
-  return { avg, count: totalCount };
+  const count = game.reviews.length;
+  const totalScore = game.reviews.reduce((sum, r) => sum + r.stars, 0);
+  const avg = count ? totalScore / count : 0;
+  return { avg, count };
 }
 
-// Calculate the percentage of game rating//
+// Calculate the percentage distribution of star ratings from actual user reviews
 function getDistribution(game) {
   const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-  dist[game.baseRating] += game.baseCount;
   game.reviews.forEach((r) => (dist[r.stars] += 1));
   const total = Object.values(dist).reduce((a, b) => a + b, 0) || 1;
   const percent = {};
