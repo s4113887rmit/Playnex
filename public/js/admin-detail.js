@@ -89,6 +89,25 @@ document.addEventListener('DOMContentLoaded', () => {
     alert(`User status successfully updated to ${data.user.status}.`);
   });
 
+  // Mark a flag as resolved
+  const resolveBtn = document.querySelector('.resolve-flag-btn');
+  if (resolveBtn) {
+    resolveBtn.addEventListener('click', () => {
+      const row = resolveBtn.closest('.flag-row');
+      const strong = row.querySelector('.flag-info strong');
+      const span = row.querySelector('.flag-info span');
+      const today = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+
+      row.classList.add('flag-resolved');
+      strong.classList.add('flag-resolved-title');
+      span.textContent = `Resolved on ${today}`;
+      resolveBtn.classList.remove('btn--outline');
+      resolveBtn.classList.add('btn--ghost');
+      resolveBtn.disabled = true;
+      resolveBtn.textContent = 'Resolved';
+    });
+  }
+
   // ---- Warning form logic (unchanged) ----
   const warningInput = document.querySelector('.warning-box textarea');
   const submitBtn = document.querySelector('.btn--warning-finalize');
