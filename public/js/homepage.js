@@ -254,7 +254,7 @@
           document.querySelectorAll(`[data-action="wishlist"][data-id="${productId}"]`).forEach(btn => {
             btn.classList.add('is-saved');
           });
-          showToast('Added item to your wishlist!', 'success');
+          showToast('Added item to your wishlist!', 'info');
         } catch (err) {
           showToast(err.message, err.status === 409 ? 'info' : 'error');
         } finally {

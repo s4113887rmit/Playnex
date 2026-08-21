@@ -114,7 +114,11 @@
 
       // Genre filter
       if (filters.genres.length > 0) {
-        const matchesGenre = filters.genres.some(g => p.genre.toLowerCase() === g.toLowerCase());
+        const matchesGenre = filters.genres.some(g => {
+          const productGenre = (p.genre || '').toLowerCase();
+          const target = g.toLowerCase().trim();
+          return productGenre === target || productGenre.includes(target) || target.includes(productGenre);
+        });
         if (!matchesGenre) return false;
       }
 
@@ -215,6 +219,43 @@
           const isCatMatch = (cat && href.includes(`cat=${cat}`)) || (!cat && href === 'shopping.html');
           tab.classList.toggle('is-active', isCatMatch);
         });
+      }
+
+      // Sync genre filter from URL query (e.g. ?genre=rpg, ?genre=action, ?genre=roguelike)
+      const genreParam = urlParams.get('genre') || urlParams.get('genres');
+      if (genreParam) {
+        const rawTargetGenres = genreParam.split(',').map(g => g.trim().toLowerCase()).filter(Boolean);
+        if (filterForm) {
+          const checkboxes = filterForm.querySelectorAll('input[name="genre"]');
+          checkboxes.forEach(cb => {
+            const val = cb.value.toLowerCase();
+            if (rawTargetGenres.some(tg => tg === val || tg.includes(val) || val.includes(tg))) {
+              cb.checked = true;
+            }
+          });
+        }
+        appliedFilters = getFormFilters();
+        if (appliedFilters.genres.length === 0) {
+          appliedFilters.genres = rawTargetGenres;
+        }
+      } else if (filterForm) {
+        appliedFilters = getFormFilters();
+      }
+
+      // Sync platform filter from URL query if present
+      const platformParam = urlParams.get('platform');
+      if (platformParam) {
+        const rawTargetPlatforms = platformParam.split(',').map(p => p.trim().toLowerCase()).filter(Boolean);
+        if (filterForm) {
+          const checkboxes = filterForm.querySelectorAll('input[name="platform"]');
+          checkboxes.forEach(cb => {
+            const val = cb.value.toLowerCase();
+            if (rawTargetPlatforms.some(tp => tp === val || tp.includes(val) || val.includes(tp))) {
+              cb.checked = true;
+            }
+          });
+        }
+        appliedFilters.platforms = getFormFilters().platforms;
       }
 
       filterAndSortProducts();
@@ -345,7 +386,7 @@
           document.querySelectorAll(`[data-action="wishlist"][data-id="${productId}"]`).forEach(btn => {
             btn.classList.add('is-saved');
           });
-          showToast('Added item to your wishlist!', 'success');
+          showToast('Added item to your wishlist!', 'info');
         } catch (err) {
           showToast(err.message, err.status === 409 ? 'info' : 'error');
         } finally {

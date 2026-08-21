@@ -721,12 +721,31 @@ img {
 }
 
 .hero__tags li {
+  list-style: none;
+}
+
+.hero__tags li a,
+.hero__tag {
+  display: inline-block;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 5px 10px;
+  padding: 6px 12px;
+  background: var(--surface-2);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hero__tags li a:hover,
+.hero__tag:hover {
+  color: #ffffff;
+  border-color: var(--accent);
+  background: rgba(255, 133, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 133, 0, 0.2);
 }
 
 .hero__actions {
@@ -972,6 +991,10 @@ img {
   transition:
     transform 0.15s ease,
     border-color 0.15s ease;
+}
+
+.recommended-card {
+  cursor: pointer;
 }
 
 .card:hover {
@@ -4364,7 +4387,7 @@ header {
   display: grid;
   grid-template-columns: repeat(3, minmax(110px, 1fr));
   gap: 12px;
-  border: 1px solid #2c2e5c;  
+  border: 1px solid #2c2e5c;
   border-radius: 14px;
   padding: 18px;
   background: rgba(30, 32, 68, 0.15);
