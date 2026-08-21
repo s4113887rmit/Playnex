@@ -18,6 +18,263 @@
   const merchSection = document.getElementById('merch');
   const searchInput = document.getElementById('site-search');
 
+  // ==========================================
+  // HERO CAROUSEL DATA & STATE
+  // ==========================================
+  const heroGames = [
+    {
+      id: 'elden-ring',
+      title: 'Elden Ring',
+      genre: 'Action RPG',
+      platform: 'PC, Console',
+      price: 59.99,
+      oldPrice: null,
+      image: 'public/img/eldenringposter.jpg',
+      href: 'listing.html?game=elden-ring',
+      desc: 'The journey on becoming the Elden Lord. Venture through ruined kingdoms and conquer legendary bosses across the Lands Between.',
+      tags: ['RPG', 'Action', 'Open World', 'Souls-like']
+    },
+    {
+      id: 'cyberpunk-2077',
+      title: 'Cyberpunk 2077',
+      genre: 'Action RPG',
+      platform: 'PC',
+      price: 20.99,
+      oldPrice: 29.99,
+      image: 'public/img/cyberpunkposter.jpg',
+      href: 'listing.html?game=cyberpunk-2077',
+      desc: 'Step into the role of V, a mercenary outlaw going after a one-of-a-kind implant that is the key to immortality in Night City.',
+      tags: ['RPG', 'Action', 'Sci-Fi', 'Open World']
+    },
+    {
+      id: 'ghost-of-tsushima',
+      title: 'Ghost of Tsushima',
+      genre: 'Action Adventure',
+      platform: 'PC, Console',
+      price: 34.99,
+      oldPrice: null,
+      image: 'public/img/ghostposter.jpg',
+      href: 'listing.html?game=ghost-of-tsushima',
+      desc: 'An open-world samurai adventure set during the Mongol invasion of Japan in 1274. Master the katana and forge a new path as the Ghost.',
+      tags: ['Action', 'Adventure', 'Open World', 'Samurai']
+    },
+    {
+      id: 'red-dead-redemption-2',
+      title: 'Red Dead Redemption II',
+      genre: 'Action Adventure',
+      platform: 'PC',
+      price: 49.99,
+      oldPrice: null,
+      image: 'public/img/reddeadposter.jpg',
+      href: 'listing.html?game=red-dead-redemption-2',
+      desc: 'Arthur Morgan and the Van der Linde gang are outlaws on the run in the vast and rugged heartland of America.',
+      tags: ['Action', 'Adventure', 'Western', 'Open World']
+    },
+    {
+      id: 'hades',
+      title: 'Hades',
+      genre: 'Roguelike',
+      platform: 'PC, Console',
+      price: 27.99,
+      oldPrice: null,
+      image: 'public/img/hadesposter.png',
+      href: 'listing.html?game=hades',
+      desc: 'Defy the god of the dead as you hack and slash out of the Underworld in this god-like rogue-like dungeon crawler.',
+      tags: ['Roguelike', 'Action', 'Indie', 'Mythology']
+    },
+    {
+      id: 'hollow-knight',
+      title: 'Hollow Knight',
+      genre: 'Metroidvania',
+      platform: 'PC, Console',
+      price: 29.99,
+      oldPrice: null,
+      image: 'public/img/hollowposter.jpg',
+      href: 'listing.html?game=hollow-knight',
+      desc: 'Explore a vast interconnected subterranean world of insects and heroes. Unravel ancient mysteries and conquer forgotten evils.',
+      tags: ['Metroidvania', 'Action', '2D', 'Atmospheric']
+    },
+    {
+      id: 'nier-automata',
+      title: 'NieR Automata',
+      genre: 'Action RPG',
+      platform: 'PC, Console',
+      price: 39.99,
+      oldPrice: null,
+      image: 'public/img/nierposter.jpg',
+      href: 'listing.html?game=nier-automata',
+      desc: 'Humanity has been driven from the Earth by mechanical beings from another world. Android soldiers 2B and 9S fight to reclaim it.',
+      tags: ['Action', 'RPG', 'Sci-Fi', 'Hack and Slash']
+    },
+    {
+      id: 'death-standing',
+      title: 'Death Stranding',
+      genre: 'Action',
+      platform: 'PC, Console',
+      price: 24.99,
+      oldPrice: null,
+      image: 'public/img/deathstandposter.jpg',
+      href: 'listing.html?game=death-standing',
+      desc: 'Sam Bridges must brave a world utterly transformed by the Death Stranding to reconnect the isolated cities of a fractured nation.',
+      tags: ['Action', 'Adventure', 'Sci-Fi', 'Open World']
+    },
+    {
+      id: 'witcher-3',
+      title: 'The Witcher 3: Wild Hunt',
+      genre: 'Action RPG',
+      platform: 'PC, Console',
+      price: 39.99,
+      oldPrice: null,
+      image: 'public/img/witcherposter.jpg',
+      href: 'listing.html?game=the-witcher-3',
+      desc: 'Track down the Child of Prophecy in a monster-infested world as Geralt of Rivia in this epic fantasy open-world RPG.',
+      tags: ['RPG', 'Action', 'Open World', 'Dark Fantasy']
+    }
+  ];
+
+  let currentHeroIndex = 0;
+  let heroTimer = null;
+  const heroStage = document.getElementById('hero-stage');
+  let heroCardElements = [];
+
+  function initHeroCarousel() {
+    if (!heroStage) return;
+
+    heroStage.innerHTML = heroGames.map((game, idx) => `
+      <a href="${game.href}" class="hero-card" data-index="${idx}" data-id="${game.id}" aria-label="View ${game.title}">
+        <div class="hero-card__art">
+          <img src="${game.image}" alt="${game.title} poster" class="hero-card__img" loading="eager">
+        </div>
+      </a>
+    `).join('');
+
+    heroCardElements = Array.from(heroStage.querySelectorAll('.hero-card'));
+
+    updateHeroCarousel(0, false);
+    startHeroTimer();
+
+    const prevBtn = document.getElementById('hero-prev-btn');
+    const nextBtn = document.getElementById('hero-next-btn');
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        updateHeroCarousel(currentHeroIndex - 1, true);
+        startHeroTimer();
+      });
+    }
+
+    if (nextBtn) {
+      nextBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        updateHeroCarousel(currentHeroIndex + 1, true);
+        startHeroTimer();
+      });
+    }
+
+    const heroVisual = document.getElementById('hero-visual');
+    if (heroVisual) {
+      heroVisual.addEventListener('mouseenter', stopHeroTimer);
+      heroVisual.addEventListener('mouseleave', startHeroTimer);
+    }
+  }
+
+  function updateHeroCarousel(index, animate = true) {
+    if (!heroCardElements.length) return;
+
+    currentHeroIndex = (index + heroGames.length) % heroGames.length;
+    const total = heroGames.length;
+    const prevIdx = (currentHeroIndex - 1 + total) % total;
+    const nextIdx = (currentHeroIndex + 1) % total;
+
+    heroCardElements.forEach((card, i) => {
+      card.classList.remove(
+        'hero-card--active',
+        'hero-card--prev',
+        'hero-card--next',
+        'hero-card--hidden-left',
+        'hero-card--hidden-right'
+      );
+
+      if (i === currentHeroIndex) {
+        card.classList.add('hero-card--active');
+      } else if (i === prevIdx) {
+        card.classList.add('hero-card--prev');
+      } else if (i === nextIdx) {
+        card.classList.add('hero-card--next');
+      } else {
+        const diff = (i - currentHeroIndex + total) % total;
+        if (diff > total / 2) {
+          card.classList.add('hero-card--hidden-left');
+        } else {
+          card.classList.add('hero-card--hidden-right');
+        }
+      }
+    });
+
+    const activeGame = heroGames[currentHeroIndex];
+    const heroContent = document.getElementById('hero-content');
+
+    if (heroContent && animate) {
+      heroContent.classList.add('is-changing');
+      setTimeout(() => {
+        renderHeroInfo(activeGame);
+        heroContent.classList.remove('is-changing');
+      }, 140);
+    } else if (heroContent) {
+      renderHeroInfo(activeGame);
+    }
+  }
+
+  function renderHeroInfo(game) {
+    const titleEl = document.getElementById('hero-title');
+    const descEl = document.getElementById('hero-desc');
+    const genreEl = document.getElementById('hero-genre');
+    const platformEl = document.getElementById('hero-platform');
+    const tagsEl = document.getElementById('hero-tags');
+    const buyBtn = document.getElementById('hero-buy-btn');
+    const wishBtn = document.getElementById('hero-wishlist-btn');
+
+    if (titleEl) titleEl.textContent = game.title;
+    if (descEl) descEl.textContent = game.desc;
+    if (genreEl) genreEl.textContent = game.genre;
+    if (platformEl) platformEl.textContent = game.platform;
+
+    if (tagsEl && game.tags) {
+      tagsEl.innerHTML = game.tags.map(tag => {
+        const slug = tag.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        return `<li><a href="shopping.html?genre=${slug}" class="hero__tag" title="Filter by ${tag}">${tag}</a></li>`;
+      }).join('');
+    }
+
+    if (buyBtn) {
+      const priceText = game.price === 0 ? 'Claim now — Free' : `Buy now — $${Number(game.price).toFixed(2)}`;
+      buyBtn.textContent = priceText;
+      buyBtn.href = game.href || `listing.html?game=${game.id}`;
+    }
+
+    if (wishBtn) {
+      wishBtn.dataset.id = game.id;
+      const isSaved = wishlistIds.has(game.id);
+      wishBtn.classList.toggle('is-saved', isSaved);
+      wishBtn.textContent = isSaved ? 'Saved in wishlist' : 'Add to wishlist';
+    }
+  }
+
+  function startHeroTimer() {
+    stopHeroTimer();
+    heroTimer = setInterval(() => {
+      updateHeroCarousel(currentHeroIndex + 1, true);
+    }, 3000);
+  }
+
+  function stopHeroTimer() {
+    if (heroTimer) {
+      clearInterval(heroTimer);
+      heroTimer = null;
+    }
+  }
+
   function money(n) {
     return `$${Number(n).toFixed(2)}`;
   }
@@ -126,6 +383,9 @@
         const id = btn.dataset.id;
         if (id) {
           btn.classList.toggle('is-saved', wishlistIds.has(id));
+          if (btn.id === 'hero-wishlist-btn') {
+            btn.textContent = wishlistIds.has(id) ? 'Saved in wishlist' : 'Add to wishlist';
+          }
         }
       });
     } catch {}
@@ -237,6 +497,7 @@
           wishlistIds.delete(productId);
           document.querySelectorAll(`[data-action="wishlist"][data-id="${productId}"]`).forEach(btn => {
             btn.classList.remove('is-saved');
+            if (btn.id === 'hero-wishlist-btn') btn.textContent = 'Add to wishlist';
           });
           showToast('Removed item from your wishlist.', 'info');
         } catch (err) {
@@ -253,6 +514,7 @@
           wishlistIds.add(productId);
           document.querySelectorAll(`[data-action="wishlist"][data-id="${productId}"]`).forEach(btn => {
             btn.classList.add('is-saved');
+            if (btn.id === 'hero-wishlist-btn') btn.textContent = 'Saved in wishlist';
           });
           showToast('Added item to your wishlist!', 'info');
         } catch (err) {
@@ -283,5 +545,6 @@
     }
   });
 
+  initHeroCarousel();
   loadProducts();
 })();

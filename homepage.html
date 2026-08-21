@@ -81,27 +81,39 @@
       </svg>
     </div>
 
-    <div class="hero__content">
-      <span class="eyebrow">Featured on Playnex</span>
-      <h1 class="hero__title">Embercrown Saga</h1>
-      <p class="hero__desc">An open-world dark fantasy RPG. Forge alliances across four burning kingdoms and decide who sits on the Embercrown throne.</p>
+    <div class="hero__content" id="hero-content">
+      <span class="eyebrow" id="hero-eyebrow">Featured on Playnex</span>
+      <h1 class="hero__title" id="hero-title">Elden Ring</h1>
+      <div class="hero__meta" id="hero-meta">
+        <span id="hero-genre">Action RPG</span>
+        <span class="hero__meta-separator">•</span>
+        <span id="hero-platform">PC, Console</span>
+      </div>
+      <p class="hero__desc" id="hero-desc">The journey on becoming the Elden Lord. Venture through ruined kingdoms and conquer legendary bosses across the Lands Between.</p>
 
-      <ul class="hero__tags list-reset">
+      <ul class="hero__tags list-reset" id="hero-tags">
         <li><a href="shopping.html?genre=rpg" class="hero__tag" title="Filter by RPG">RPG</a></li>
         <li><a href="shopping.html?genre=action" class="hero__tag" title="Filter by Action">Action</a></li>
-        <li><a href="shopping.html?genre=adventure" class="hero__tag" title="Filter by Adventure">Adventure</a></li>
-        <li><a href="shopping.html?genre=strategy" class="hero__tag" title="Filter by Strategy">Strategy</a></li>
-        <li><a href="shopping.html?genre=roguelike" class="hero__tag" title="Filter by Roguelike">Roguelike</a></li>
-        <li><a href="shopping.html?genre=metroidvania" class="hero__tag" title="Filter by Metroidvania">Metroidvania</a></li>
+        <li><a href="shopping.html?genre=open-world" class="hero__tag" title="Filter by Open World">Open World</a></li>
+        <li><a href="shopping.html?genre=souls-like" class="hero__tag" title="Filter by Souls-like">Souls-like</a></li>
       </ul>
 
       <div class="hero__actions">
-        <a href="cart.html" class="btn btn--primary btn--large">Buy now — $59.99</a>
-        <a href="wishlist.html" class="btn btn--outline btn--large">Add to wishlist</a>
+        <a href="listing.html?game=elden-ring" class="btn btn--primary btn--large" id="hero-buy-btn">Buy now — $59.99</a>
+        <button type="button" class="btn btn--outline btn--large" id="hero-wishlist-btn" data-action="wishlist" data-id="elden-ring">Add to wishlist</button>
       </div>
     </div>
 
-    </section>
+    <!-- 3D Card Carousel Visual -->
+    <div class="hero__visual" id="hero-visual" aria-label="Featured games carousel">
+      <button type="button" class="hero__nav hero__nav--prev" id="hero-prev-btn" aria-label="Previous game">&lsaquo;</button>
+      <div class="hero__stage" id="hero-stage">
+        <!-- Injected and managed dynamically by homepage.js -->
+      </div>
+      <button type="button" class="hero__nav hero__nav--next" id="hero-next-btn" aria-label="Next game">&rsaquo;</button>
+    </div>
+
+  </section>
 
 
   <!-- Free-game-of-the-week promo banner -->
