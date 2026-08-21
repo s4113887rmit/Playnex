@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<base href="/">
 <meta name="description" content="Read reviews and ratings for <%= game.name %> on Playnex.">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -122,8 +123,8 @@
             <div class="comment-meta">
               <span class="author"><%= r.author %></span>
               <span class="date"><%= r.date %></span>
-              <a href="/game/<%= game.id %>/review?edit=<%= r.id %>" class="comment-action">Edit</a>
-              <form method="POST" action="/game/<%= game.id %>/review/<%= r.id %>/delete" class="delete-review-form" style="display:inline">
+              <a href="/game/<%= game.id %>/review?edit=<%= r.id %>" class="comment-action review-owner-action" data-author-id="<%= r.authorId || '' %>">Edit</a>
+              <form method="POST" action="/game/<%= game.id %>/review/<%= r.id %>/delete" class="delete-review-form review-owner-action" data-author-id="<%= r.authorId || '' %>" style="display:inline">
                 <input type="hidden" name="userId" class="review-delete-user-id" value="">
                 <button type="submit" class="comment-action comment-action--danger">Delete</button>
               </form>
@@ -184,6 +185,12 @@
 
   try {
     const user = JSON.parse(localStorage.getItem('playnex_user') || 'null');
+    document.querySelectorAll('.review-owner-action').forEach((el) => {
+      const authorId = el.getAttribute('data-author-id');
+      const isAdmin = user && user.role === 'admin';
+      const isOwner = user && authorId && String(authorId) === String(user.id);
+      if (!isAdmin && !isOwner) el.style.display = 'none';
+    });
     if (user) {
       document.querySelectorAll('.review-delete-user-id').forEach((el) => {
         el.value = user.id || '';

@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="Style.css">
+<link rel="stylesheet" href="style.css">
 <style>
   /* Page-specific layout extending style.css variables */
   .forum-toolbar {
@@ -142,7 +142,6 @@
     </nav>
     <div class="topbar__actions">
       <!-- Search and Icons omitted for brevity, identical to homepage.html -->
-      <a href="admin.html" class="btn btn--outline btn--small" data-admin-only hidden>Admin Panel</a>
       <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
       <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
@@ -164,24 +163,24 @@
     <input type="text" class="forum-toolbar__search" placeholder="Search threads...">
     
     <div class="forum-toolbar__filters">
-      <select aria-label="Filter Category">
-        <option value="">All Categories</option>
-        <option value="games">Digital Games</option>
-        <option value="merch">Physical Merch</option>
-      </select>
       <select aria-label="Filter Type">
         <option value="">All Types</option>
-        <option value="review">Reviews</option>
+        <option value="general">General</option>
         <option value="support">Support</option>
+        <option value="review">Reviews</option>
+        <option value="modding">Modding</option>
       </select>
       <select aria-label="Sort By">
-        <option value="recent">Latest Activity</option>
+        <option value="latest">Latest Activity</option>
+        <option value="oldest-activity">Oldest Activity</option>
+        <option value="newest-thread">Newest Thread</option>
+        <option value="oldest-thread">Oldest Thread</option>
         <option value="views">Most Viewed</option>
         <option value="replies">Most Replies</option>
       </select>
     </div>
 
-    <a href="forum-create.html" class="btn btn--primary btn--large">Create New Thread</a>
+    <a href="forum-create.html" class="btn btn--primary btn--large" id="create-thread-btn">Create New Thread</a>
   </div>
 
   <div class="forum-list">
@@ -194,8 +193,7 @@
       <div>Last Post</div>
     </div>
   </div>
-</div> 
-  
+
     <div class="load-more-container">
       <button class="btn btn--ghost btn--large">Load More Threads</button>
     </div>
@@ -206,7 +204,6 @@
     <div class="site-footer__bottom"><p>&copy; 2026 Playnex. All rights reserved.</p></div>
   </footer>
 
-  <script src="public/js/forum-filter.js"></script>
   <script src="public/js/header.js"></script>
   <script src="public/js/forum-render.js"></script>
 </body>

@@ -103,9 +103,10 @@
     usernameEl.textContent = '@' + user.username;
     emailDisplay.textContent = user.email;
     descEl.textContent = user.description || '';
-    nameInput.value = name;
-    descInput.value = user.description || '';
-    descCharCount.textContent = (user.description || '').length;
+    var draft = loadProfileDraft();
+    nameInput.value = draft && typeof draft.name === 'string' ? draft.name : name;
+    descInput.value = draft && typeof draft.description === 'string' ? draft.description : (user.description || '');
+    descCharCount.textContent = descInput.value.length;
     currentEmailInput.value = user.email;
     currentEmail = user.email;
     profFileName.textContent = 'No file chosen';
@@ -114,6 +115,19 @@
     if (user.profilePicture && user.profilePicture !== 'uploads/default-profile.svg') {
       profAvatarImg.src = user.profilePicture;
     }
+  }
+
+  function saveProfileDraft() {
+    try {
+      sessionStorage.setItem('playnex_draft_profile', JSON.stringify({ name: nameInput.value, description: descInput.value }));
+    } catch (e) {}
+  }
+
+  function loadProfileDraft() {
+    try {
+      var raw = sessionStorage.getItem('playnex_draft_profile');
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
   }
 
   function updateLocalStorage(updates) {
@@ -160,6 +174,7 @@
       .then(function (result) {
         if (result.status === 200) {
           showServerMsg('profile-edit-msg', result.data.message, 'success');
+          sessionStorage.removeItem('playnex_draft_profile');
           renderProfile(result.data.user);
           updateLocalStorage({ name: result.data.user.name });
           profFileInput.value = '';
@@ -292,9 +307,14 @@
 
   if (nameInput) {
     nameInput.addEventListener('input', function () {
-      if (nameInput.value.trim()) {
-        avatarLetter.textContent = nameInput.value.trim().charAt(0);
-      }
+      var v = nameInput.value.trim();
+      if (!v) { showFieldError('profile-name', ''); }
+      else { showFieldError('profile-name', v.length > 100 ? 'Name must be at most 100 characters' : ''); }
+      if (v) avatarLetter.textContent = v.charAt(0);
+      saveProfileDraft();
+    });
+    nameInput.addEventListener('blur', function () {
+      if (!nameInput.value.trim()) showFieldError('profile-name', 'Display name is required');
     });
   }
 
@@ -337,6 +357,37 @@
     descInput.addEventListener('input', function () {
       var len = descInput.value.trim().length;
       showFieldError('profile-desc', len > 500 ? 'Description must be at most 500 characters' : '');
+      saveProfileDraft();
+    });
+    descInput.addEventListener('blur', function () {
+      if (!descInput.value.trim()) showFieldError('profile-desc', 'Short description is required');
+    });
+  }
+
+  var currentPasswordInput = document.getElementById('current-password');
+  if (currentPasswordInput) {
+    currentPasswordInput.addEventListener('input', function () {
+      if (currentPasswordInput.value) showFieldError('current-password', '');
+    });
+    currentPasswordInput.addEventListener('blur', function () {
+      if (!currentPasswordInput.value) showFieldError('current-password', 'Current password is required');
+    });
+  }
+
+  var deletePasswordInput = document.getElementById('delete-password');
+  if (deletePasswordInput) {
+    deletePasswordInput.addEventListener('input', function () {
+      if (deletePasswordInput.value) showFieldError('delete-password', '');
+    });
+    deletePasswordInput.addEventListener('blur', function () {
+      if (!deletePasswordInput.value) showFieldError('delete-password', 'Password is required');
+    });
+  }
+
+  var confirmDeleteCheck = document.getElementById('confirm-delete');
+  if (confirmDeleteCheck) {
+    confirmDeleteCheck.addEventListener('change', function () {
+      showFieldError('confirm-delete', confirmDeleteCheck.checked ? '' : 'You must confirm you understand this is permanent');
     });
   }
 

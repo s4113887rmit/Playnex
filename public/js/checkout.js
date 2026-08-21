@@ -18,6 +18,26 @@
   const summaryLines = document.querySelector('.cart-summary');
   const headerCountEl = document.querySelector('.page-header__count');
 
+  const getCurrentUser = () => {
+    try {
+      return window.Playnex && typeof window.Playnex.getCurrentUser === 'function'
+        ? window.Playnex.getCurrentUser()
+        : JSON.parse(localStorage.getItem('playnex_user') || 'null');
+    } catch (e) {
+      return null;
+    }
+  };
+
+  const isLoggedIn = !!getCurrentUser();
+
+  if (!isLoggedIn && form) {
+    const notice = document.createElement('p');
+    notice.className = 'auth-server-msg is-error';
+    notice.style.marginBottom = '16px';
+    notice.innerHTML = 'You are checking out as a guest. <a href="Login.html" class="text-link">Log in</a> to place an order.';
+    form.insertBefore(notice, form.firstChild);
+  }
+
   const fields = [
     'full-name',
     'phone',
@@ -267,6 +287,12 @@
   if (form) {
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
+      if (!isLoggedIn) {
+        showToast('Please log in to place an order.', 'error');
+        setTimeout(() => { window.location.href = 'Login.html'; }, 1200);
+        return;
+      }
 
       // Mark all fields touched
       fields.forEach((id) => touched.add(id));

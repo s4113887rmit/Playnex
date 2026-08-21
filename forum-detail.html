@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="Style.css">
+<link rel="stylesheet" href="style.css">
 <style>
   .thread-layout { max-width: 1000px; margin: 0 auto; padding: 24px 40px 64px; }
   .thread-header { margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
@@ -27,6 +27,14 @@
   
   .reply-thread { margin-left: 48px; border-left: 2px solid var(--border); padding-left: 24px; }
   .rating-stars { color: #f1c40f; font-size: 14px; text-align: right; margin-bottom: 12px; }
+
+  .thread-loading { color: var(--text-muted); padding: 40px 0; text-align: center; }
+  .reply-form-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-top: 24px; }
+  .reply-form-card h2 { font-size: 18px; margin-bottom: 16px; }
+  .reply-form-card textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 12px; color: var(--text); font-family: inherit; font-size: 14px; resize: vertical; }
+  .reply-form-card .form-group__error { color: #e74c3c; font-size: 12px; }
+  .post-edit-area { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 12px; color: var(--text); font-family: inherit; font-size: 14px; }
+  .thread-post-body { white-space: pre-wrap; }
 </style>
 <link rel="icon" href="/logo.png">
 </head>
@@ -61,62 +69,30 @@
 
 <main id="main-content" class="thread-layout">
   <div class="breadcrumb-nav">
-    Community Forum > Technical Support > Server Administration
-  </div>
-  
-  <div class="thread-header">
-    <h1>[Technical Support] Troubleshooting server TPS drops and Radmin VPN LAN issues</h1>
+    <a href="forum.html">Community Forum</a> > Thread Details
   </div>
 
-  <!-- Main Post -->
-  <article class="thread-post-card">
-    <div class="thread-post-sidebar">
-      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=ServerDev" alt="User avatar">
-      <h2>dev_admin99</h2>
-      <p>Joined: Dec 2025</p>
-      <p>Posts: 342</p>
-    </div>
-    <div class="thread-post-content">
-      <div class="rating-stars">★★★★★</div>
-      <div class="thread-post-body">
-        <p>Hey everyone,</p>
-        <p>I'm currently managing a custom server primarily for Southeast Asian players. We are using Radmin VPN to configure the LAN play network, which usually runs smoothly. However, recently we've been experiencing massive TPS (Ticks Per Second) drops whenever a player activates a specific custom datapack ability.</p>
-        <p>I've written some complex scoreboard logic to manage the ability cooldowns. It looks something like this:</p>
-        <pre><code>execute as @a[scores={ability_cooldown=1..}] run scoreboard players remove @s ability_cooldown 1
-execute as @a[scores={ability_active=1}] at @s run function custom:skills/fire_blast</code></pre>
-        <p>Could the continuous execution of this logic be causing the performance bottleneck for the SEA player base? Any advice on performance optimization or restructuring this logic would be highly appreciated.</p>
-      </div>
-      <div class="thread-post-actions">
-        <button class="btn btn--outline btn--small">Quote</button>
-        <button class="btn btn--primary btn--small">Reply</button>
-      </div>
-    </div>
-  </article>
-
-  <!-- Reply 1 -->
-  <div class="reply-thread">
-    <article class="thread-post-card">
-      <div class="thread-post-sidebar">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=CodeWizard" alt="User avatar">
-        <h2>script_master</h2>
-        <p>Joined: Jan 2026</p>
-      </div>
-      <div class="thread-post-content">
-        <div class="thread-post-body">
-          <p>The issue is definitely tied to how your server handles the recursive function calls. Checking that scoreboard logic every single tick for every connected player over a VPN will absolutely drain your TPS.</p>
-          <p>Instead of checking every tick, try implementing a macro or scheduling the function to only check when a specific event is triggered rather than looping it infinitely. Also, ensure your Radmin VPN routing isn't creating packet loss, which can simulate server lag.</p>
-        </div>
-        <div class="thread-post-actions">
-          <button class="btn btn--outline btn--small">Quote</button>
-          <button class="btn btn--primary btn--small">Reply</button>
-        </div>
-      </div>
-    </article>
+  <div id="thread-detail-container">
+    <p class="thread-loading">Loading thread...</p>
   </div>
 
-  <div class="thread-reply-action">
-    <button class="btn btn--primary btn--large">Reply to Thread</button>
-  </div>
+  <section id="reply-form-section" class="reply-form-card" hidden>
+    <h2>Post a reply</h2>
+    <form id="reply-form" class="create-form" novalidate>
+      <div class="form-group">
+        <label for="reply-content">Your reply</label>
+        <textarea id="reply-content" name="content" rows="5" maxlength="2000" placeholder="Share your thoughts..." required></textarea>
+        <span class="form-group__char-count"><span id="reply-char-count">0</span>/2000</span>
+        <span class="form-group__error" role="alert" id="reply-content-error"></span>
+      </div>
+      <button type="submit" class="btn btn--primary">Post reply</button>
+      <p class="auth-server-msg" id="reply-server-msg"></p>
+    </form>
+  </section>
+
+  <section id="login-cta" class="reply-form-card" hidden>
+    <p><a href="Login.html" class="btn btn--primary">Log in to join the discussion</a></p>
+  </section>
 
 </main>
 <footer class="site-footer">

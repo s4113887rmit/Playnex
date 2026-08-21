@@ -179,8 +179,16 @@ function handleMemoryAuth(req, res, route) {
   if (route === 'profile-put') {
     const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
     if (!user) return res.status(404).json({ error: 'User not found.' });
-    if (name) user.name = name;
-    if (description) user.description = description;
+    const trimmedName = typeof name === 'string' ? name.trim() : '';
+    const trimmedDesc = typeof description === 'string' ? description.trim() : '';
+    if (name !== undefined && (!trimmedName || trimmedName.length > 100)) {
+      return res.status(400).json({ error: 'Name must be between 1 and 100 characters.' });
+    }
+    if (description !== undefined && (!trimmedDesc || trimmedDesc.length > 500)) {
+      return res.status(400).json({ error: 'Description must be between 1 and 500 characters.' });
+    }
+    if (trimmedName) user.name = trimmedName;
+    if (trimmedDesc) user.description = trimmedDesc;
     const saved = profilePicture && saveBase64Image(profilePicture);
     if (saved) user.profilePicture = saved;
     return res.json({ message: 'Profile updated successfully.', user: memoryUsers.publicUser(user) });
@@ -237,6 +245,9 @@ function handleMemoryAuth(req, res, route) {
   }
 
   if (route === 'forgot-password') {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
+    }
     const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
     if (user) {
       user.passwordResetToken = crypto.randomBytes(32).toString('hex');
@@ -417,8 +428,8 @@ app.post('/api/auth/login', authLimiter, authGuard('login'), async (req, res) =>
 app.post('/api/auth/forgot-password', authLimiter, authGuard('forgot-password'), async (req, res) => {
   try {
     var { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email))) {
+      return res.status(400).json({ error: 'Please provide a valid email address.' });
     }
 
     var user = await User.findOne({ email: email.toLowerCase() });
@@ -514,8 +525,20 @@ app.put('/api/auth/profile', authLimiter, authGuard('profile-put'), async (req, 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    if (name) user.name = name;
-    if (description) user.description = description;
+    if (name !== undefined) {
+      var trimmedName = String(name).trim();
+      if (!trimmedName || trimmedName.length > 100) {
+        return res.status(400).json({ error: 'Name must be between 1 and 100 characters.' });
+      }
+      user.name = trimmedName;
+    }
+    if (description !== undefined) {
+      var trimmedDesc = String(description).trim();
+      if (!trimmedDesc || trimmedDesc.length > 500) {
+        return res.status(400).json({ error: 'Description must be between 1 and 500 characters.' });
+      }
+      user.description = trimmedDesc;
+    }
     if (profilePicture) {
       var saved = saveBase64Image(profilePicture);
       if (saved) user.profilePicture = saved;
@@ -630,40 +653,110 @@ app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async 
 });
 
 // --- FORUM MODULE: IN-MEMORY DATA ---
+function timeAgo(ts) {
+  const diff = Date.now() - ts;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return mins + " min ago";
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
+  const days = Math.floor(hours / 24);
+  return days + " day" + (days > 1 ? "s" : "") + " ago";
+}
+
 let forumThreads = [
   {
     id: 1,
     title: "[Nightfall Protocol] Troubleshooting LAN connectivity for SEA players",
+    content: "We run a Nightfall Protocol server for SEA players over Radmin VPN. Lately we see heavy TPS drops whenever a player uses a specific datapack ability. Any tips on profiling the tick loop?",
     author: "darknexus",
-    tag: "Technical Support",
+    authorId: null,
+    tag: "support",
     tagClass: "tag--support",
-    replies: 42,
+    replies: 2,
     views: 1200,
-    lastPostAuthor: "an_admin",
-    lastPostTime: "3 hours ago"
+    lastPostAuthor: "script_master",
+    createdAt: Date.now() - 3 * 60 * 60 * 1000,
+    lastPostAt: Date.now() - 2 * 60 * 60 * 1000,
+    deleted: false,
+    posts: [
+      {
+        id: "p1",
+        author: "script_master",
+        authorId: null,
+        content: "Checking scoreboard logic every tick for every connected player over a VPN will drain your TPS. Schedule the check on an event trigger instead of looping it, and verify your VPN routing is not adding packet loss.",
+        createdAt: Date.now() - 2 * 60 * 60 * 1000,
+        deleted: false
+      },
+      {
+        id: "p2",
+        author: "netguru",
+        authorId: null,
+        content: "Also profile with /tick health to confirm the source. Radmin LAN mode usually adds only 2-5ms; a datapack loop is the likely culprit.",
+        createdAt: Date.now() - 90 * 60 * 1000,
+        deleted: false
+      }
+    ]
   },
   {
     id: 2,
     title: "[Embercrown Saga] Collector's Edition Throne Figure Review",
+    content: "Just received the Embercrown Saga Collector's Edition throne figure. Sharing photos and thoughts on build quality, paint application, and packaging.",
     author: "cyber_fan",
-    tag: "Merch Review",
+    authorId: null,
+    tag: "review",
     tagClass: "tag--review",
-    replies: 85,
+    replies: 1,
     views: 3400,
     lastPostAuthor: "merch_guy",
-    lastPostTime: "6 hours ago"
+    createdAt: Date.now() - 6 * 60 * 60 * 1000,
+    lastPostAt: Date.now() - 5 * 60 * 60 * 1000,
+    deleted: false,
+    posts: [
+      {
+        id: "p3",
+        author: "merch_guy",
+        authorId: null,
+        content: "Paint application is clean on mine too. The throne base is heavier than expected, which is great for display stability.",
+        createdAt: Date.now() - 5 * 60 * 60 * 1000,
+        deleted: false
+      }
+    ]
   }
 ];
 
+function publicThread(t) {
+  return {
+    id: t.id,
+    title: t.title,
+    content: t.content,
+    author: t.author,
+    authorId: t.authorId,
+    tag: t.tag,
+    tagClass: t.tagClass,
+    replies: t.replies,
+    views: t.views,
+    lastPostAuthor: t.lastPostAuthor,
+    lastPostTime: timeAgo(t.lastPostAt),
+    createdAt: t.createdAt,
+    lastPostAt: t.lastPostAt
+  };
+}
+
 // GET: Retrieve all forum threads
 app.get('/api/threads', (req, res) => {
-  // Send the in-memory array to the frontend as JSON
-  res.json(forumThreads);
+  const visible = forumThreads.filter((t) => !t.deleted).map(publicThread);
+  res.json(visible);
 });
 
 // POST: Create a new forum thread
-app.post('/api/threads', (req, res) => {
+app.post('/api/threads', async (req, res) => {
   const { title, game, category, content } = req.body;
+
+  const user = await resolveCurrentUser(req);
+  if (!user) {
+    return res.status(401).json({ error: "You must be logged in to create a thread." });
+  }
 
   // Server-Side Validation
   if (!title || title.trim() === '') {
@@ -681,18 +774,20 @@ app.post('/api/threads', (req, res) => {
   if (category === "support") tagClass = "tag--support";
   if (category === "review") tagClass = "tag--review";
 
+  const authorName = user.name || user.username;
+
   // Create the new thread object
   const newThread = {
     id: forumThreads.length + 1,
     title: title,
     content: content,
-    // Dynamic behaviour: Pull the actual logged-in user's name if available, otherwise fallback
-    author: req.session?.user?.username || "Guest_User", 
+    author: authorName,
+    authorId: String(user.id),
     tag: category,
     tagClass: tagClass,
     replies: 0,
     views: 0,
-    lastPostAuthor: req.session?.user?.username || "Guest_User",
+    lastPostAuthor: authorName,
     lastPostTime: "Just now"
   };
 
@@ -735,62 +830,226 @@ let adminUsers = [
 ];
 
 // GET: Retrieve all users for the dashboard
-app.get('/api/users', (req, res) => {
+app.get('/api/users', async (req, res) => {
+  const user = await resolveCurrentUser(req);
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: "Administrator access required." });
+  }
   res.json(adminUsers);
 });
 
 // POST: Toggle user lock status
-app.post('/api/users/:id/toggle-lock', (req, res) => {
+app.post('/api/users/:id/toggle-lock', async (req, res) => {
+  const user = await resolveCurrentUser(req);
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: "Administrator access required." });
+  }
   // Grab the ID from the URL and convert it to an integer
   const userId = parseInt(req.params.id);
   
   // Find the specific user in our in-memory array
-  const user = adminUsers.find(u => u.id === userId);
+  const targetUser = adminUsers.find(u => u.id === userId);
 
   // Server-side validation: Make sure the user actually exists
-  if (!user) {
+  if (!targetUser) {
     return res.status(404).json({ error: "User not found." });
   }
 
   // Toggle the status
-  if (user.status === 'normal') {
-    user.status = 'locked';
-    user.lockedDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-    user.reason = req.body.reason || "Manual Admin Lock";
+  if (targetUser.status === 'normal') {
+    targetUser.status = 'locked';
+    targetUser.lockedDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    targetUser.reason = req.body.reason || "Manual Admin Lock";
   } else {
-    user.status = 'normal';
+    targetUser.status = 'normal';
     // Clean up locked properties
-    delete user.lockedDate;
-    delete user.reason;
+    delete targetUser.lockedDate;
+    delete targetUser.reason;
   }
 
-  res.json({ message: `User status successfully updated to ${user.status}`, user: user });
+  res.json({ message: `User status successfully updated to ${targetUser.status}`, user: targetUser });
 });
 // GET: Retrieve a single thread by ID
 app.get('/api/threads/:id', (req, res) => {
   const threadId = parseInt(req.params.id);
   const thread = forumThreads.find(t => t.id === threadId);
-  
-  if (thread) {
-    res.json(thread);
-  } else {
-    res.status(404).json({ error: "Thread not found." });
+
+  if (!thread || thread.deleted) {
+    return res.status(404).json({ error: "Thread not found." });
   }
+
+  res.json({
+    ...publicThread(thread),
+    posts: (thread.posts || [])
+      .filter((p) => !p.deleted)
+      .map((p) => ({
+        id: p.id,
+        author: p.author,
+        authorId: p.authorId,
+        content: p.content,
+        createdAt: p.createdAt,
+        timeAgo: timeAgo(p.createdAt)
+      }))
+  });
 });
 
-// DELETE: Remove a forum thread
-app.delete('/api/threads/:id', (req, res) => {
+// POST: Reply to a thread
+app.post('/api/threads/:id/replies', async (req, res) => {
   const threadId = parseInt(req.params.id);
-  const initialLength = forumThreads.length;
-  
-  // Filter out the thread with the matching ID
-  forumThreads = forumThreads.filter(t => t.id !== threadId);
-
-  if (forumThreads.length < initialLength) {
-    res.json({ message: "Thread successfully deleted." });
-  } else {
-    res.status(404).json({ error: "Thread not found." });
+  const thread = forumThreads.find(t => t.id === threadId);
+  if (!thread || thread.deleted) {
+    return res.status(404).json({ error: "Thread not found." });
   }
+
+  const user = await resolveCurrentUser(req);
+  if (!user) {
+    return res.status(401).json({ error: "You must be logged in to reply." });
+  }
+
+  const content = (req.body.content || "").trim();
+  if (!content) {
+    return res.status(400).json({ error: "Reply content cannot be empty." });
+  }
+  if (content.length > 2000) {
+    return res.status(400).json({ error: "Reply content must be at most 2000 characters." });
+  }
+
+  const reply = {
+    id: "p_" + Date.now(),
+    author: user.name || user.username,
+    authorId: String(user.id),
+    content,
+    createdAt: Date.now(),
+    deleted: false
+  };
+
+  thread.posts = thread.posts || [];
+  thread.posts.push(reply);
+  thread.replies = thread.posts.filter((p) => !p.deleted).length;
+  thread.lastPostAuthor = reply.author;
+  thread.lastPostAt = reply.createdAt;
+
+  res.status(201).json({ message: "Reply posted successfully.", reply: { ...reply, timeAgo: "Just now" } });
+});
+
+// PUT: Edit a thread (owner or admin)
+app.put('/api/threads/:id', async (req, res) => {
+  const threadId = parseInt(req.params.id);
+  const thread = forumThreads.find(t => t.id === threadId);
+  if (!thread || thread.deleted) {
+    return res.status(404).json({ error: "Thread not found." });
+  }
+
+  const user = await resolveCurrentUser(req);
+  if (!user) {
+    return res.status(401).json({ error: "You must be logged in to edit a thread." });
+  }
+
+  const isOwner = thread.authorId && String(thread.authorId) === String(user.id);
+  const isAdmin = user.role === 'admin';
+  if (!isOwner && !isAdmin) {
+    return res.status(403).json({ error: "You can only edit your own threads." });
+  }
+
+  const title = (req.body.title || "").trim();
+  const content = (req.body.content || "").trim();
+  if (!title) return res.status(400).json({ error: "Thread title is strictly required." });
+  if (!content) return res.status(400).json({ error: "Post content cannot be empty." });
+  if (title.length > 150) return res.status(400).json({ error: "Thread title must be at most 150 characters." });
+  if (content.length > 5000) return res.status(400).json({ error: "Post content must be at most 5000 characters." });
+
+  thread.title = title;
+  thread.content = content;
+  thread.lastPostAt = Date.now();
+
+  res.json({ message: "Thread updated successfully.", thread: publicThread(thread) });
+});
+
+// PUT: Edit a reply (owner or admin)
+app.put('/api/threads/:id/replies/:replyId', async (req, res) => {
+  const threadId = parseInt(req.params.id);
+  const thread = forumThreads.find(t => t.id === threadId);
+  if (!thread || thread.deleted) {
+    return res.status(404).json({ error: "Thread not found." });
+  }
+
+  const reply = (thread.posts || []).find((p) => p.id === req.params.replyId && !p.deleted);
+  if (!reply) {
+    return res.status(404).json({ error: "Reply not found." });
+  }
+
+  const user = await resolveCurrentUser(req);
+  if (!user) {
+    return res.status(401).json({ error: "You must be logged in to edit a reply." });
+  }
+
+  const isOwner = reply.authorId && String(reply.authorId) === String(user.id);
+  const isAdmin = user.role === 'admin';
+  if (!isOwner && !isAdmin) {
+    return res.status(403).json({ error: "You can only edit your own replies." });
+  }
+
+  const content = (req.body.content || "").trim();
+  if (!content) return res.status(400).json({ error: "Reply content cannot be empty." });
+  if (content.length > 2000) return res.status(400).json({ error: "Reply content must be at most 2000 characters." });
+
+  reply.content = content;
+
+  res.json({ message: "Reply updated successfully.", reply: { ...reply, timeAgo: timeAgo(reply.createdAt) } });
+});
+
+// DELETE: Soft-delete a thread (retained for auditing)
+app.delete('/api/threads/:id', async (req, res) => {
+  const threadId = parseInt(req.params.id);
+  const thread = forumThreads.find(t => t.id === threadId);
+  if (!thread || thread.deleted) {
+    return res.status(404).json({ error: "Thread not found." });
+  }
+
+  const user = await resolveCurrentUser(req);
+  if (!user) {
+    return res.status(401).json({ error: "You must be logged in to delete a thread." });
+  }
+
+  const isOwner = thread.authorId && String(thread.authorId) === String(user.id);
+  const isAdmin = user.role === 'admin';
+  if (!isOwner && !isAdmin) {
+    return res.status(403).json({ error: "You can only delete your own threads." });
+  }
+
+  thread.deleted = true;
+  res.json({ message: "Thread successfully deleted." });
+});
+
+// DELETE: Soft-delete a reply (retained for auditing)
+app.delete('/api/threads/:id/replies/:replyId', async (req, res) => {
+  const threadId = parseInt(req.params.id);
+  const thread = forumThreads.find(t => t.id === threadId);
+  if (!thread || thread.deleted) {
+    return res.status(404).json({ error: "Thread not found." });
+  }
+
+  const reply = (thread.posts || []).find((p) => p.id === req.params.replyId && !p.deleted);
+  if (!reply) {
+    return res.status(404).json({ error: "Reply not found." });
+  }
+
+  const user = await resolveCurrentUser(req);
+  if (!user) {
+    return res.status(401).json({ error: "You must be logged in to delete a reply." });
+  }
+
+  const isOwner = reply.authorId && String(reply.authorId) === String(user.id);
+  const isAdmin = user.role === 'admin';
+  if (!isOwner && !isAdmin) {
+    return res.status(403).json({ error: "You can only delete your own replies." });
+  }
+
+  reply.deleted = true;
+  thread.replies = thread.posts.filter((p) => !p.deleted).length;
+  thread.lastPostAt = Date.now();
+
+  res.json({ message: "Reply successfully deleted." });
 });
 
 function readGames() {
@@ -889,14 +1148,23 @@ app.get("/game/:id", (req, res) => {
 
 // Write game review
 
-app.get("/game/:id/review", (req, res) => {
+app.get("/game/:id/review", async (req, res) => {
   const games = readGames();
   const game = games.find((g) => g.id === parseInt(req.params.id));
   if (!game) return res.status(404).send("Game not found");
 
+  const user = await resolveCurrentUser(req);
+  if (!user) return res.redirect("/Login.html");
+
   let review = null;
   if (req.query.edit) {
     review = game.reviews.find((r) => r.id === req.query.edit) || null;
+    if (!review) return res.status(404).send("Review not found");
+    const isOwner = review.authorId && String(review.authorId) === String(user.id);
+    const isAdmin = user.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).send("You can only edit your own reviews");
+    }
   }
 
   res.render("writegamereview", { game, review, errors: [] });
@@ -909,6 +1177,7 @@ app.post("/game/:id/review", async (req, res) => {
   if (!game) return res.status(404).send("Game not found");
 
   const user = await resolveCurrentUser(req);
+  if (!user) return res.redirect("/Login.html");
 
   const { title, content, rating, image, reviewId } = req.body;
   const errors = validateReviewInput(title, content, rating);
@@ -936,8 +1205,8 @@ app.post("/game/:id/review", async (req, res) => {
     // create new review
     game.reviews.push({
       id: "r_" + Date.now(),
-      author: user ? (user.name || user.username) : "Guest",
-      authorId: user ? String(user.id) : null,
+      author: user.name || user.username,
+      authorId: String(user.id),
       date: new Date().toLocaleDateString("vi-VN"),
       stars: parseInt(rating),
       title: title.trim(),

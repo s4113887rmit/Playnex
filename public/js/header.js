@@ -1,18 +1,31 @@
 (function () {
   'use strict';
 
+  function applyAdminUI(user) {
+    if (user && user.role === 'admin') {
+      document.querySelectorAll('[data-admin-only]').forEach(function (el) {
+        el.hidden = false;
+      });
+    }
+  }
+
   function updateHeader() {
     var page = window.location.pathname.split('/').pop() || 'homepage.html';
-    if (page === 'Login.html' || page === 'Profile.html') return;
-
-    var wrapper = document.querySelector('.topbar__actions');
-    if (!wrapper || wrapper.getAttribute('data-auth-synced') === 'true') return;
+    if (page === 'Login.html') return;
 
     var user = null;
     try {
       var raw = localStorage.getItem('playnex_user');
       if (raw) user = JSON.parse(raw);
     } catch (e) {}
+
+    if (page === 'Profile.html') {
+      applyAdminUI(user);
+      return;
+    }
+
+    var wrapper = document.querySelector('.topbar__actions');
+    if (!wrapper || wrapper.getAttribute('data-auth-synced') === 'true') return;
 
     if (!user) {
       localStorage.removeItem('playnex_user');
@@ -53,12 +66,7 @@
     wrapper.insertBefore(logoutBtn, wrapper.firstElementChild);
     wrapper.insertBefore(profileLink, wrapper.firstElementChild);
 
-    // reveal admin-only UI (e.g. Admin Panel button) for administrators
-    if (user.role === 'admin') {
-      document.querySelectorAll('[data-admin-only]').forEach(function (el) {
-        el.hidden = false;
-      });
-    }
+    applyAdminUI(user);
   }
 
   if (document.readyState === 'loading') {

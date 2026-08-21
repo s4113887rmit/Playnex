@@ -2,10 +2,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const normalList = document.querySelectorAll('.admin-list')[0];
   const lockedList = document.querySelectorAll('.admin-list')[1];
 
+  const getAuthHeaders = () => {
+    try {
+      const user = JSON.parse(localStorage.getItem('playnex_user') || 'null');
+      return user && user.id ? { 'x-user-id': String(user.id) } : {};
+    } catch (e) {
+      return {};
+    }
+  };
+
   // Function to fetch and render users
   const loadUsers = async () => {
     try {
-      const response = await fetch('/api/users');
+      const response = await fetch('/api/users', { headers: getAuthHeaders() });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        normalList.innerHTML = `<p>${err.error || 'Administrator access required.'}</p>`;
+        lockedList.innerHTML = '';
+        return;
+      }
       const users = await response.json();
       
       normalList.innerHTML = ''; 
@@ -53,7 +68,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const handleToggle = async (e) => {
     if (e.target.classList.contains('toggle-lock-btn')) {
       const userId = e.target.getAttribute('data-id');
-      await fetch(`/api/users/${userId}/toggle-lock`, { method: 'POST' });
+      const res = await fetch(`/api/users/${userId}/toggle-lock`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || 'Action failed.');
+      }
       loadUsers(); // Instantly refresh the UI!
     }
   };
