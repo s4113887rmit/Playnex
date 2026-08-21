@@ -78,7 +78,6 @@ Shared User Account module (with team):
    ```
    npm start
    ```
-   (or run `start.bat`)
 3. Open http://localhost:3000
 
 The A2 prototype does not require MongoDB. If no MongoDB connection string is set (or the database is unreachable), the app automatically falls back to in-memory users.
