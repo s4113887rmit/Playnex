@@ -49,7 +49,6 @@
     <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
     <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
     <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
-    <a href="forum.html" class="subnav__link">Forums</a>
   </nav>
 </header>
 
@@ -78,6 +77,15 @@
 
       <div class="profile-content">
 
+        <!-- ADMINISTRATION (admin only) -->
+        <section class="profile-section" data-admin-only hidden>
+          <h2>Administration</h2>
+          <p class="profile-section__hint">Manage Playnex accounts and community activity.</p>
+          <a href="admin.html" class="btn btn--outline">Open Admin Panel</a>
+        </section>
+
+        <hr class="profile-divider" data-admin-only hidden>
+
         <!-- EDIT PROFILE -->
         <section class="profile-section">
           <h2>Edit your profile</h2>
@@ -87,10 +95,13 @@
             <div class="form-group">
               <label for="profile-name">Display name</label>
               <input id="profile-name" type="text" name="name" value="" maxlength="100" autocomplete="name">
+              <span class="form-group__error" role="alert" id="profile-name-error"></span>
             </div>
             <div class="form-group">
               <label for="profile-desc">Short description</label>
               <textarea id="profile-desc" name="description" maxlength="500" rows="4">Hardcore RPG fan and indie game enthusiast. Always hunting for the next big adventure.</textarea>
+              <span class="form-group__char-count"><span id="prof-desc-char-count">0</span>/500</span>
+              <span class="form-group__error" role="alert" id="profile-desc-error"></span>
             </div>
             <div class="form-group">
               <label for="profile-picture-upload">Profile picture</label>
@@ -100,7 +111,7 @@
                   <svg viewBox="0 0 24 24" aria-hidden="true" class="file-upload__icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   <span>Choose an image</span>
                 </label>
-                <span class="file-upload__name">No file chosen</span>
+                <span class="file-upload__name" id="prof-file-name">No file chosen</span>
               </div>
             </div>
             <button type="submit" class="btn btn--primary">Save changes</button>
@@ -123,10 +134,12 @@
             <div class="form-group">
               <label for="new-email">New email address</label>
               <input id="new-email" type="email" name="newEmail" placeholder="new@example.com" required autocomplete="email">
+              <span class="form-group__error" role="alert" id="new-email-error"></span>
             </div>
             <div class="form-group">
               <label for="email-password">Current password (required to confirm)</label>
               <input id="email-password" type="password" name="password" placeholder="Enter current password" required autocomplete="current-password">
+              <span class="form-group__error" role="alert" id="email-password-error"></span>
             </div>
             <button type="submit" class="btn btn--primary">Update email</button>
             <p class="auth-server-msg" id="email-msg"></p>
@@ -144,14 +157,17 @@
             <div class="form-group">
               <label for="current-password">Current password</label>
               <input id="current-password" type="password" name="currentPassword" placeholder="Enter current password" required autocomplete="current-password">
+              <span class="form-group__error" role="alert" id="current-password-error"></span>
             </div>
             <div class="form-group">
               <label for="new-password">New password</label>
               <input id="new-password" type="password" name="newPassword" placeholder="At least 8 characters" required minlength="8" autocomplete="new-password">
+              <span class="form-group__error" role="alert" id="new-password-error"></span>
             </div>
             <div class="form-group">
               <label for="new-password-confirm">Confirm new password</label>
               <input id="new-password-confirm" type="password" name="confirmNewPassword" placeholder="Re-enter new password" required autocomplete="new-password">
+              <span class="form-group__error" role="alert" id="new-password-confirm-error"></span>
             </div>
             <button type="submit" class="btn btn--primary">Update password</button>
             <p class="auth-server-msg" id="password-msg"></p>
@@ -171,10 +187,12 @@
                 <input type="checkbox" name="confirmDelete" id="confirm-delete" required>
                 <span>I understand that deleting my account is permanent and cannot be undone</span>
               </label>
+              <span class="form-group__error" role="alert" id="confirm-delete-error"></span>
             </div>
             <div class="form-group">
               <label for="delete-password">Current password (required to confirm)</label>
               <input id="delete-password" type="password" name="password" placeholder="Enter your password to confirm" required autocomplete="current-password">
+              <span class="form-group__error" role="alert" id="delete-password-error"></span>
             </div>
             <button type="submit" class="btn btn--danger">Delete my account</button>
             <p class="auth-server-msg" id="delete-msg"></p>

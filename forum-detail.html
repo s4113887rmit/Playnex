@@ -7,27 +7,36 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="Style.css">
+<link rel="stylesheet" href="style.css">
 <style>
   .thread-layout { max-width: 1000px; margin: 0 auto; padding: 24px 40px 64px; }
   .thread-header { margin-bottom: 32px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
   .thread-header h1 { font-family: var(--font-display); font-size: 24px; font-weight: 600; margin-bottom: 8px; }
   .breadcrumb-nav { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
-
+  
   .post-card { display: flex; gap: 24px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-bottom: 16px; }
   .post-sidebar { width: 140px; flex-shrink: 0; text-align: center; border-right: 1px solid var(--border); padding-right: 24px; }
   .post-sidebar img { width: 80px; height: 80px; border-radius: 50%; background: var(--surface-3); margin-bottom: 12px; }
   .post-sidebar h4 { font-size: 14px; font-weight: 600; color: var(--accent); margin-bottom: 4px; }
   .post-sidebar p { font-size: 11px; color: var(--text-muted); }
-
+  
   .post-content { flex: 1; display: flex; flex-direction: column; }
   .post-content-body { font-size: 14px; line-height: 1.6; color: var(--text); flex: 1; margin-bottom: 24px; }
   .post-content-body pre { background: var(--surface-2); padding: 12px; border-radius: 4px; border: 1px solid var(--border); overflow-x: auto; font-family: monospace; font-size: 13px; margin: 12px 0; }
   .post-actions { display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 16px; }
-
+  
   .reply-thread { margin-left: 48px; border-left: 2px solid var(--border); padding-left: 24px; }
   .rating-stars { color: #f1c40f; font-size: 14px; text-align: right; margin-bottom: 12px; }
+
+  .thread-loading { color: var(--text-muted); padding: 40px 0; text-align: center; }
+  .reply-form-card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin-top: 24px; }
+  .reply-form-card h2 { font-size: 18px; margin-bottom: 16px; }
+  .reply-form-card textarea { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 12px; color: var(--text); font-family: inherit; font-size: 14px; resize: vertical; }
+  .reply-form-card .form-group__error { color: #e74c3c; font-size: 12px; }
+  .post-edit-area { width: 100%; background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 12px; color: var(--text); font-family: inherit; font-size: 14px; }
+  .thread-post-body { white-space: pre-wrap; }
 </style>
+<link rel="icon" href="/logo.png">
 </head>
 <body>
 <a class="skip-to-content" href="#main-content">Skip to main content</a>
@@ -45,74 +54,71 @@
         <a href="forum.html" class="primary-nav__link is-active">Community</a>
         <div class="primary-nav__menu">
           <a href="forum.html" class="primary-nav__sub is-active">Forum</a>
-          <a href="/blog" class="primary-nav__sub">Blog</a>
+          <a href="/rating" class="primary-nav__sub">Reviews</a>
+<a href="/blog" class="primary-nav__sub">Blog</a>
         </div>
       </div>
     </nav>
   </div>
+<nav class="subnav">
+  <a href="forum.html" class="subnav__link is-active">Forum</a>
+  <a href="/rating" class="subnav__link">Reviews</a>
+  <a href="/blog" class="subnav__link">Blog</a>
+</nav>
 </header>
 
 <main id="main-content" class="thread-layout">
   <div class="breadcrumb-nav">
-    Community Forum > Technical Support > Server Administration
+    <a href="forum.html">Community Forum</a> > Thread Details
   </div>
 
-  <div class="thread-header">
-    <h1>[Technical Support] Troubleshooting server TPS drops and Radmin VPN LAN issues</h1>
+  <div id="thread-detail-container">
+    <p class="thread-loading">Loading thread...</p>
   </div>
 
-  <!-- Main Post -->
-  <article class="thread-post-card">
-    <div class="thread-post-sidebar">
-      <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=ServerDev" alt="User avatar">
-      <h2>dev_admin99</h2>
-      <p>Joined: Dec 2025</p>
-      <p>Posts: 342</p>
-    </div>
-    <div class="thread-post-content">
-      <div class="rating-stars">★★★★★</div>
-      <div class="thread-post-body">
-        <p>Hey everyone,</p>
-        <p>I'm currently managing a custom server primarily for Southeast Asian players. We are using Radmin VPN to configure the LAN play network, which usually runs smoothly. However, recently we've been experiencing massive TPS (Ticks Per Second) drops whenever a player activates a specific custom datapack ability.</p>
-        <p>I've written some complex scoreboard logic to manage the ability cooldowns. It looks something like this:</p>
-        <pre><code>execute as @a[scores={ability_cooldown=1..}] run scoreboard players remove @s ability_cooldown 1
-execute as @a[scores={ability_active=1}] at @s run function custom:skills/fire_blast</code></pre>
-        <p>Could the continuous execution of this logic be causing the performance bottleneck for the SEA player base? Any advice on performance optimization or restructuring this logic would be highly appreciated.</p>
+  <section id="reply-form-section" class="reply-form-card" hidden>
+    <h2>Post a reply</h2>
+    <form id="reply-form" class="create-form" novalidate>
+      <div class="form-group">
+        <label for="reply-content">Your reply</label>
+        <textarea id="reply-content" name="content" rows="5" maxlength="2000" placeholder="Share your thoughts..." required></textarea>
+        <span class="form-group__char-count"><span id="reply-char-count">0</span>/2000</span>
+        <span class="form-group__error" role="alert" id="reply-content-error"></span>
       </div>
-      <div class="thread-post-actions">
-        <button class="btn btn--outline btn--small">Quote</button>
-        <button class="btn btn--primary btn--small">Reply</button>
-      </div>
-    </div>
-  </article>
+      <button type="submit" class="btn btn--primary">Post reply</button>
+      <p class="auth-server-msg" id="reply-server-msg"></p>
+    </form>
+  </section>
 
-  <!-- Reply 1 -->
-  <div class="reply-thread">
-    <article class="thread-post-card">
-      <div class="thread-post-sidebar">
-        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=CodeWizard" alt="User avatar">
-        <h2>script_master</h2>
-        <p>Joined: Jan 2026</p>
-      </div>
-      <div class="thread-post-content">
-        <div class="thread-post-body">
-          <p>The issue is definitely tied to how your server handles the recursive function calls. Checking that scoreboard logic every single tick for every connected player over a VPN will absolutely drain your TPS.</p>
-          <p>Instead of checking every tick, try implementing a macro or scheduling the function to only check when a specific event is triggered rather than looping it infinitely. Also, ensure your Radmin VPN routing isn't creating packet loss, which can simulate server lag.</p>
-        </div>
-        <div class="thread-post-actions">
-          <button class="btn btn--outline btn--small">Quote</button>
-          <button class="btn btn--primary btn--small">Reply</button>
-        </div>
-      </div>
-    </article>
-  </div>
-
-  <div class="thread-reply-action">
-    <button class="btn btn--primary btn--large">Reply to Thread</button>
-  </div>
+  <section id="login-cta" class="reply-form-card" hidden>
+    <p><a href="Login.html" class="btn btn--primary">Log in to join the discussion</a></p>
+  </section>
 
 </main>
-<script src="public/js/header.js"></script>
+<footer class="site-footer">
+  <div class="site-footer__inner">
+    <div class="site-footer__col">
+      <a href="homepage.html" class="logo logo--footer">
+        <img src="logo.png" alt="Playnex Logo" class="logo__img">
+      </a>
+      <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
+    </div>
+    <div class="site-footer__col">
+      <h3>Support</h3>
+      <a href="contact.html">Contact us</a>
+      <a href="/sitemap">Sitemap</a>
+    </div>
+    <div class="site-footer__col">
+      <h3>Company</h3>
+      <a href="terms.html">Terms of service</a>
+      <a href="privacy.html">Privacy policy</a>
+    </div>
+  </div>
+  <div class="site-footer__bottom">
+    <p>&copy; 2026 Playnex. All rights reserved.</p>
+  </div>
+</footer>
 <script src="public/js/forum-detail.js"></script>
+<script src="public/js/header.js"></script>
 </body>
 </html>

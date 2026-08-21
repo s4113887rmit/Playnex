@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
+<base href="/">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><%= game.name %> — Playnex</title>
     <meta name="description" content="View the selected Playnex game listing and discover similar titles.">
@@ -58,7 +59,6 @@
         <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
         <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
         <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
-        <a href="forum.html" class="subnav__link">Forums</a>
       </nav>
     </header>
 
@@ -179,9 +179,9 @@
               <div class="comment-meta">
                 <span class="author"><%= r.author %></span>
                 <span class="date"><%= r.date %></span>
-                <a href="/game/<%= game.id %>/review?edit=<%= r.id %>" class="comment-action">Edit</a>
+                <a href="/game/<%= game.id %>/review?edit=<%= r.id %>" class="comment-action review-owner-action" data-author-id="<%= r.authorId || '' %>">Edit</a>
                 <form method="POST" action="/game/<%= game.id %>/review/<%= r.id %>/delete"
-                      class="delete-review-form" style="display:inline">
+                      class="delete-review-form review-owner-action" data-author-id="<%= r.authorId || '' %>" style="display:inline">
                   <input type="hidden" name="userId" class="review-delete-user-id" value="">
                   <button type="submit" class="comment-action comment-action--danger">Delete</button>
                 </form>
@@ -272,6 +272,12 @@
 
         try {
           var user = JSON.parse(localStorage.getItem('playnex_user') || 'null');
+          document.querySelectorAll('.review-owner-action').forEach(function (el) {
+            var authorId = el.getAttribute('data-author-id');
+            var isAdmin = user && user.role === 'admin';
+            var isOwner = user && authorId && String(authorId) === String(user.id);
+            if (!isAdmin && !isOwner) el.style.display = 'none';
+          });
           if (user) {
             document.querySelectorAll('.review-delete-user-id').forEach(function (el) {
               el.value = user.id || '';

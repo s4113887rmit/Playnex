@@ -1,4 +1,13 @@
 document.addEventListener('DOMContentLoaded', () => {
+  let currentUser = null;
+  try {
+    currentUser = JSON.parse(localStorage.getItem('playnex_user') || 'null');
+  } catch (e) {}
+  if (!currentUser) {
+    window.location.href = 'Login.html';
+    return;
+  }
+
   const form = document.querySelector('.create-form');
   const titleInput = document.getElementById('thread-title');
   const gameInput = document.getElementById('game-selector');
@@ -67,7 +76,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const response = await fetch('/api/threads', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'x-user-id': String(currentUser.id)
           },
           body: JSON.stringify(threadData)
         });
@@ -80,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.removeItem('draftContent');
 
           // Redirect the user back to the main forum page to see their new post
-          window.location.href = 'Forum.html';
+          window.location.href = 'forum.html';
         } else {
           const errorData = await response.json();
           alert(`Error: ${errorData.error}`);
