@@ -803,29 +803,29 @@ app.post('/api/threads', async (req, res) => {
 // ==========================================
 
 let adminUsers = [
-  { 
-    id: 1, 
-    username: "John_A", 
-    status: "normal", 
-    joined: "Jan 12, 2026", 
-    avatarSeed: "Ngyuen", 
-    flags: "0 active flags" 
+  {
+    id: 1,
+    username: "John_A",
+    status: "normal",
+    joined: "Jan 12, 2026",
+    avatarSeed: "Ngyuen",
+    flags: "0 active flags"
   },
-  { 
-    id: 2, 
-    username: "jane_B", 
-    status: "normal", 
-    joined: "Mar 05, 2026", 
-    avatarSeed: "Dang", 
-    flags: "1 resolved warning" 
+  {
+    id: 2,
+    username: "jane_B",
+    status: "normal",
+    joined: "Mar 05, 2026",
+    avatarSeed: "Dang",
+    flags: "1 resolved warning"
   },
-  { 
-    id: 3, 
-    username: "spammer_99", 
-    status: "locked", 
-    lockedDate: "Jul 21, 2026", 
-    avatarSeed: "Spam", 
-    reason: "Forum Abuse" 
+  {
+    id: 3,
+    username: "spammer_99",
+    status: "locked",
+    lockedDate: "Jul 21, 2026",
+    avatarSeed: "Spam",
+    reason: "Forum Abuse"
   }
 ];
 
@@ -838,6 +838,20 @@ app.get('/api/users', async (req, res) => {
   res.json(adminUsers);
 });
 
+// GET: Retrieve a single user by ID
+app.get('/api/users/:id', async (req, res) => {
+  const user = await resolveCurrentUser(req);
+  if (!user || user.role !== 'admin') {
+    return res.status(403).json({ error: "Administrator access required." });
+  }
+  const userId = parseInt(req.params.id);
+  const targetUser = adminUsers.find(u => u.id === userId);
+  if (!targetUser) {
+    return res.status(404).json({ error: "User not found." });
+  }
+  res.json(targetUser);
+});
+
 // POST: Toggle user lock status
 app.post('/api/users/:id/toggle-lock', async (req, res) => {
   const user = await resolveCurrentUser(req);
@@ -846,7 +860,7 @@ app.post('/api/users/:id/toggle-lock', async (req, res) => {
   }
   // Grab the ID from the URL and convert it to an integer
   const userId = parseInt(req.params.id);
-  
+
   // Find the specific user in our in-memory array
   const targetUser = adminUsers.find(u => u.id === userId);
 
@@ -1307,7 +1321,7 @@ app.get('/sitemap', (req, res) => {
     res.render('sitemap', {
       games: games.map(g => ({ id: g.id, name: g.name })),
       blogPosts: blogPosts.map(p => ({ id: p.id, title: p.title })),
-      threads: threads.map(t => ({ id: t.id, title: t.title })) 
+      threads: threads.map(t => ({ id: t.id, title: t.title }))
     });
   } catch (err) {
     console.error('Error rendering sitemap:', err);
