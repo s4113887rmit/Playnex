@@ -1,0 +1,61 @@
+<%
+  var currentNav = typeof activeNav !== 'undefined' ? activeNav : '';
+  var currentSubnavType = typeof subnavType !== 'undefined' ? subnavType : 'community';
+  var currentSubnav = typeof activeSubnav !== 'undefined' ? activeSubnav : '';
+  var isCommunityActive = currentNav === 'community' || currentNav === 'forum' || currentNav === 'reviews' || currentNav === 'rating' || currentNav === 'blog' || currentSubnav === 'forum' || currentSubnav === 'reviews' || currentSubnav === 'rating' || currentSubnav === 'blog';
+%>
+<header class="topbar">
+  <div class="topbar__inner">
+    <a href="homepage.html" class="logo" aria-label="Playnex home">
+      <img src="logo.png" alt="Playnex" class="logo__img">
+    </a>
+
+    <nav class="primary-nav" aria-label="Main navigation">
+      <a href="homepage.html" class="primary-nav__link<%= currentNav === 'home' ? ' is-active' : '' %>">Home</a>
+      <a href="shopping.html" class="primary-nav__link<%= currentNav === 'shopping' ? ' is-active' : '' %>">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link<%= currentNav === 'wishlist' ? ' is-active' : '' %>">Wishlist</a>
+      <div class="primary-nav__dropdown">
+        <a href="forum.html" class="primary-nav__link<%= isCommunityActive ? ' is-active' : '' %>">Community</a>
+        <div class="primary-nav__menu">
+          <a href="forum.html" class="primary-nav__sub<%= currentSubnav === 'forum' ? ' is-active' : '' %>">Forum</a>
+          <a href="/rating" class="primary-nav__sub<%= (currentSubnav === 'reviews' || currentSubnav === 'rating') ? ' is-active' : '' %>">Reviews</a>
+          <a href="/blog" class="primary-nav__sub<%= currentSubnav === 'blog' ? ' is-active' : '' %>">Blog</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="topbar__actions">
+      <form class="search" role="search" action="shopping.html" method="get">
+        <label for="site-search" class="visually-hidden">Search games, merch, tags</label>
+        <svg viewBox="0 0 24 24" class="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.6" y2="16.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="site-search" name="q" type="search" placeholder="Search games, merch, tags">
+        <button type="submit" class="visually-hidden">Search</button>
+      </form>
+
+      <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 14.9 3 8.9C3 5.9 5.4 3.5 8.4 3.5c1.7 0 3.3.8 4.3 2.1a5.3 5.3 0 0 1 4.3-2.1C20 3.5 21.5 5.9 21.5 8.9c0 6-9.5 11.6-9.5 11.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="cart.html" class="icon-btn" aria-label="Cart">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
+      </a>
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
+    </div>
+  </div>
+
+  <% if (currentSubnavType === 'shopping') { %>
+  <nav class="subnav" aria-label="Categories">
+    <a href="shopping.html" class="subnav__link<%= (currentSubnav === 'all' || !currentSubnav) ? ' is-active' : '' %>">All</a>
+    <a href="shopping.html?cat=digital" class="subnav__link<%= currentSubnav === 'digital' ? ' is-active' : '' %>">Digital games</a>
+    <a href="shopping.html?cat=merch" class="subnav__link<%= currentSubnav === 'merch' ? ' is-active' : '' %>">Physical merch</a>
+    <a href="shopping.html?cat=deals" class="subnav__link<%= currentSubnav === 'deals' ? ' is-active' : '' %>">Deals</a>
+    <a href="shopping.html?cat=free" class="subnav__link<%= currentSubnav === 'free' ? ' is-active' : '' %>">Free this week</a>
+  </nav>
+  <% } else if (currentSubnavType === 'community') { %>
+  <nav class="subnav">
+    <a href="forum.html" class="subnav__link<%= currentSubnav === 'forum' ? ' is-active' : '' %>">Forum</a>
+    <a href="/rating" class="subnav__link<%= (currentSubnav === 'reviews' || currentSubnav === 'rating') ? ' is-active' : '' %>">Reviews</a>
+    <a href="/blog" class="subnav__link<%= currentSubnav === 'blog' ? ' is-active' : '' %>">Blog</a>
+  </nav>
+  <% } %>
+</header>
