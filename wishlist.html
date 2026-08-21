@@ -9,10 +9,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<link rel="icon" href="/logo.png">
 </head>
 <body>
-<a class="skip-to-content" href="#main-content">Skip to main content</a>
 
 
 <!-- ============ SITE HEADER: logo, primary nav, search, account/cart icons ============ -->
@@ -30,8 +28,7 @@
         <a href="forum.html" class="primary-nav__link">Community</a>
         <div class="primary-nav__menu">
           <a href="forum.html" class="primary-nav__sub">Forum</a>
-          <a href="/rating" class="primary-nav__sub">Reviews</a>
-<a href="/blog" class="primary-nav__sub">Blog</a>
+          <a href="/blog" class="primary-nav__sub">Blog</a>
         </div>
       </div>
     </nav>
@@ -47,10 +44,10 @@
       <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 14.9 3 8.9C3 5.9 5.4 3.5 8.4 3.5c1.7 0 3.3.8 4.3 2.1a5.3 5.3 0 0 1 4.3-2.1C20 3.5 21.5 5.9 21.5 8.9c0 6-9.5 11.6-9.5 11.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
       </a>
-      <a href="cart.html" class="icon-btn" aria-label="Cart, 3 items">
+      <a href="cart.html" class="icon-btn" aria-label="Cart">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
       </a>
-      
+
       <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
       <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
@@ -62,6 +59,7 @@
     <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
     <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
     <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
+    <a href="/rating" class="subnav__link">Reviews</a>
   </nav>
 </header>
 
@@ -70,27 +68,23 @@
 </nav>
 
 <div class="page-header">
-  <h1>Your wishlist</h1>
-  <span class="page-header__count">6 saved · 1 purchased</span>
-</div>
-
-<div class="wishlist-summary">
-  <span><strong>0</strong> items saved</span>
-  <span><strong>$0.00</strong> total value</span>
-  <span><strong>0</strong> already purchased</span>
+  <div>
+    <h1>Your wishlist</h1>
+    <p class="page-header__subtitle">Save games and merch you want to come back to.</p>
+  </div>
+  <span class="page-header__count">0 items saved</span>
 </div>
 
 <!-- ============ MAIN CONTENT ============ -->
-<main id="main-content">
+<main>
 
-  <div class="shop-toolbar" style="max-width: 1400px; margin: 0 auto 24px; padding: 0 40px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
-    <div class="wishlist-filter-tabs" style="display: flex; gap: 8px; flex-wrap: wrap;">
-      <button type="button" class="btn btn--ghost btn--small is-active" data-wishlist-filter="all">All items</button>
-      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="digital">Digital games</button>
-      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="physical">Physical merch</button>
-      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="purchased">Purchased</button>
+  <div class="wishlist-toolbar">
+    <div class="wishlist-filter-tabs">
+      <button type="button" class="btn btn--ghost btn--small is-active" data-wishlist-filter="all">All items <span class="wishlist-filter__count" data-wishlist-count="all">0</span></button>
+      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="digital">Digital games <span class="wishlist-filter__count" data-wishlist-count="digital">0</span></button>
+      <button type="button" class="btn btn--ghost btn--small" data-wishlist-filter="physical">Physical merch <span class="wishlist-filter__count" data-wishlist-count="physical">0</span></button>
     </div>
-    <div style="display: flex; align-items: center; gap: 8px;">
+    <div class="wishlist-sort">
       <label for="wishlist-sort" class="visually-hidden">Sort wishlist</label>
       <select id="wishlist-sort" class="sort-select" aria-label="Sort wishlist">
         <option value="default">Sort: Recently Added</option>
@@ -103,7 +97,7 @@
 
   <ul class="wishlist-grid list-reset">
     <li>
-      <article class="wishlist-card">
+      <article class="card wishlist-card">
         <div class="card__art card__art--1 wishlist-card__art">
           <a href="listing.html?game=elden-ring" aria-label="View Elden Ring detail page">
             <img src="/img/eldenringposter.jpg" alt="Elden Ring poster">
@@ -123,7 +117,7 @@
     </li>
 
     <li>
-      <article class="wishlist-card">
+      <article class="card wishlist-card">
         <div class="card__art card__art--3 wishlist-card__art">
           <a href="listing.html?game=cyberpunk-2077" aria-label="View Cyberpunk detail page">
             <img src="/img/cyberpunkposter.jpg" alt="Cyberpunk poster">
@@ -143,7 +137,7 @@
     </li>
 
     <li>
-      <article class="wishlist-card">
+      <article class="card wishlist-card">
         <div class="card__art card__art--3 wishlist-card__art">
           <a href="listing.html?game=ghost-of-tsushima" aria-label="View Ghost of Tsushima detail page">
             <img src="/img/ghostposter.jpg" alt="Ghost of Tsushima poster">
@@ -163,7 +157,7 @@
     </li>
 
     <li>
-      <article class="wishlist-card">
+      <article class="card wishlist-card">
         <div class="card__art card__art--4 wishlist-card__art">
           <a href="listing.html?game=red-dead-redemption-2" aria-label="View Red Dead Redemption II detail page">
             <img src="/img/reddeadposter.jpg" alt="Red Dead Redemption II poster">
@@ -183,7 +177,7 @@
     </li>
 
     <li>
-      <article class="wishlist-card">
+      <article class="card wishlist-card">
         <div class="card__art card__art--5 wishlist-card__art">
           <a href="listing.html?game=hades" aria-label="View Hades detail page">
             <img src="/img/hadesposter.png" alt="Hades poster">
@@ -203,27 +197,29 @@
     </li>
 
     <li>
-      <article class="wishlist-card is-purchased">
+      <article class="card wishlist-card">
         <div class="card__art card__art--5 wishlist-card__art">
           <a href="listing.html?game=hollow-knight" aria-label="View Hollow Knight detail page">
             <img src="/img/hollowposter.jpg" alt="Hollow Knight poster">
           </a>
-          <span class="wishlist-card__purchased-tag">Purchased</span>
+          <span class="card__badge">Digital</span>
         </div>
         <div class="wishlist-card__body">
           <p class="wishlist-card__meta">Added 3 weeks ago</p>
           <h3 class="wishlist-card__title"><a href="listing.html?game=hollow-knight">Hollow Knight</a></h3>
         <p class="wishlist-card__price">$27.99</p>
         <div class="wishlist-card__actions">
-          <button type="button" class="btn btn--ghost">Buy again</button>
+          <a href="cart.html" class="btn btn--primary">Move to cart</a>
           <button type="button" class="btn btn--ghost">Remove</button>
         </div>
       </div>
     </article>
       </li>
 
-  
+
     </ul>
+
+  <p class="wishlist-total" id="wishlist-total" role="status"></p>
 
   <div class="section-title">
     <h2>Recommended for you</h2>
@@ -305,7 +301,7 @@
       </article>
       </li>
 
-    
+
     </ul>
   </section>
 
@@ -326,7 +322,7 @@
     <div class="site-footer__col">
       <h3>Support</h3>
       <a href="contact.html">Contact us</a>
-      <a href="/sitemap">Sitemap</a>
+      <a href="sitemap.html">Sitemap</a>
     </div>
 
     <div class="site-footer__col">

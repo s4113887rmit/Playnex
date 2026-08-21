@@ -5,9 +5,10 @@
 (function () {
   'use strict';
 
-  const { api, showToast } = window.Playnex;
+  const { api, showToast, requireLogin } = window.Playnex;
 
   let allProducts = [];
+  let wishlistIds = new Set();
   let activeCategory = 'all'; // 'all' | 'digital' | 'physical'
   let searchTerm = '';
 
@@ -30,9 +31,11 @@
       ? `<span class="card__badge${p.category === 'physical' ? ' card__badge--merch' : (p.badge === 'New' ? ' card__badge--new' : '')}">${p.badge}</span>`
       : (p.category === 'physical' ? '<span class="card__badge card__badge--merch">Physical</span>' : '');
 
-    const imgTag = p.image 
-      ? `<img src="${p.image}" alt="${p.title} poster" loading="lazy">` 
+    const imgTag = p.image
+      ? `<img src="${p.image}" alt="${p.title} poster" loading="lazy">`
       : `<div class="card__placeholder-art">${p.title.charAt(0)}</div>`;
+
+    const isSaved = wishlistIds.has(p.id);
 
     return `
       <li>
@@ -42,7 +45,7 @@
               ${imgTag}
             </a>
             ${badge}
-            <button class="card__wishlist" aria-label="Add ${p.title} to wishlist" type="button" data-action="wishlist" data-id="${p.id}">&hearts;</button>
+            <button class="card__wishlist${isSaved ? ' is-saved' : ''}" aria-label="${isSaved ? 'Remove ' + p.title + ' from wishlist' : 'Add ' + p.title + ' to wishlist'}" type="button" data-action="wishlist" data-id="${p.id}">&hearts;</button>
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="${p.href || 'shopping.html'}">${p.title}</a></h3>
@@ -103,12 +106,33 @@
 
   async function loadProducts() {
     try {
-      allProducts = await api('/api/products');
+      const [productsData, wishlistData] = await Promise.all([
+        api('/api/products'),
+        api('/api/wishlist').catch(() => ({ items: [] }))
+      ]);
+      allProducts = productsData;
+      wishlistIds = new Set((wishlistData.items || []).map(item => item.id));
       render();
     } catch (err) {
       console.error('Failed to load products:', err);
     }
   }
+
+  async function refreshWishlist() {
+    try {
+      const wishlistData = await api('/api/wishlist').catch(() => ({ items: [] }));
+      wishlistIds = new Set((wishlistData.items || []).map(item => item.id));
+      document.querySelectorAll('[data-action="wishlist"]').forEach(btn => {
+        const id = btn.dataset.id;
+        if (id) {
+          btn.classList.toggle('is-saved', wishlistIds.has(id));
+        }
+      });
+    } catch {}
+  }
+
+  window.addEventListener('pageshow', refreshWishlist);
+  window.addEventListener('focus', refreshWishlist);
 
   // Live search input
   if (searchInput) {
@@ -156,10 +180,25 @@
     }
   });
 
+  // Hero action buttons (Buy now & Add to wishlist) require login
+  const heroBuyBtn = document.querySelector('.hero__actions .btn--primary');
+  if (heroBuyBtn) {
+    heroBuyBtn.addEventListener('click', (e) => {
+      if (!requireLogin()) e.preventDefault();
+    });
+  }
+  const heroWishBtn = document.querySelector('.hero__actions .btn--outline');
+  if (heroWishBtn) {
+    heroWishBtn.addEventListener('click', (e) => {
+      if (!requireLogin()) e.preventDefault();
+    });
+  }
+
   // Event delegation for adding to cart & wishlist
   document.addEventListener('click', async (e) => {
     const addBtn = e.target.closest('[data-action="add-to-cart"]');
     if (addBtn) {
+      if (!requireLogin()) return;
       const productId = addBtn.dataset.id;
       addBtn.disabled = true;
       const originalText = addBtn.textContent;
@@ -183,19 +222,44 @@
 
     const wishBtn = e.target.closest('[data-action="wishlist"]');
     if (wishBtn) {
+      if (!requireLogin()) return;
       const productId = wishBtn.dataset.id;
+      if (!productId) return;
       wishBtn.disabled = true;
-      try {
-        await api('/api/wishlist', {
-          method: 'POST',
-          body: { productId }
-        });
-        wishBtn.classList.add('is-saved');
-        showToast('Added item to your wishlist!', 'success');
-      } catch (err) {
-        showToast(err.message, err.status === 409 ? 'info' : 'error');
-      } finally {
-        wishBtn.disabled = false;
+
+      const isAlreadySaved = wishBtn.classList.contains('is-saved') || wishlistIds.has(productId);
+
+      if (isAlreadySaved) {
+        try {
+          await api(`/api/wishlist/${productId}`, {
+            method: 'DELETE'
+          });
+          wishlistIds.delete(productId);
+          document.querySelectorAll(`[data-action="wishlist"][data-id="${productId}"]`).forEach(btn => {
+            btn.classList.remove('is-saved');
+          });
+          showToast('Removed item from your wishlist.', 'info');
+        } catch (err) {
+          showToast(err.message, 'error');
+        } finally {
+          wishBtn.disabled = false;
+        }
+      } else {
+        try {
+          await api('/api/wishlist', {
+            method: 'POST',
+            body: { productId }
+          });
+          wishlistIds.add(productId);
+          document.querySelectorAll(`[data-action="wishlist"][data-id="${productId}"]`).forEach(btn => {
+            btn.classList.add('is-saved');
+          });
+          showToast('Added item to your wishlist!', 'success');
+        } catch (err) {
+          showToast(err.message, err.status === 409 ? 'info' : 'error');
+        } finally {
+          wishBtn.disabled = false;
+        }
       }
       return;
     }
@@ -203,6 +267,7 @@
     const claimBtn = e.target.closest('.promo-strip a, .promo-strip button');
     if (claimBtn) {
       e.preventDefault();
+      if (!requireLogin()) return;
       try {
         await api('/api/cart', {
           method: 'POST',

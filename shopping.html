@@ -47,10 +47,10 @@
       <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 14.9 3 8.9C3 5.9 5.4 3.5 8.4 3.5c1.7 0 3.3.8 4.3 2.1a5.3 5.3 0 0 1 4.3-2.1C20 3.5 21.5 5.9 21.5 8.9c0 6-9.5 11.6-9.5 11.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
       </a>
-      <a href="cart.html" class="icon-btn" aria-label="Cart, 3 items">
+      <a href="cart.html" class="icon-btn" aria-label="Cart">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
       </a>
-      
+
       <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
       <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
     </div>
@@ -103,13 +103,13 @@
 <!-- ============ MAIN CONTENT: filters sidebar + product grid ============ -->
 <main id="main-content" class="shop-layout">
 
-  
+
   <!-- Product filter sidebar (platform, genre, price, availability) -->
   <aside class="filters" aria-label="Filters">
     <form action="shopping.html" method="get">
       <fieldset class="filters__group">
         <legend>Platform</legend>
-        <div class="filters__option"><input type="checkbox" id="platform-pc" name="platform" value="pc" checked><label for="platform-pc">PC</label></div>
+        <div class="filters__option"><input type="checkbox" id="platform-pc" name="platform" value="pc"><label for="platform-pc">PC</label></div>
         <div class="filters__option"><input type="checkbox" id="platform-console" name="platform" value="console"><label for="platform-console">Console</label></div>
       </fieldset>
 
@@ -354,14 +354,14 @@
       </article>
       </li>
 
-    
+
     </ul>
 
     <nav class="pagination" aria-label="Pagination">
       <a href="shopping.html" class="is-active">1</a>
       <a href="shopping.html?page=2">2</a>
       <a href="shopping.html?page=3">3</a>
-      <a href="shopping.html?page=2">Next</a> 
+      <a href="shopping.html?page=2" class="pagination__next">Next</a>
     </nav>
   </div>
 

@@ -4,10 +4,12 @@
 (function () {
   'use strict';
 
-  const { api, showToast } = window.Playnex;
+  const { api, showToast, requireLogin } = window.Playnex;
 
   let allProducts = [];
+  let wishlistIds = new Set();
   let filteredProducts = [];
+  let appliedFilters = { platforms: [], genres: [], prices: [], availability: [] };
   let currentPage = 1;
   const itemsPerPage = 9;
 
@@ -33,9 +35,11 @@
       ? `<span class="card__badge${p.category === 'physical' ? ' card__badge--merch' : (p.badge === 'New' ? ' card__badge--new' : '')}">${p.badge}</span>`
       : (p.category === 'physical' ? '<span class="card__badge card__badge--merch">Physical</span>' : '');
 
-    const imgTag = p.image 
-      ? `<img src="${p.image}" alt="${p.title} poster" loading="lazy">` 
+    const imgTag = p.image
+      ? `<img src="${p.image}" alt="${p.title} poster" loading="lazy">`
       : `<div class="card__placeholder-art">${p.title.charAt(0)}</div>`;
+
+    const isSaved = wishlistIds.has(p.id);
 
     return `
       <li>
@@ -45,7 +49,7 @@
               ${imgTag}
             </a>
             ${badge}
-            <button class="card__wishlist" aria-label="Add ${p.title} to wishlist" type="button" data-action="wishlist" data-id="${p.id}">&hearts;</button>
+            <button class="card__wishlist${isSaved ? ' is-saved' : ''}" aria-label="${isSaved ? 'Remove ' + p.title + ' from wishlist' : 'Add ' + p.title + ' to wishlist'}" type="button" data-action="wishlist" data-id="${p.id}">&hearts;</button>
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="${p.href || 'shopping.html'}">${p.title}</a></h3>
@@ -68,7 +72,7 @@
     return (urlParams.get('q') || '').trim().toLowerCase();
   }
 
-  function getSelectedFilters() {
+  function getFormFilters() {
     if (!filterForm) return { platforms: [], genres: [], prices: [], availability: [] };
 
     const formData = new FormData(filterForm);
@@ -83,7 +87,7 @@
   function filterAndSortProducts() {
     const activeCat = getActiveCategory();
     const query = getSearchQuery();
-    const filters = getSelectedFilters();
+    const filters = appliedFilters;
 
     filteredProducts = allProducts.filter(p => {
       // Category filter
@@ -159,8 +163,8 @@
     // Update counts
     if (countEl) countEl.textContent = `${total} item${total === 1 ? '' : 's'}`;
     if (toolbarCountEl) {
-      toolbarCountEl.textContent = total > 0 
-        ? `Showing ${startIdx + 1}–${endIdx} of ${total}` 
+      toolbarCountEl.textContent = total > 0
+        ? `Showing ${startIdx + 1}–${endIdx} of ${total}`
         : '0 items found';
     }
 
@@ -181,7 +185,7 @@
           pagesHTML += `<a href="#page-${i}" class="${i === currentPage ? 'is-active' : ''}" data-page="${i}">${i}</a>`;
         }
         if (currentPage < totalPages) {
-          pagesHTML += `<a href="#page-${currentPage + 1}" data-page="${currentPage + 1}">Next</a>`;
+          pagesHTML += `<a href="#page-${currentPage + 1}" class="pagination__next" data-page="${currentPage + 1}">Next</a>`;
         }
         paginationNav.innerHTML = pagesHTML;
       }
@@ -190,8 +194,13 @@
 
   async function loadCatalogue() {
     try {
-      allProducts = await api('/api/products');
-      
+      const [productsData, wishlistData] = await Promise.all([
+        api('/api/products'),
+        api('/api/wishlist').catch(() => ({ items: [] }))
+      ]);
+      allProducts = productsData;
+      wishlistIds = new Set((wishlistData.items || []).map(item => item.id));
+
       // Sync initial search from URL query
       const urlParams = new URLSearchParams(window.location.search);
       if (searchInput && urlParams.get('q')) {
@@ -214,21 +223,34 @@
     }
   }
 
+  async function refreshWishlist() {
+    try {
+      const wishlistData = await api('/api/wishlist').catch(() => ({ items: [] }));
+      wishlistIds = new Set((wishlistData.items || []).map(item => item.id));
+      document.querySelectorAll('[data-action="wishlist"]').forEach(btn => {
+        const id = btn.dataset.id;
+        if (id) {
+          btn.classList.toggle('is-saved', wishlistIds.has(id));
+        }
+      });
+    } catch {}
+  }
+
+  window.addEventListener('pageshow', refreshWishlist);
+  window.addEventListener('focus', refreshWishlist);
+
   // Filter Form listeners
   if (filterForm) {
-    filterForm.addEventListener('change', () => {
-      currentPage = 1;
-      filterAndSortProducts();
-    });
-
     filterForm.addEventListener('submit', (e) => {
       e.preventDefault();
+      appliedFilters = getFormFilters();
       currentPage = 1;
       filterAndSortProducts();
     });
 
     filterForm.addEventListener('reset', () => {
       setTimeout(() => {
+        appliedFilters = { platforms: [], genres: [], prices: [], availability: [] };
         currentPage = 1;
         filterAndSortProducts();
       }, 10);
@@ -267,6 +289,7 @@
   document.addEventListener('click', async (e) => {
     const addBtn = e.target.closest('[data-action="add-to-cart"]');
     if (addBtn) {
+      if (!requireLogin()) return;
       const productId = addBtn.dataset.id;
       addBtn.disabled = true;
       const originalText = addBtn.textContent;
@@ -290,20 +313,46 @@
 
     const wishBtn = e.target.closest('[data-action="wishlist"]');
     if (wishBtn) {
+      if (!requireLogin()) return;
       const productId = wishBtn.dataset.id;
+      if (!productId) return;
       wishBtn.disabled = true;
-      try {
-        await api('/api/wishlist', {
-          method: 'POST',
-          body: { productId }
-        });
-        wishBtn.classList.add('is-saved');
-        showToast('Added item to your wishlist!', 'success');
-      } catch (err) {
-        showToast(err.message, err.status === 409 ? 'info' : 'error');
-      } finally {
-        wishBtn.disabled = false;
+
+      const isAlreadySaved = wishBtn.classList.contains('is-saved') || wishlistIds.has(productId);
+
+      if (isAlreadySaved) {
+        try {
+          await api(`/api/wishlist/${productId}`, {
+            method: 'DELETE'
+          });
+          wishlistIds.delete(productId);
+          document.querySelectorAll(`[data-action="wishlist"][data-id="${productId}"]`).forEach(btn => {
+            btn.classList.remove('is-saved');
+          });
+          showToast('Removed item from your wishlist.', 'info');
+        } catch (err) {
+          showToast(err.message, 'error');
+        } finally {
+          wishBtn.disabled = false;
+        }
+      } else {
+        try {
+          await api('/api/wishlist', {
+            method: 'POST',
+            body: { productId }
+          });
+          wishlistIds.add(productId);
+          document.querySelectorAll(`[data-action="wishlist"][data-id="${productId}"]`).forEach(btn => {
+            btn.classList.add('is-saved');
+          });
+          showToast('Added item to your wishlist!', 'success');
+        } catch (err) {
+          showToast(err.message, err.status === 409 ? 'info' : 'error');
+        } finally {
+          wishBtn.disabled = false;
+        }
       }
+      return;
     }
   });
 
