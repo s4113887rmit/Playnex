@@ -5,7 +5,13 @@
  *   - Dynamic saved-item count in the page header
  *   - Dynamic filter counts (All / Digital / Physical / Purchased)
  *   - Polished empty states (fully empty wishlist vs. no matches for a filter)
- *   - Move to cart, remove, mark purchased, buy again
+ *   - Move to cart, remove from wishlist
+ *   - Dynamic "Recommended for you" shelf:
+ *       * Prioritizes real games with images over placeholder items
+ *       * Random order on each page refresh/load
+ *       * Excludes items already in the user's wishlist
+ *       * Clicking on any recommended item navigates to its description page
+ *       * Wishlist button allows quick addition to wishlist
  *   - Total wishlist value displayed subtly below the grid
  *   - Seamless server & local synchronization scoped to current user.
  */
@@ -20,17 +26,29 @@
   const sortSelect = document.getElementById('wishlist-sort');
   const filterBtns = document.querySelectorAll('[data-wishlist-filter]');
   const countEls = document.querySelectorAll('[data-wishlist-count]');
+  const recommendedGrid = document.getElementById('recommended-list') || document.querySelector('.shelf .shelf__row');
 
   let rawWishlistData = { items: [], totalCount: 0, savedCount: 0, totalValue: 0 };
+  let allProducts = [];
   let currentFilter = 'all';
 
   function money(n) {
     return `$${Number(n).toFixed(2)}`;
   }
 
+  function shuffle(array) {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
   function cardHTML(item) {
     const badgeText = item.category === 'physical' ? 'Physical' : 'Digital';
     const stats = item.stats || { wishlistCount: 1, cartCount: 0 };
+    const detailUrl = item.href || `listing.html?game=${item.id}`;
 
     const actionButtons = `
       <button type="button" class="btn btn--primary btn--small" data-action="move-to-cart" data-id="${item.id}">Move to cart</button>
@@ -44,14 +62,14 @@
       <li>
         <article class="card wishlist-card" data-id="${item.id}">
           <div class="card__art ${item.art || 'card__art--1'} wishlist-card__art">
-            <a href="${item.href || 'shopping.html'}" aria-label="View ${item.title} details">
+            <a href="${detailUrl}" aria-label="View ${item.title} details">
               ${imgTag}
             </a>
             <span class="card__badge${item.category === 'physical' ? ' card__badge--merch' : ''}">${badgeText}</span>
           </div>
           <div class="wishlist-card__body">
             <p class="wishlist-card__meta">${item.genre} · ${item.platform}</p>
-            <h3 class="wishlist-card__title"><a href="${item.href || 'shopping.html'}">${item.title}</a></h3>
+            <h3 class="wishlist-card__title"><a href="${detailUrl}">${item.title}</a></h3>
             <p class="wishlist-card__price">${item.price === 0 ? 'Free' : money(item.price)}</p>
 
             <div class="wishlist-card__stats">
@@ -62,6 +80,39 @@
             <div class="wishlist-card__actions">
               ${actionButtons}
             </div>
+          </div>
+        </article>
+      </li>`;
+  }
+
+  function recommendedCardHTML(item) {
+    const detailUrl = item.href || `listing.html?game=${item.id}`;
+    const priceHTML = item.oldPrice
+      ? `<span class="card__price-old">${money(item.oldPrice)}</span><span class="card__price-now">${money(item.price)}</span>`
+      : `<span class="card__price-now">${item.price === 0 ? 'Free' : money(item.price)}</span>`;
+
+    const badge = item.badge
+      ? `<span class="card__badge${item.category === 'physical' ? ' card__badge--merch' : (item.badge === 'New' ? ' card__badge--new' : '')}">${item.badge}</span>`
+      : (item.category === 'physical' ? '<span class="card__badge card__badge--merch">Physical</span>' : '');
+
+    const imgTag = item.image
+      ? `<img src="${item.image}" alt="${item.title} poster" loading="lazy">`
+      : `<div class="card__placeholder-art">${item.title.charAt(0)}</div>`;
+
+    return `
+      <li>
+        <article class="card recommended-card" data-id="${item.id}" data-href="${detailUrl}">
+          <div class="card__art ${item.art || 'card__art--1'}">
+            <a href="${detailUrl}" aria-label="View ${item.title} details">
+              ${imgTag}
+            </a>
+            ${badge}
+            <button class="card__wishlist" aria-label="Add ${item.title} to wishlist" type="button" data-action="add-to-wishlist" data-id="${item.id}">&hearts;</button>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title"><a href="${detailUrl}">${item.title}</a></h3>
+            <p class="card__meta">${item.genre} · ${item.platform}</p>
+            <div class="card__price">${priceHTML}</div>
           </div>
         </article>
       </li>`;
@@ -148,6 +199,40 @@
     }
   }
 
+  function renderRecommended() {
+    if (!recommendedGrid) return;
+
+    const wishlistIds = new Set((rawWishlistData.items || []).map(item => item.id));
+
+    // Exclude any game already in the user's wishlist
+    // Prioritize real games with images over placeholder games without images
+    const realGamesWithImages = allProducts.filter(p => {
+      return p.image && p.image.trim() !== '' && !wishlistIds.has(p.id);
+    });
+
+    const otherProducts = allProducts.filter(p => {
+      return (!p.image || p.image.trim() === '') && !wishlistIds.has(p.id);
+    });
+
+    // Randomize candidates on each refresh/render
+    const shuffledReal = shuffle(realGamesWithImages);
+    const shuffledOthers = shuffle(otherProducts);
+
+    // Pick recommended items, prioritizing real games with images
+    let recommendedList = shuffledReal.slice(0, 5);
+    if (recommendedList.length < 5) {
+      const needed = 5 - recommendedList.length;
+      recommendedList = recommendedList.concat(shuffledOthers.slice(0, needed));
+    }
+
+    if (recommendedList.length === 0) {
+      recommendedGrid.innerHTML = '<li class="shelf-empty">No recommended games available right now.</li>';
+      return;
+    }
+
+    recommendedGrid.innerHTML = recommendedList.map(recommendedCardHTML).join('');
+  }
+
   function render() {
     const displayItems = getFilteredAndSortedItems();
 
@@ -160,6 +245,7 @@
     updateHeader();
     updateFilterCounts();
     updateTotal();
+    renderRecommended();
   }
 
   async function loadWishlist() {
@@ -168,6 +254,20 @@
       render();
     } catch (err) {
       console.error('Error fetching wishlist:', err);
+    }
+  }
+
+  async function init() {
+    try {
+      const [wishlistData, productsData] = await Promise.all([
+        api('/api/wishlist').catch(() => ({ items: [], totalCount: 0, savedCount: 0, totalValue: 0 })),
+        api('/api/products').catch(() => [])
+      ]);
+      rawWishlistData = wishlistData;
+      allProducts = productsData;
+      render();
+    } catch (err) {
+      console.error('Error initializing wishlist page:', err);
     }
   }
 
@@ -188,7 +288,7 @@
     });
   }
 
-  // Action event delegation
+  // Action event delegation on wishlist grid
   if (grid) {
     grid.addEventListener('click', async (e) => {
       // 1. Move to cart
@@ -200,7 +300,7 @@
         try {
           await api(`/api/wishlist/${productId}/move-to-cart`, { method: 'POST' });
           showToast('Moved item to cart!', 'success');
-          loadWishlist();
+          await loadWishlist();
         } catch (err) {
           showToast(err.message, 'error');
           moveBtn.disabled = false;
@@ -216,7 +316,7 @@
         try {
           await api(`/api/wishlist/${productId}`, { method: 'DELETE' });
           showToast('Removed item from wishlist.', 'info');
-          loadWishlist();
+          await loadWishlist();
         } catch (err) {
           showToast(err.message, 'error');
         }
@@ -224,5 +324,41 @@
     });
   }
 
-  loadWishlist();
+  // Action event delegation on recommended shelf
+  if (recommendedGrid) {
+    recommendedGrid.addEventListener('click', async (e) => {
+      // 1. Add to wishlist button on recommended card
+      const wishBtn = e.target.closest('[data-action="add-to-wishlist"]');
+      if (wishBtn) {
+        e.stopPropagation();
+        e.preventDefault();
+        if (!requireLogin()) return;
+        const productId = wishBtn.dataset.id;
+        wishBtn.disabled = true;
+        try {
+          await api('/api/wishlist', {
+            method: 'POST',
+            body: { productId }
+          });
+          showToast('Added item to your wishlist!', 'info');
+          await loadWishlist();
+        } catch (err) {
+          showToast(err.message, err.status === 409 ? 'info' : 'error');
+          wishBtn.disabled = false;
+        }
+        return;
+      }
+
+      // 2. Click anywhere on recommended card -> navigate to description page
+      const card = e.target.closest('.recommended-card');
+      if (card && !e.target.closest('button') && !e.target.closest('a')) {
+        const href = card.dataset.href;
+        if (href) {
+          window.location.href = href;
+        }
+      }
+    });
+  }
+
+  init();
 })();
