@@ -34,7 +34,57 @@
       throw error;
     }
 
+    if (typeof path === 'string') {
+      if (path.startsWith('/api/cart') && data && data.itemCount !== undefined) {
+        updateCartBadge(data.itemCount);
+      } else if (path.includes('/api/checkout') && options.method === 'POST') {
+        updateCartBadge(0);
+      }
+    }
+
     return data;
+  }
+
+  // Login guard: when logged out, shows a centered "please log in" notice
+  // (info toast, ~1s) and returns false so the caller can abort the action.
+  function requireLogin() {
+    const user = (window.Playnex && typeof window.Playnex.getCurrentUser === 'function')
+      ? window.Playnex.getCurrentUser()
+      : null;
+    if (user) return true;
+    showToast('Please log in to continue.', 'info');
+    return false;
+  }
+
+  // Update topbar cart icon badge count
+  function updateCartBadge(count) {
+    const totalCount = Number(count) || 0;
+    const cartIcons = document.querySelectorAll('a.icon-btn[href="cart.html"], a.icon-btn[href*="cart.html"], a.icon-btn[aria-label*="Cart"]');
+    cartIcons.forEach(cartIcon => {
+      let badge = cartIcon.querySelector('.nav-count');
+      if (totalCount > 0) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'nav-count';
+          cartIcon.appendChild(badge);
+        }
+        badge.textContent = totalCount > 99 ? '99+' : totalCount;
+        cartIcon.setAttribute('aria-label', `Cart, ${totalCount} item${totalCount === 1 ? '' : 's'}`);
+      } else {
+        if (badge) badge.remove();
+        cartIcon.setAttribute('aria-label', 'Cart');
+      }
+    });
+  }
+
+  async function syncCartBadge() {
+    try {
+      const data = await api('/api/cart');
+      const count = data.itemCount !== undefined ? data.itemCount : (data.items || []).reduce((sum, i) => sum + i.qty, 0);
+      updateCartBadge(count);
+    } catch {
+      updateCartBadge(0);
+    }
   }
 
   // Toast notification helper for UI feedback
@@ -53,10 +103,21 @@
     clearTimeout(toast._timeout);
     toast._timeout = setTimeout(() => {
       toast.classList.remove('is-visible');
-    }, 3200);
+    }, type === 'info' ? 1000 : 3200);
   }
 
   window.Playnex = window.Playnex || {};
   window.Playnex.api = api;
   window.Playnex.showToast = showToast;
+  window.Playnex.requireLogin = requireLogin;
+  window.Playnex.updateCartBadge = updateCartBadge;
+  window.Playnex.syncCartBadge = syncCartBadge;
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncCartBadge);
+  } else {
+    syncCartBadge();
+  }
+  window.addEventListener('pageshow', syncCartBadge);
+  window.addEventListener('focus', syncCartBadge);
 })();

@@ -115,6 +115,10 @@
     if (itemCountHeader) itemCountHeader.textContent = `${totalQty} item${totalQty === 1 ? '' : 's'}`;
     if (toolbarCountEl) toolbarCountEl.textContent = `${totalQty} item${totalQty === 1 ? '' : 's'} in your cart`;
 
+    if (window.Playnex && typeof window.Playnex.updateCartBadge === 'function') {
+      window.Playnex.updateCartBadge(totalQty);
+    }
+
     if (summarySubtotal) summarySubtotal.textContent = money(subtotal);
     if (summaryShipping) summaryShipping.textContent = money(shipping);
     if (summaryTax) summaryTax.textContent = money(tax);
@@ -145,7 +149,7 @@
     if (list) {
       list.innerHTML = displayItems.length
         ? displayItems.map(itemHTML).join('')
-        : (items.length === 0 
+        : (items.length === 0
             ? '<li class="shelf-empty">Your cart is currently empty. <a href="shopping.html">Browse games &amp; merch →</a></li>'
             : '<li class="shelf-empty">No cart items match your filter.</li>');
     }
@@ -263,7 +267,7 @@
 
         appliedDiscount = data.discountPercent / 100;
         promoCodeName = data.promoCode;
-        
+
         sessionStorage.setItem(PROMO_KEY, JSON.stringify({
           code: promoCodeName,
           discount: appliedDiscount
