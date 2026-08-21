@@ -42,7 +42,7 @@
 
     return `
       <li>
-        <article class="wishlist-card" data-id="${item.id}">
+        <article class="card wishlist-card" data-id="${item.id}">
           <div class="card__art ${item.art || 'card__art--1'} wishlist-card__art">
             <a href="${item.href || 'shopping.html'}" aria-label="View ${item.title} details">
               ${imgTag}
