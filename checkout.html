@@ -107,10 +107,50 @@
         <div class="form-group form-group--full">
           <label for="country">Country</label>
           <select id="country" name="country" required>
-            <option value="vn" selected>Vietnam</option>
-            <option value="us">United States</option>
-            <option value="sg">Singapore</option>
-            <option value="au">Australia</option>
+            <option value="" disabled>Select your country</option>
+            <optgroup label="Asia">
+              <option value="vn" selected>Vietnam</option>
+              <option value="jp">Japan</option>
+              <option value="kr">South Korea</option>
+              <option value="cn">China</option>
+              <option value="sg">Singapore</option>
+              <option value="th">Thailand</option>
+              <option value="my">Malaysia</option>
+              <option value="id">Indonesia</option>
+              <option value="ph">Philippines</option>
+              <option value="in">India</option>
+              <option value="tw">Taiwan</option>
+              <option value="hk">Hong Kong</option>
+              <option value="ae">United Arab Emirates</option>
+              <option value="sa">Saudi Arabia</option>
+            </optgroup>
+            <optgroup label="Europe">
+              <option value="gb">United Kingdom</option>
+              <option value="de">Germany</option>
+              <option value="fr">France</option>
+              <option value="it">Italy</option>
+              <option value="es">Spain</option>
+              <option value="nl">Netherlands</option>
+              <option value="se">Sweden</option>
+              <option value="ch">Switzerland</option>
+              <option value="pl">Poland</option>
+              <option value="no">Norway</option>
+              <option value="dk">Denmark</option>
+              <option value="fi">Finland</option>
+              <option value="be">Belgium</option>
+              <option value="at">Austria</option>
+              <option value="pt">Portugal</option>
+              <option value="ie">Ireland</option>
+              <option value="cz">Czech Republic</option>
+              <option value="gr">Greece</option>
+            </optgroup>
+            <optgroup label="Other Regions">
+              <option value="us">United States</option>
+              <option value="ca">Canada</option>
+              <option value="au">Australia</option>
+              <option value="nz">New Zealand</option>
+              <option value="br">Brazil</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -122,25 +162,25 @@
       <div class="form-row">
         <div class="form-group form-group--full">
           <label for="card-name">Name on card</label>
-          <input id="card-name" name="card-name" type="text" placeholder="Nguyễn Văn A" required>
+          <input id="card-name" name="card-name" type="text" placeholder="NGUYEN VAN A" autocomplete="cc-name" required>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group form-group--full">
           <label for="card-number">Card number</label>
-          <input id="card-number" name="card-number" type="text" inputmode="numeric" placeholder="4242 4242 4242 4242" pattern="[0-9 ]{13,19}" required>
+          <input id="card-number" name="card-number" type="text" inputmode="numeric" placeholder="4242 4242 4242 4242" maxlength="23" autocomplete="cc-number" required>
         </div>
       </div>
 
       <div class="form-row">
         <div class="form-group">
           <label for="card-expiry">Expiry date</label>
-          <input id="card-expiry" name="card-expiry" type="text" placeholder="MM/YY" pattern="(0[1-9]|1[0-2])\/[0-9]{2}" required>
+          <input id="card-expiry" name="card-expiry" type="text" placeholder="MM/YY" required>
         </div>
         <div class="form-group">
           <label for="card-cvc">Security code</label>
-          <input id="card-cvc" name="card-cvc" type="text" inputmode="numeric" placeholder="CVC" pattern="[0-9]{3,4}" required>
+          <input id="card-cvc" name="card-cvc" type="text" inputmode="numeric" placeholder="CVC" required>
         </div>
       </div>
     </fieldset>

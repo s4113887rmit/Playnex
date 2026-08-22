@@ -80,29 +80,33 @@
   // Validation rules
   const validators = {
     'full-name': (v) => (v.trim().length >= 2 ? '' : 'Full name must be at least 2 characters.'),
-    'phone': (v) => (/^[0-9 +()-]{7,15}$/.test(v.trim()) ? '' : 'Enter a valid phone number (7–15 digits).'),
-    'address': (v) => (v.trim().length >= 5 ? '' : 'Street address must be at least 5 characters.'),
+    'phone': (v) => (/^[0-9 +()-]{7,20}$/.test(v.trim()) ? '' : 'Enter a valid phone number.'),
+    'address': (v) => (v.trim().length >= 3 ? '' : 'Street address must be at least 3 characters.'),
     'city': (v) => (v.trim().length >= 2 ? '' : 'Please enter your city.'),
-    'postal-code': (v) => (/^[0-9]{4,10}$/.test(v.trim()) ? '' : 'Enter a valid postal code (4–10 digits).'),
+    'postal-code': (v) => (v.trim().length >= 3 ? '' : 'Enter a valid postal code.'),
     'country': (v) => (v ? '' : 'Please select a delivery country.'),
-    'card-name': (v) => (v.trim().length >= 2 ? '' : 'Enter the cardholder name.'),
+    'card-name': (v) => {
+      const clean = v.trim();
+      if (clean.length < 2) return 'Enter the cardholder name.';
+      if (!/^[A-Z\s]{2,100}$/.test(clean)) return 'Name on card must contain only unaccented uppercase letters (no numbers or special characters).';
+      return '';
+    },
     'card-number': (v) => {
       const clean = v.replace(/\s+/g, '');
-      if (!/^[0-9]{13,19}$/.test(clean)) return 'Card number must contain 13 to 19 digits.';
-      if (!isValidLuhn(clean)) return 'Invalid card number checksum.';
+      if (clean.length < 15) return 'Card number must be at least 15 digits.';
+      if (clean.length > 19) return 'Card number cannot exceed 19 digits.';
+      if (!/^[0-9]{15,19}$/.test(clean)) return 'Card number must contain only numbers (15 to 19 digits).';
       return '';
     },
     'card-expiry': (v) => {
-      const m = v.match(/^(0[1-9]|1[0-2])\/([0-9]{2})$/);
+      const clean = v.trim();
+      const m = clean.match(/^(\d{1,2})\/(\d{2,4})$/);
       if (!m) return 'Enter expiry in MM/YY format.';
-      const now = new Date();
-      const expYear = 2000 + parseInt(m[2], 10);
-      const expMonth = parseInt(m[1], 10);
-      const expiryDate = new Date(expYear, expMonth, 0, 23, 59, 59);
-      if (expiryDate < now) return 'Card has already expired.';
+      const month = parseInt(m[1], 10);
+      if (month < 1 || month > 12) return 'Invalid expiry month (01–12).';
       return '';
     },
-    'card-cvc': (v) => (/^[0-9]{3,4}$/.test(v.trim()) ? '' : 'Security code must be 3 or 4 digits.')
+    'card-cvc': (v) => (/^[0-9]{2,6}$/.test(v.trim()) ? '' : 'Security code must be digits (e.g. 3 or 4 digits).')
   };
 
   function getOrCreateErrorElement(input) {
@@ -186,6 +190,19 @@
   }
 
   // --- Error Prevention Input Masking ---
+  const cardNameInput = document.getElementById('card-name');
+  if (cardNameInput) {
+    cardNameInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .replace(/[^a-zA-Z\s]/g, '')
+        .toUpperCase();
+    });
+  }
+
   const cardNumberInput = document.getElementById('card-number');
   if (cardNumberInput) {
     cardNumberInput.addEventListener('input', (e) => {
@@ -199,7 +216,7 @@
     cardExpiryInput.addEventListener('input', (e) => {
       let digits = e.target.value.replace(/\D/g, '').slice(0, 4);
       if (digits.length >= 3) {
-        digits = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+        digits = `${digits.slice(0, 2)}/${digits.slice(2, 4)}`;
       }
       e.target.value = digits;
     });
@@ -208,7 +225,7 @@
   const cardCvcInput = document.getElementById('card-cvc');
   if (cardCvcInput) {
     cardCvcInput.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
     });
   }
 
@@ -331,12 +348,20 @@
           body: payload
         });
 
+        if (res && res.order) {
+          try {
+            sessionStorage.setItem('playnex_last_order', JSON.stringify(res.order));
+            localStorage.setItem('playnex_last_order', JSON.stringify(res.order));
+          } catch (e) {}
+        }
+
         clearDraft();
         localStorage.removeItem('playnex_cart_cache');
         showToast('Order confirmed successfully!', 'success');
 
         setTimeout(() => {
-          window.location.href = `confirmation.html?order=${encodeURIComponent(res.order.id)}`;
+          const orderId = (res && res.order && res.order.id) ? res.order.id : '';
+          window.location.href = orderId ? `confirmation.html?order=${encodeURIComponent(orderId)}` : 'confirmation.html';
         }, 500);
       } catch (err) {
         submitBtn.disabled = false;

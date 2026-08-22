@@ -271,6 +271,7 @@
     const tagsEl = document.getElementById('hero-tags');
     const buyBtn = document.getElementById('hero-buy-btn');
     const wishBtn = document.getElementById('hero-wishlist-btn');
+    let cartBtn = document.getElementById('hero-cart-btn');
 
     if (titleEl) titleEl.textContent = game.title;
     if (descEl) descEl.textContent = game.desc;
@@ -288,6 +289,27 @@
       const priceText = game.price === 0 ? 'Claim now — Free' : `Buy now — $${Number(game.price).toFixed(2)}`;
       buyBtn.textContent = priceText;
       buyBtn.href = game.href || `listing.html?game=${game.id}`;
+    }
+
+    if (!cartBtn) {
+      const heroActions = document.querySelector('.hero__actions');
+      if (heroActions) {
+        cartBtn = document.createElement('button');
+        cartBtn.type = 'button';
+        cartBtn.id = 'hero-cart-btn';
+        cartBtn.className = 'btn btn--outline btn--large';
+        cartBtn.setAttribute('data-action', 'add-to-cart');
+        cartBtn.textContent = 'Add to cart';
+        if (wishBtn) {
+          heroActions.insertBefore(cartBtn, wishBtn);
+        } else {
+          heroActions.appendChild(cartBtn);
+        }
+      }
+    }
+
+    if (cartBtn) {
+      cartBtn.dataset.id = game.id;
     }
 
     if (wishBtn) {

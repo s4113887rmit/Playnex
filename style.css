@@ -1696,25 +1696,48 @@ img {
 .cart-list {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.cart-list li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .cart-item {
   display: grid;
-  grid-template-columns: 96px 1fr auto auto auto;
-  gap: 18px;
+  grid-template-columns: 84px 1fr auto auto auto;
+  gap: 20px;
   align-items: center;
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 16px;
+  padding: 14px 20px;
+  margin: 0;
+  min-height: 120px;
 }
 
 .cart-item__art {
-  width: 96px;
-  height: 72px;
+  width: 84px;
+  height: 112px;
   border-radius: 6px;
   background: linear-gradient(160deg, #23233c, #14142a);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cart-item__art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .cart-item__art--1 {
@@ -1722,51 +1745,75 @@ img {
 }
 
 .cart-item__title {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   margin-bottom: 4px;
 }
 
+.cart-item__title a {
+  color: var(--text);
+  transition: color 0.15s ease;
+}
+
+.cart-item__title a:hover {
+  color: var(--accent);
+}
+
 .cart-item__variant {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
+  margin: 0;
 }
 
 .cart-item__qty {
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .cart-item__qty label {
-  font-size: 11px;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-muted);
-  margin-right: 8px;
+  margin-right: 0;
 }
 
 .cart-item__qty input {
-  width: 56px;
+  width: 64px;
+  height: 38px;
   background: var(--surface-2);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 7px 8px;
+  border-radius: 6px;
+  padding: 6px 8px;
   text-align: center;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .cart-item__price {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 700;
-  min-width: 72px;
+  min-width: 76px;
   text-align: right;
+  color: var(--text);
 }
 
 .cart-item__remove {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 6px 10px;
+  transition: color 0.15s ease, background-color 0.15s ease;
 }
 
 .cart-item__remove:hover {
-  color: var(--accent);
+  color: #ff4757;
+  background: rgba(255, 71, 87, 0.1);
 }
 
 .cart-summary {
@@ -4387,9 +4434,10 @@ header {
 /* Toast notification */
 .playnex-toast {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  padding: 14px 22px;
+  left: 50%;
+  right: auto;
+  bottom: 50%;
+  padding: 12px 14px 12px 18px;
   background: #18192b;
   color: #f0f0ff;
   border: 1px solid #3c3e66;
@@ -4399,15 +4447,49 @@ header {
   font-weight: 500;
   z-index: 9999;
   opacity: 0;
-  transform: translateY(20px);
+  transform: translate(-50%, 20px);
   pointer-events: none;
   transition: opacity 0.25s ease, transform 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: min(500px, 92vw);
 }
 
 .playnex-toast.is-visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translate(-50%, 0);
   pointer-events: auto;
+}
+
+.playnex-toast__content {
+  flex: 1;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.playnex-toast__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #a0a0c0;
+  font-size: 22px;
+  line-height: 1;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.playnex-toast__close:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .playnex-toast.is-success {
@@ -4419,15 +4501,7 @@ header {
 }
 
 .playnex-toast.is-info {
-  left: 50%;
-  right: auto;
-  bottom: 50%;
   border-left: 4px solid #7c5cff;
-  transform: translate(-50%, 20px);
-}
-
-.playnex-toast.is-info.is-visible {
-  transform: translate(-50%, 0);
 }
 
 .playnex-toast__link,

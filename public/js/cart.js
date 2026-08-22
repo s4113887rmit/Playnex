@@ -4,7 +4,7 @@
  *   - Client & Server synchronization
  *   - Live search/filter within cart items
  *   - Live sort (Title, Quantity, Price)
- *   - Quantity validation (1-10) with error prevention & live totals
+ *   - Quantity validation with error prevention & live totals
  *   - Promo code validation with live feedback (PLAYNEX10, PLAYNEX20)
  *   - Web Storage persistence for promo code and cart cache
  *   - Order Summary calculations with physical shipping logic & taxes.
@@ -70,8 +70,8 @@
             <p class="cart-item__variant">${variant || product.variant || (product.category === 'physical' ? 'Physical Merch' : 'Digital Game')}</p>
           </div>
           <div class="cart-item__qty">
-            <label for="qty-${product.id}">Qty</label>
-            <input id="qty-${product.id}" name="qty-${product.id}" type="number" min="1" max="10" value="${qty}" data-id="${product.id}">
+            <label for="qty-${product.id}">Quantity</label>
+            <input id="qty-${product.id}" name="qty-${product.id}" type="number" min="1" value="${qty}" data-id="${product.id}">
           </div>
           <span class="cart-item__price">${money(product.price * qty)}</span>
           <button type="button" class="cart-item__remove" data-id="${product.id}">Remove</button>
@@ -209,11 +209,6 @@
       if (isNaN(qty) || qty < 1) {
         qty = 1;
         input.value = 1;
-      }
-      if (qty > 10) {
-        qty = 10;
-        input.value = 10;
-        showToast('Maximum quantity per item is 10.', 'info');
       }
 
       try {

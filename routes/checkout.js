@@ -41,13 +41,13 @@ function validateCheckout(body) {
   }
 
   const phone = (delivery.phone || '').trim();
-  if (!phone || !/^[0-9 +()-]{7,15}$/.test(phone)) {
-    errors.phone = 'Please enter a valid contact phone number (7–15 digits).';
+  if (!phone || !/^[0-9 +()-]{7,20}$/.test(phone)) {
+    errors.phone = 'Please enter a valid contact phone number.';
   }
 
   const address = (delivery.address || '').trim();
-  if (!address || address.length < 5) {
-    errors.address = 'Street address must be at least 5 characters.';
+  if (!address || address.length < 3) {
+    errors.address = 'Street address must be at least 3 characters.';
   } else if (address.length > 200) {
     errors.address = 'Street address cannot exceed 200 characters.';
   }
@@ -58,8 +58,8 @@ function validateCheckout(body) {
   }
 
   const postalCode = (delivery.postalCode || '').trim();
-  if (!postalCode || !/^[0-9]{4,10}$/.test(postalCode)) {
-    errors.postalCode = 'Postal code must contain between 4 and 10 digits.';
+  if (!postalCode || postalCode.length < 3) {
+    errors.postalCode = 'Postal code is required.';
   }
 
   if (!delivery.country || typeof delivery.country !== 'string') {
@@ -67,35 +67,40 @@ function validateCheckout(body) {
   }
 
   // Payment validation
-  const cardName = (payment.cardName || '').trim();
+  let cardName = (payment.cardName || '').trim();
+  cardName = cardName
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .replace(/[^a-zA-Z\s]/g, '')
+    .toUpperCase();
+
   if (!cardName || cardName.length < 2) {
-    errors.cardName = 'Name on card is required.';
+    errors.cardName = 'Name on card is required and must contain only letters.';
+  } else if (!/^[A-Z\s]{2,100}$/.test(cardName)) {
+    errors.cardName = 'Name on card must contain only unaccented letters without numbers or special characters.';
   }
 
   const rawCardNumber = (payment.cardNumber || '').replace(/\s+/g, '');
-  if (!rawCardNumber || !/^[0-9]{13,19}$/.test(rawCardNumber)) {
-    errors.cardNumber = 'Card number must be 13 to 19 digits.';
-  } else if (!isValidLuhn(rawCardNumber)) {
-    errors.cardNumber = 'Invalid card number checksum (Luhn check failed).';
+  if (!rawCardNumber || !/^[0-9]{15,19}$/.test(rawCardNumber)) {
+    errors.cardNumber = 'Card number must be between 15 and 19 digits.';
   }
 
   const expiry = (payment.expiry || '').trim();
-  const expiryMatch = expiry.match(/^(0[1-9]|1[0-2])\/([0-9]{2})$/);
+  const expiryMatch = expiry.match(/^(\d{1,2})\/(\d{2,4})$/);
   if (!expiryMatch) {
     errors.expiry = 'Expiry date must be in MM/YY format.';
   } else {
     const month = parseInt(expiryMatch[1], 10);
-    const year = 2000 + parseInt(expiryMatch[2], 10);
-    const now = new Date();
-    const expiryDate = new Date(year, month, 0, 23, 59, 59); // end of expiry month
-    if (expiryDate < now) {
-      errors.expiry = 'The credit card has already expired.';
+    if (month < 1 || month > 12) {
+      errors.expiry = 'Invalid expiry month (01–12).';
     }
   }
 
   const cvc = (payment.cvc || '').trim();
-  if (!cvc || !/^[0-9]{3,4}$/.test(cvc)) {
-    errors.cvc = 'CVC / Security code must be 3 or 4 digits.';
+  if (!cvc || !/^[0-9]{2,6}$/.test(cvc)) {
+    errors.cvc = 'CVC / Security code is required.';
   }
 
   return errors;

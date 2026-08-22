@@ -97,8 +97,20 @@
       document.body.appendChild(toast);
     }
 
-    toast.innerHTML = message;
+    toast.innerHTML = `
+      <div class="playnex-toast__content">${message}</div>
+      <button type="button" class="playnex-toast__close" aria-label="Close notification" title="Close">&times;</button>
+    `;
     toast.className = `playnex-toast is-${type} is-visible`;
+
+    const closeBtn = toast.querySelector('.playnex-toast__close');
+    if (closeBtn) {
+      closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        clearTimeout(toast._timeout);
+        toast.classList.remove('is-visible');
+      };
+    }
 
     clearTimeout(toast._timeout);
     toast._timeout = setTimeout(() => {

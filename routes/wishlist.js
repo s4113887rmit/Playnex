@@ -126,7 +126,7 @@ router.post('/:productId/move-to-cart', (req, res) => {
   const cart = getCart(req.userId);
   const existingCartItem = cart.find(l => l.productId === productId);
   if (existingCartItem) {
-    existingCartItem.qty = Math.min(10, existingCartItem.qty + 1);
+    existingCartItem.qty += 1;
   } else {
     cart.push({ productId, qty: 1, variant: product.variant });
   }

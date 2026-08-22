@@ -50,8 +50,8 @@ router.post('/', (req, res) => {
     return res.status(400).json({ error: 'Product ID is required and must be a valid string.' });
   }
 
-  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
-    return res.status(400).json({ error: 'Quantity must be a whole number between 1 and 10.' });
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    return res.status(400).json({ error: 'Quantity must be a whole number greater than 0.' });
   }
 
   const product = products.find(p => p.id === productId);
@@ -63,11 +63,6 @@ router.post('/', (req, res) => {
   const existing = cart.find(l => l.productId === productId);
 
   if (existing) {
-    if (existing.qty + quantity > 10) {
-      return res.status(400).json({ 
-        error: `Cannot add ${quantity} more. Maximum allowed quantity per item is 10 (you already have ${existing.qty} in your cart).` 
-      });
-    }
     existing.qty += quantity;
     if (variant) existing.variant = variant;
   } else {
@@ -98,8 +93,8 @@ router.put('/:productId', (req, res) => {
   const { qty, variant } = req.body;
   const quantity = Number(qty);
 
-  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
-    return res.status(400).json({ error: 'Quantity must be a whole number between 1 and 10.' });
+  if (!Number.isInteger(quantity) || quantity < 1) {
+    return res.status(400).json({ error: 'Quantity must be a whole number greater than 0.' });
   }
 
   const cart = getCart(req.userId);
