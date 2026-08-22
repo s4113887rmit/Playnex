@@ -17,10 +17,9 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 - `views/rating.ejs` - Browse games with search, sorting, and average star ratings
 - `views/ratinggame.ejs` - Game review details with rating breakdown and user reviews
 - `views/writegamereview.ejs` - Submit a star rating and written review for a game
-- `views/listing.ejs` - Game detail page (hero, facts, related games)
-- `public/js/listing.js` - Add to cart / wishlist wiring for the listing page
 - `views/sitemap.ejs` - Automatically generated sitemap
 - `data/games.json` - Game and review data
+- `views/partials/header.ejs`, `views/partials/footer.ejs` - Shared EJS header and footer partials
 
 ### Nguyen Ngoc Quang Dang (S4113887)
 - `homepage.html` - Landing page with hero carousel, new releases, merch shelves
@@ -29,10 +28,11 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 - `checkout.html` - Delivery and payment form
 - `confirmation.html` - Order confirmation page
 - `wishlist.html` - Saved items with purchased/favorited sections
+- `views/listing.ejs` - Game detail page (hero, facts, related games; mostly Dang, game review section by Bao)
+- `public/js/listing.js` - Add to cart / wishlist wiring for the listing page
 - `routes/products.js`, `routes/cart.js`, `routes/wishlist.js`, `routes/checkout.js` - Store APIs
 - `data/products.js`, `data/store.js` - Store catalogue and in-memory store data
 - `public/js/homepage.js`, `shopping.js`, `cart.js`, `wishlist.js`, `checkout.js`, `confirmation.js` - Client scripts
-- `views/partials/header.ejs`, `views/partials/footer.ejs` - Shared EJS header and footer partials
 - `style.css` - Global stylesheet (shared)
 
 ### Tran Binh An (S4206755)
@@ -78,7 +78,6 @@ Shared User Account module (with team):
    ```
    npm start
    ```
-   (or run `start.bat`)
 3. Open http://localhost:3000
 
 The A2 prototype does not require MongoDB. If no MongoDB connection string is set (or the database is unreachable), the app automatically falls back to in-memory users.

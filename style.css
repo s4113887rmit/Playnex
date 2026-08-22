@@ -4673,4 +4673,6 @@ a.btn.is-disabled {
 .rating-toolbar {
   max-width: none;
   margin: 0 100px 28px;
+  margin-top: 10px;
+  margin-bottom: -10px;
 }

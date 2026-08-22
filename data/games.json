@@ -23,25 +23,23 @@
       "Deep RPG progression and builds",
       "Cross-platform digital delivery"
     ],
-    "baseRating": 5,
-    "baseCount": 36,
     "reviews": [
       {
-        "id": "r_1787067730449",
-        "author": "You",
-        "date": "18/8/2026 (edited)",
+        "id": "r_1710000001001",
+        "author": "Valkyrie_Blade",
+        "date": "14/01/2026",
         "stars": 5,
-        "title": "hehe",
-        "content": "game hay nên chơi bai baiadadada",
+        "title": "A masterpiece of open-world game design",
+        "content": "FromSoftware has outdone themselves with the Lands Between. The sense of discovery, challenging combat encounters, and world-building are unmatched. Easily one of the greatest games ever made.",
         "image": ""
       },
       {
-        "id": "r_1787229855426",
-        "author": "You",
-        "date": "20/8/2026",
+        "id": "r_1710000001002",
+        "author": "TarnishedOne",
+        "date": "02/02/2026",
         "stars": 5,
-        "title": "Great game",
-        "content": "This is a really long review content that passes the minimum length requirement.",
+        "title": "Peak dark fantasy experience",
+        "content": "The boss fights are demanding but deeply satisfying once you learn their patterns. Build diversity is enormous, allowing countless playstyles. An absolute must-play.",
         "image": ""
       }
     ]
@@ -69,9 +67,26 @@
       "Character upgrades and cybernetic builds",
       "Rich urban exploration"
     ],
-    "baseRating": 4,
-    "baseCount": 24,
-    "reviews": []
+    "reviews": [
+      {
+        "id": "r_1710000002001",
+        "author": "NetRunner_V",
+        "date": "18/12/2025",
+        "stars": 4,
+        "title": "Night City is breathtaking despite minor quirks",
+        "content": "The narrative and atmosphere are incredible. The recent updates have polished the combat and progression substantially. Still has occasional visual glitches, but the story is unforgettable.",
+        "image": ""
+      },
+      {
+        "id": "r_1710000002002",
+        "author": "ChromeSamurai",
+        "date": "10/01/2026",
+        "stars": 4,
+        "title": "Great immersion and thrilling combat builds",
+        "content": "Hacking, gunplay, and cyberware builds feel distinct and powerful. The main campaign keeps you hooked throughout, though vehicle handling could still use slight fine-tuning.",
+        "image": ""
+      }
+    ]
   },
   {
     "id": 3,
@@ -97,24 +112,24 @@
       "Story-driven side quests",
       "Stunning cinematic atmosphere"
     ],
-    "baseRating": 4,
-    "baseCount": 20,
     "reviews": [
       {
-        "author": "You",
-        "date": "18/8/2026",
+        "id": "r_1710000003001",
+        "author": "Kensei_Honor",
+        "date": "05/11/2025",
         "stars": 5,
-        "title": "helllo",
-        "content": "alibaba",
-        "id": "r_17870674047101uw6rq"
+        "title": "Breathtaking visual beauty and fluid katana combat",
+        "content": "Jin Sakai's journey between the samurai code and the way of the Ghost is powerfully told. The swordplay feels crisp, responsive, and cinematic in every encounter.",
+        "image": ""
       },
       {
-        "author": "You",
-        "date": "18/8/2026",
-        "stars": 1,
-        "title": "đă",
-        "content": "ưdad",
-        "id": "r_1787067404710ik7wdz"
+        "id": "r_1710000003002",
+        "author": "WindFollower",
+        "date": "20/01/2026",
+        "stars": 5,
+        "title": "An artistic marvel from start to finish",
+        "content": "Following the guiding wind instead of traditional mini-map markers makes exploration feel completely natural and organic. The soundtrack and duel cutscenes are top notch.",
+        "image": ""
       }
     ]
   },
@@ -141,9 +156,27 @@
       "Story-rich missions and camp life",
       "Immersive wildlife and scenery"
     ],
-    "baseRating": 4,
-    "baseCount": 30,
-    "reviews": []
+
+    "reviews": [
+      {
+        "id": "r_1710000004001",
+        "author": "ArthurM_Outlaw",
+        "date": "12/11/2025",
+        "stars": 5,
+        "title": "An emotional, unforgettable narrative journey",
+        "content": "Arthur Morgan is one of the best written protagonists in gaming history. The world feels alive with reactive wildlife, memorable camp interactions, and rich side stories.",
+        "image": ""
+      },
+      {
+        "id": "r_1710000004002",
+        "author": "FrontierGunslinger",
+        "date": "08/02/2026",
+        "stars": 5,
+        "title": "Unrivaled level of detail and realism",
+        "content": "The attention to detail in every town, campsite, and landscape is astounding. Combat is punchy and every chapter raises the stakes beautifully.",
+        "image": ""
+      }
+    ]
   },
   {
     "id": 5,
@@ -169,9 +202,27 @@
       "Rich mythological narrative",
       "Endless build experimentation"
     ],
-    "baseRating": 5,
-    "baseCount": 18,
-    "reviews": []
+
+    "reviews": [
+      {
+        "id": "r_1710000005001",
+        "author": "UnderworldPrince",
+        "date": "25/11/2025",
+        "stars": 5,
+        "title": "The gold standard for roguelike storytelling",
+        "content": "Fast-paced, responsive combat combined with witty, voice-acted dialogue on every single run. Even dying feels rewarding because the story continues to unfold.",
+        "image": ""
+      },
+      {
+        "id": "r_1710000005002",
+        "author": "NyxDevotee",
+        "date": "15/01/2026",
+        "stars": 5,
+        "title": "Addictive loop with phenomenal music and art",
+        "content": "Boons from the Olympian gods create endless build variety. The art style is gorgeous and Darren Korb's soundtrack elevates every boss fight.",
+        "image": ""
+      }
+    ]
   },
   {
     "id": 6,
@@ -197,9 +248,27 @@
       "Beautiful hand-drawn art direction",
       "Tons of secrets and upgrades"
     ],
-    "baseRating": 4,
-    "baseCount": 22,
-    "reviews": []
+
+    "reviews": [
+      {
+        "id": "r_1710000006001",
+        "author": "HallownestWanderer",
+        "date": "30/10/2025",
+        "stars": 4,
+        "title": "Atmospheric metroidvania with tight controls",
+        "content": "The interconnected map of Hallownest is a joy to explore with charming secrets everywhere. Some backtracking can feel tedious at times, but the boss designs are superb.",
+        "image": ""
+      },
+      {
+        "id": "r_1710000006002",
+        "author": "NailMaster_Z",
+        "date": "19/12/2025",
+        "stars": 4,
+        "title": "Brutal difficulty with deep lore",
+        "content": "Tight platforming and responsive combat make every victory feel well earned. The learning curve is steep and can punish casual players, but it is well worth the effort.",
+        "image": ""
+      }
+    ]
   },
   {
     "id": 7,
@@ -225,9 +294,26 @@
       "Memorable soundtrack",
       "Multiple playthrough perspectives"
     ],
-    "baseRating": 3,
-    "baseCount": 15,
-    "reviews": []
+    "reviews": [
+      {
+        "id": "r_1710000007001",
+        "author": "YoRHa_Scanner",
+        "date": "03/11/2025",
+        "stars": 3,
+        "title": "Unique story, but repetitive environments",
+        "content": "The philosophical narrative and soundtrack are exceptional, but some side quests feel like tedious fetch chores and open world zones look somewhat barren and dated.",
+        "image": ""
+      },
+      {
+        "id": "r_1710000007002",
+        "author": "PodOperator042",
+        "date": "11/01/2026",
+        "stars": 3,
+        "title": "Ambitious concept with uneven pacing",
+        "content": "The seamless shifts between hack-and-slash and shoot-em-up mechanics are creative. However, replaying sections for different endings requires patience that not all players may enjoy.",
+        "image": ""
+      }
+    ]
   },
   {
     "id": 8,
@@ -253,9 +339,26 @@
       "Rich environmental storytelling",
       "Replayable challenge modes"
     ],
-    "baseRating": 3,
-    "baseCount": 12,
-    "reviews": []
+    "reviews": [
+      {
+        "id": "r_1710000008001",
+        "author": "BridgesCourier",
+        "date": "17/10/2025",
+        "stars": 3,
+        "title": "An acquired taste with polarizing mechanics",
+        "content": "Visually stunning and mechanically unique, but the early delivery routes can feel monotonous before unlocking vehicles and zip-lines. Definitely not for everyone.",
+        "image": ""
+      },
+      {
+        "id": "r_1710000008002",
+        "author": "TimefallWalker",
+        "date": "05/01/2026",
+        "stars": 3,
+        "title": "Incredible concept, slow burn pacing",
+        "content": "The asynchronous multiplayer bridge-building is genuinely innovative. Still, long exposition cutscenes and sluggish terrain management test your patience during the opening chapters.",
+        "image": ""
+      }
+    ]
   },
   {
     "id": 9,
@@ -281,8 +384,25 @@
       "Deep character builds and alchemy",
       "Meaningful choices and consequences"
     ],
-    "baseRating": 5,
-    "baseCount": 42,
-    "reviews": []
+    "reviews": [
+      {
+        "id": "r_1710000009001",
+        "author": "WhiteWolfFan",
+        "date": "22/10/2025",
+        "stars": 5,
+        "title": "The definitive standard for story-driven RPGs",
+        "content": "Even minor side quests offer deep narrative choices and moral dilemmas. Geralt's journey across Velen, Novigrad, and Skellige remains an unmatched RPG benchmark.",
+        "image": ""
+      },
+      {
+        "id": "r_1710000009002",
+        "author": "SilverSword",
+        "date": "09/02/2026",
+        "stars": 5,
+        "title": "Unforgettable characters and world immersion",
+        "content": "From the Bloody Baron storyline to the expansions Blood and Wine, every quest is meticulously crafted. A masterpiece that holds up brilliantly year after year.",
+        "image": ""
+      }
+    ]
   }
 ]
