@@ -46,13 +46,13 @@
   }
 
   // Login guard: when logged out, shows a centered "please log in" notice
-  // (info toast, ~1s) and returns false so the caller can abort the action.
+  // with a clickable underlined "Log In" link and returns false so caller can abort.
   function requireLogin() {
     const user = (window.Playnex && typeof window.Playnex.getCurrentUser === 'function')
       ? window.Playnex.getCurrentUser()
       : null;
     if (user) return true;
-    showToast('Please log in to continue.', 'info');
+    showToast('Please log in to continue. <a href="Login.html" class="playnex-toast__link">Log In -&gt;</a>', 'info');
     return false;
   }
 
@@ -97,13 +97,23 @@
       document.body.appendChild(toast);
     }
 
-    toast.textContent = message;
+    toast.innerHTML = message;
     toast.className = `playnex-toast is-${type} is-visible`;
 
     clearTimeout(toast._timeout);
     toast._timeout = setTimeout(() => {
       toast.classList.remove('is-visible');
-    }, type === 'info' ? 1000 : 3200);
+    }, type === 'info' ? 3500 : 3200);
+
+    toast.onmouseenter = () => {
+      clearTimeout(toast._timeout);
+    };
+    toast.onmouseleave = () => {
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(() => {
+        toast.classList.remove('is-visible');
+      }, 1500);
+    };
   }
 
   window.Playnex = window.Playnex || {};

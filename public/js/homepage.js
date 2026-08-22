@@ -136,6 +136,7 @@
   let heroTimer = null;
   const heroStage = document.getElementById('hero-stage');
   let heroCardElements = [];
+  let heroDotElements = [];
 
   function initHeroCarousel() {
     if (!heroStage) return;
@@ -149,6 +150,36 @@
     `).join('');
 
     heroCardElements = Array.from(heroStage.querySelectorAll('.hero-card'));
+
+    const heroVisual = document.getElementById('hero-visual');
+    let heroDotsContainer = document.getElementById('hero-dots');
+    if (!heroDotsContainer && heroVisual) {
+      heroDotsContainer = document.createElement('div');
+      heroDotsContainer.id = 'hero-dots';
+      heroDotsContainer.className = 'hero__dots';
+      heroDotsContainer.setAttribute('role', 'tablist');
+      heroDotsContainer.setAttribute('aria-label', 'Featured games pagination');
+      heroVisual.appendChild(heroDotsContainer);
+    }
+
+    if (heroDotsContainer) {
+      heroDotsContainer.innerHTML = heroGames.map((game, idx) => `
+        <button type="button" class="hero__dot${idx === 0 ? ' is-active' : ''}" data-index="${idx}" role="tab" aria-label="Go to slide ${idx + 1}: ${game.title}" aria-selected="${idx === 0 ? 'true' : 'false'}"></button>
+      `).join('');
+
+      heroDotElements = Array.from(heroDotsContainer.querySelectorAll('.hero__dot'));
+
+      heroDotElements.forEach((dot) => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetIndex = parseInt(dot.dataset.index, 10);
+          if (!isNaN(targetIndex) && targetIndex !== currentHeroIndex) {
+            updateHeroCarousel(targetIndex, true);
+            startHeroTimer();
+          }
+        });
+      });
+    }
 
     updateHeroCarousel(0, false);
     startHeroTimer();
@@ -172,7 +203,6 @@
       });
     }
 
-    const heroVisual = document.getElementById('hero-visual');
     if (heroVisual) {
       heroVisual.addEventListener('mouseenter', stopHeroTimer);
       heroVisual.addEventListener('mouseleave', startHeroTimer);
@@ -210,6 +240,13 @@
           card.classList.add('hero-card--hidden-right');
         }
       }
+    });
+
+    // Update pagination dots
+    heroDotElements.forEach((dot, i) => {
+      const isActive = i === currentHeroIndex;
+      dot.classList.toggle('is-active', isActive);
+      dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
 
     const activeGame = heroGames[currentHeroIndex];

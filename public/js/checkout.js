@@ -289,8 +289,8 @@
       e.preventDefault();
 
       if (!isLoggedIn) {
-        showToast('Please log in to place an order.', 'error');
-        setTimeout(() => { window.location.href = 'Login.html'; }, 1200);
+        showToast('Please log in to place an order. <a href="Login.html" class="playnex-toast__link">Log In -&gt;</a>', 'error');
+        setTimeout(() => { window.location.href = 'Login.html'; }, 2000);
         return;
       }
 
