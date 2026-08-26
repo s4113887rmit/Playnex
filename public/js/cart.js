@@ -55,9 +55,18 @@
 
   function itemHTML(line) {
     const { product, qty, variant } = line;
+    const isDigital = product.category === 'digital' || !product.category;
+    const effectiveQty = isDigital ? 1 : (qty || 1);
     const imgTag = product.image
       ? `<img src="${product.image}" alt="${product.title} poster">`
       : `<div class="card__placeholder-art">${product.title.charAt(0)}</div>`;
+
+    const qtyHTML = isDigital
+      ? `<div class="cart-item__qty cart-item__qty--digital"></div>`
+      : `<div class="cart-item__qty">
+          <label for="qty-${product.id}">Quantity</label>
+          <input id="qty-${product.id}" name="qty-${product.id}" type="number" min="1" value="${effectiveQty}" data-id="${product.id}">
+        </div>`;
 
     return `
       <li>
@@ -69,11 +78,8 @@
             <h3 class="cart-item__title"><a href="${product.href || 'shopping.html'}">${product.title}</a></h3>
             <p class="cart-item__variant">${variant || product.variant || (product.category === 'physical' ? 'Physical Merch' : 'Digital Game')}</p>
           </div>
-          <div class="cart-item__qty">
-            <label for="qty-${product.id}">Quantity</label>
-            <input id="qty-${product.id}" name="qty-${product.id}" type="number" min="1" value="${qty}" data-id="${product.id}">
-          </div>
-          <span class="cart-item__price">${money(product.price * qty)}</span>
+          ${qtyHTML}
+          <span class="cart-item__price">${money(product.price * effectiveQty)}</span>
           <button type="button" class="cart-item__remove" data-id="${product.id}">Remove</button>
         </article>
       </li>`;
@@ -103,14 +109,21 @@
   }
 
   function updateSummary(items) {
-    const subtotal = items.reduce((sum, i) => sum + i.product.price * i.qty, 0);
+    const subtotal = items.reduce((sum, i) => {
+      const isDigital = i.product.category === 'digital' || !i.product.category;
+      const effectiveQty = isDigital ? 1 : i.qty;
+      return sum + i.product.price * effectiveQty;
+    }, 0);
     const hasPhysical = items.some(i => i.product.category === 'physical');
     const shipping = items.length === 0 ? 0 : (hasPhysical ? 6.00 : 0.00);
     const discountVal = Number((subtotal * appliedDiscount).toFixed(2));
     const taxable = Math.max(0, subtotal - discountVal);
     const tax = Number((taxable * 0.083).toFixed(2));
     const total = Number((taxable + shipping + tax).toFixed(2));
-    const totalQty = items.reduce((sum, i) => sum + i.qty, 0);
+    const totalQty = items.reduce((sum, i) => {
+      const isDigital = i.product.category === 'digital' || !i.product.category;
+      return sum + (isDigital ? 1 : i.qty);
+    }, 0);
 
     if (itemCountHeader) itemCountHeader.textContent = `${totalQty} item${totalQty === 1 ? '' : 's'}`;
     if (toolbarCountEl) toolbarCountEl.textContent = `${totalQty} item${totalQty === 1 ? '' : 's'} in your cart`;

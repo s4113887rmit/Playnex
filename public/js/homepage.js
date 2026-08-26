@@ -396,7 +396,7 @@
     const merchSort = merchSortEl ? merchSortEl.value : 'title';
 
     const digital = applySort(
-      allProducts.filter(p => p.category === 'digital' && matchesSearch(p)),
+      allProducts.filter(p => p.category === 'digital' && p.image && p.image.trim() !== '' && matchesSearch(p)),
       digitalSort
     );
     const physical = applySort(
@@ -426,7 +426,13 @@
         api('/api/products'),
         api('/api/wishlist').catch(() => ({ items: [] }))
       ]);
-      allProducts = productsData;
+      // Only keep real games with images and legitimate physical products
+      allProducts = (productsData || []).filter(p => {
+        if (p.category === 'digital') {
+          return p.image && p.image.trim() !== '';
+        }
+        return true;
+      });
       wishlistIds = new Set((wishlistData.items || []).map(item => item.id));
       render();
     } catch (err) {
@@ -592,9 +598,9 @@
       try {
         await api('/api/cart', {
           method: 'POST',
-          body: { productId: 'ruinport-chronicles', qty: 1 }
+          body: { productId: 'death-standing', qty: 1 }
         });
-        showToast('Claimed Ruinport Chronicles for free!', 'success');
+        showToast('Claimed Death Stranding for your cart!', 'success');
         setTimeout(() => {
           window.location.href = 'cart.html';
         }, 600);

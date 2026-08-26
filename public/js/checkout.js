@@ -77,18 +77,25 @@
     return sum % 10 === 0;
   }
 
-  // Validation rules
+  // Validation rules tailored for Vietnam
   const validators = {
-    'full-name': (v) => (v.trim().length >= 2 ? '' : 'Full name must be at least 2 characters.'),
-    'phone': (v) => (/^[0-9 +()-]{7,20}$/.test(v.trim()) ? '' : 'Enter a valid phone number.'),
-    'address': (v) => (v.trim().length >= 3 ? '' : 'Street address must be at least 3 characters.'),
-    'city': (v) => (v.trim().length >= 2 ? '' : 'Please enter your city.'),
-    'postal-code': (v) => (v.trim().length >= 3 ? '' : 'Enter a valid postal code.'),
-    'country': (v) => (v ? '' : 'Please select a delivery country.'),
+    'full-name': (v) => (v.trim().length >= 2 ? '' : 'Please enter your full name (e.g. Nguyễn Văn A).'),
+    'phone': (v) => {
+      const clean = v.trim().replace(/[\s().-]/g, '');
+      const isVN = /^(?:(?:\+84|84|0)[35789]\d{8}|(?:\+84|84|0)2\d{9}|[0-9]{9,11})$/.test(clean);
+      return isVN ? '' : 'Please enter a valid Vietnam phone number (e.g. 090 123 4567 or +84901234567).';
+    },
+    'address': (v) => (v.trim().length >= 3 ? '' : 'Please enter your street address in Vietnam (e.g. 123 Le Van Viet Street).'),
+    'city': (v) => (v.trim().length >= 2 ? '' : 'Please enter your city/province in Vietnam (e.g. Ho Chi Minh City, Ha Noi, Da Nang).'),
+    'postal-code': (v) => {
+      const clean = v.trim().replace(/\s/g, '');
+      return /^\d{5,6}$/.test(clean) ? '' : 'Enter a valid Vietnam postal code (5–6 digits, e.g. 700000 for HCMC, 100000 for Hanoi).';
+    },
+    'country': (v) => (v ? '' : 'Please select delivery country (Vietnam).'),
     'card-name': (v) => {
       const clean = v.trim();
-      if (clean.length < 2) return 'Enter the cardholder name.';
-      if (!/^[A-Z\s]{2,100}$/.test(clean)) return 'Name on card must contain only unaccented uppercase letters (no numbers or special characters).';
+      if (clean.length < 2) return 'Enter the cardholder name (e.g. NGUYEN VAN A).';
+      if (!/^[A-Z\s]{2,100}$/.test(clean)) return 'Name on card must contain only unaccented uppercase letters.';
       return '';
     },
     'card-number': (v) => {
@@ -173,6 +180,10 @@
 
   function restoreDraft() {
     try {
+      const countryEl = document.getElementById('country');
+      if (countryEl && !countryEl.value) {
+        countryEl.value = 'vn';
+      }
       const raw = sessionStorage.getItem(DRAFT_KEY);
       if (!raw) return;
       const draft = JSON.parse(raw);
@@ -182,6 +193,9 @@
           el.value = draft[id];
         }
       });
+      if (countryEl && !countryEl.value) {
+        countryEl.value = 'vn';
+      }
     } catch (e) {}
   }
 

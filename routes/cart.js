@@ -59,16 +59,20 @@ router.post('/', (req, res) => {
     return res.status(404).json({ error: `Product "${productId}" does not exist in the catalogue.` });
   }
 
+  const isDigital = product.category === 'digital' || !product.category;
+
   const cart = getCart(req.userId);
   const existing = cart.find(l => l.productId === productId);
 
   if (existing) {
-    existing.qty += quantity;
+    if (!isDigital) {
+      existing.qty += quantity;
+    }
     if (variant) existing.variant = variant;
   } else {
     cart.push({
       productId,
-      qty: quantity,
+      qty: isDigital ? 1 : quantity,
       variant: variant || product.variant
     });
   }
@@ -104,7 +108,8 @@ router.put('/:productId', (req, res) => {
     return res.status(404).json({ error: 'Item not found in your cart.' });
   }
 
-  line.qty = quantity;
+  const isDigital = product.category === 'digital' || !product.category;
+  line.qty = isDigital ? 1 : quantity;
   if (variant) line.variant = variant;
 
   const items = cart.map(withProductDetails).filter(Boolean);

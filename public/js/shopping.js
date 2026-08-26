@@ -90,6 +90,9 @@
     const filters = appliedFilters;
 
     filteredProducts = allProducts.filter(p => {
+      // Exclude fake/placeholder digital games without real posters
+      if (p.category === 'digital' && (!p.image || p.image.trim() === '')) return false;
+
       // Category filter
       if (activeCat === 'digital' && p.category !== 'digital') return false;
       if (activeCat === 'merch' && p.category !== 'physical') return false;
@@ -202,7 +205,13 @@
         api('/api/products'),
         api('/api/wishlist').catch(() => ({ items: [] }))
       ]);
-      allProducts = productsData;
+      // Only keep real games with poster images and legitimate physical merchandise
+      allProducts = (productsData || []).filter(p => {
+        if (p.category === 'digital') {
+          return p.image && p.image.trim() !== '';
+        }
+        return true;
+      });
       wishlistIds = new Set((wishlistData.items || []).map(item => item.id));
 
       // Sync initial search from URL query
