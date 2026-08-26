@@ -12,7 +12,7 @@ router.get('/', (req, res) => {
   // Search filter
   if (q && q.trim()) {
     const term = q.trim().toLowerCase();
-    list = list.filter(p => 
+    list = list.filter(p =>
       p.title.toLowerCase().includes(term) ||
       p.genre.toLowerCase().includes(term) ||
       p.platform.toLowerCase().includes(term)
@@ -33,7 +33,11 @@ router.get('/', (req, res) => {
   // Genre filter
   if (genre) {
     const genres = Array.isArray(genre) ? genre : [genre];
-    list = list.filter(p => genres.some(g => p.genre.toLowerCase() === g.toLowerCase()));
+    list = list.filter(p => genres.some(g => {
+      const pGenre = (p.genre || '').toLowerCase();
+      const target = g.toLowerCase().trim();
+      return pGenre === target || pGenre.includes(target) || target.includes(pGenre);
+    }));
   }
 
   // Platform filter

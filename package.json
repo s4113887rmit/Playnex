@@ -1,7 +1,7 @@
 {
   "name": "playnex",
   "version": "1.0.0",
-  "description": "Playnex — Digital games and merch, all in one store",
+  "description": "Playnex - Digital games and merch, all in one store",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

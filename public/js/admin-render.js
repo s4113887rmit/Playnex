@@ -22,15 +22,14 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       const users = await response.json();
-      
-      normalList.innerHTML = ''; 
+
+      normalList.innerHTML = '';
       lockedList.innerHTML = '';
 
       users.forEach(user => {
         if (user.status === 'normal') {
           normalList.innerHTML += `
             <div class="admin-row">
-              <input type="checkbox" aria-label="Select user">
               <div class="account-profile">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}" alt="Avatar">
                 <div class="account-info">
@@ -39,13 +38,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
               </div>
               <div class="admin-actions">
+                <a class="btn btn--outline btn--small" href="admin-detail.html?id=${user.id}">View details</a>
                 <button class="btn btn--danger btn--small toggle-lock-btn" data-id="${user.id}">Lock account</button>
               </div>
             </div>`;
         } else {
           lockedList.innerHTML += `
             <div class="admin-row">
-              <input type="checkbox" aria-label="Select user">
               <div class="account-profile">
                 <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}" alt="Avatar" style="opacity:0.5;">
                 <div class="account-info">
@@ -54,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
               </div>
               <div class="admin-actions">
+                <a class="btn btn--outline btn--small" href="admin-detail.html?id=${user.id}">View details</a>
                 <button class="btn btn--success btn--small toggle-lock-btn" data-id="${user.id}">Unlock account</button>
               </div>
             </div>`;

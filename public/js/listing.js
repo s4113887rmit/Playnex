@@ -110,7 +110,7 @@
         })
           .then(function () {
             updateWishBtn(true);
-            window.Playnex.showToast('Added to your wishlist.', 'success');
+            window.Playnex.showToast('Added to your wishlist.', 'info');
           })
           .catch(function (err) {
             window.Playnex.showToast(err.message || 'Something went wrong.', 'error');
