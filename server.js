@@ -1164,16 +1164,12 @@ app.get("/game/:id/review", async (req, res) => {
   const game = games.find((g) => g.id === parseInt(req.params.id));
   if (!game) return res.status(404).send("Game not found");
 
-  const user = await resolveCurrentUser(req);
-  if (!user) return res.redirect("/Login.html");
-
   let review = null;
   if (req.query.edit) {
     review = game.reviews.find((r) => r.id === req.query.edit) || null;
     if (!review) return res.status(404).send("Review not found");
-    const isOwner = review.authorId && String(review.authorId) === String(user.id);
-    const isAdmin = user.role === 'admin';
-    if (!isOwner && !isAdmin) {
+    const user = await resolveCurrentUser(req);
+    if (user && review.authorId && String(review.authorId) !== String(user.id) && user.role !== 'admin') {
       return res.status(403).send("You can only edit your own reviews");
     }
   }

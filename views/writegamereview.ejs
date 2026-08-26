@@ -89,10 +89,20 @@
   const DRAFT_KEY = 'reviewDraft_<%= game.id %>_<%= review ? review.id : "new" %>';
 
   // send the logged-in user id so the server can set the review author
+  const reviewAuthorId = '<%= review ? (review.authorId || "") : "" %>';
   try {
     const user = JSON.parse(localStorage.getItem('playnex_user') || 'null');
-    if (user) document.getElementById('review-user-id').value = user.id || '';
-  } catch (e) {}
+    if (!user) {
+      window.location.replace('/Login.html');
+    } else {
+      if (reviewAuthorId && String(user.id) !== String(reviewAuthorId) && user.role !== 'admin') {
+        window.location.replace('/game/<%= game.id %>');
+      }
+      document.getElementById('review-user-id').value = user.id || '';
+    }
+  } catch (e) {
+    window.location.replace('/Login.html');
+  }
 
   function validateTitle() {
     const err = document.getElementById('titleError');
