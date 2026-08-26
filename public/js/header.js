@@ -77,17 +77,13 @@
     { id: 'hades', title: 'Hades', genre: 'RPG', platform: 'PC, Console', price: 27.99, image: 'public/img/hadesposter.png', href: 'listing.html?game=hades' },
     { id: 'hollow-knight', title: 'Hollow Knight', genre: 'Puzzle', platform: 'PC, Console', price: 29.99, image: 'public/img/hollowposter.jpg', href: 'listing.html?game=hollow-knight' },
     { id: 'nier-automata', title: 'NieR Automata', genre: 'RPG', platform: 'PC, Console', price: 39.99, image: 'public/img/nierposter.jpg', href: 'listing.html?game=nier-automata' },
-    { id: 'death-standing', title: 'Death Standing', genre: 'Horror', platform: 'PC, Console', price: 24.99, image: 'public/img/deathstandposter.jpg', href: 'listing.html?game=death-standing' },
+    { id: 'death-standing', title: 'Death Stranding', genre: 'Action', platform: 'PC, Console', price: 24.99, image: 'public/img/deathstandposter.jpg', href: 'listing.html?game=death-standing' },
     { id: 'witcher-3', title: 'The Witcher 3: Wild Hunt', genre: 'RPG', platform: 'PC, Console', price: 39.99, image: 'public/img/witcherposter.jpg', href: 'listing.html?game=the-witcher-3' },
-    { id: 'ruinport-chronicles', title: 'Ruinport Chronicles', genre: 'Strategy', platform: 'PC', price: 0, badge: 'Free', href: 'shopping.html?cat=free' },
-    { id: 'embercrown-saga', title: 'Embercrown Saga', genre: 'RPG', platform: 'PC, Console', price: 59.99, badge: 'Featured', href: 'shopping.html' },
-    { id: 'nightfall-protocol', title: 'Nightfall Protocol', genre: 'Strategy', platform: 'PC, Console', price: 44.99, href: 'shopping.html' },
-    { id: 'ironvale-racers', title: 'Ironvale Racers', genre: 'Racing', platform: 'PC, Console', price: 34.99, href: 'shopping.html' },
-    { id: 'embercrown-throne-figure', title: 'Embercrown throne figure', genre: 'Merch', platform: 'Collectible', price: 64.00, badge: 'Physical', href: 'shopping.html?cat=merch' },
-    { id: 'nightfall-hoodie', title: 'Nightfall Protocol hoodie', genre: 'Merch', platform: 'Apparel', price: 52.00, badge: 'Physical', href: 'shopping.html?cat=merch' },
-    { id: 'ruinport-vinyl', title: 'Ruinport Chronicles vinyl', genre: 'Merch', platform: 'Soundtrack', price: 38.00, badge: 'Physical', href: 'shopping.html?cat=merch' },
-    { id: 'ironvale-racers-keycap', title: 'Ironvale Racers keycap set', genre: 'Merch', platform: 'Accessory', price: 29.00, badge: 'Physical', href: 'shopping.html?cat=merch' },
-    { id: 'emberkeep-artbook', title: 'Emberkeep Tactics art book', genre: 'Merch', platform: 'Collectible', price: 34.00, badge: 'Physical', href: 'shopping.html?cat=merch' }
+    { id: 'elden-ring-figure', title: 'Elden Ring - Malenia Collector Figure', genre: 'Merch', platform: 'Collectible', price: 64.00, badge: 'Physical', image: 'public/img/eldenringposter.jpg', href: 'shopping.html?cat=merch' },
+    { id: 'cyberpunk-hoodie', title: 'Cyberpunk 2077 Samurai Hoodie', genre: 'Merch', platform: 'Apparel', price: 52.00, badge: 'Physical', image: 'public/img/cyberpunkposter.jpg', href: 'shopping.html?cat=merch' },
+    { id: 'witcher-3-vinyl', title: 'The Witcher 3: Wild Hunt Vinyl OST', genre: 'Merch', platform: 'Soundtrack', price: 38.00, badge: 'Physical', image: 'public/img/witcherposter.jpg', href: 'shopping.html?cat=merch' },
+    { id: 'hollow-knight-keycap', title: 'Hollow Knight Artisan Keycap Set', genre: 'Merch', platform: 'Accessory', price: 29.00, badge: 'Physical', image: 'public/img/hollowposter.jpg', href: 'shopping.html?cat=merch' },
+    { id: 'ghost-of-tsushima-artbook', title: 'Ghost of Tsushima Official Art Book', genre: 'Merch', platform: 'Collectible', price: 34.00, badge: 'Physical', image: 'public/img/ghostposter.jpg', href: 'shopping.html?cat=merch' }
   ];
 
   var cachedProducts = fallbackProducts;

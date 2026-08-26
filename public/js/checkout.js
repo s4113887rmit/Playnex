@@ -77,32 +77,43 @@
     return sum % 10 === 0;
   }
 
-  // Validation rules
+  // Validation rules tailored for Vietnam
   const validators = {
-    'full-name': (v) => (v.trim().length >= 2 ? '' : 'Full name must be at least 2 characters.'),
-    'phone': (v) => (/^[0-9 +()-]{7,15}$/.test(v.trim()) ? '' : 'Enter a valid phone number (7–15 digits).'),
-    'address': (v) => (v.trim().length >= 5 ? '' : 'Street address must be at least 5 characters.'),
-    'city': (v) => (v.trim().length >= 2 ? '' : 'Please enter your city.'),
-    'postal-code': (v) => (/^[0-9]{4,10}$/.test(v.trim()) ? '' : 'Enter a valid postal code (4–10 digits).'),
-    'country': (v) => (v ? '' : 'Please select a delivery country.'),
-    'card-name': (v) => (v.trim().length >= 2 ? '' : 'Enter the cardholder name.'),
+    'full-name': (v) => (v.trim().length >= 2 ? '' : 'Please enter your full name (e.g. Nguyễn Văn A).'),
+    'phone': (v) => {
+      const clean = v.trim().replace(/[\s().-]/g, '');
+      const isVN = /^(?:(?:\+84|84|0)[35789]\d{8}|(?:\+84|84|0)2\d{9}|[0-9]{9,11})$/.test(clean);
+      return isVN ? '' : 'Please enter a valid Vietnam phone number (e.g. 090 123 4567 or +84901234567).';
+    },
+    'address': (v) => (v.trim().length >= 3 ? '' : 'Please enter your street address in Vietnam (e.g. 123 Le Van Viet Street).'),
+    'city': (v) => (v.trim().length >= 2 ? '' : 'Please enter your city/province in Vietnam (e.g. Ho Chi Minh City, Ha Noi, Da Nang).'),
+    'postal-code': (v) => {
+      const clean = v.trim().replace(/\s/g, '');
+      return /^\d{5,6}$/.test(clean) ? '' : 'Enter a valid Vietnam postal code (5–6 digits, e.g. 700000 for HCMC, 100000 for Hanoi).';
+    },
+    'country': (v) => (v ? '' : 'Please select delivery country (Vietnam).'),
+    'card-name': (v) => {
+      const clean = v.trim();
+      if (clean.length < 2) return 'Enter the cardholder name (e.g. NGUYEN VAN A).';
+      if (!/^[A-Z\s]{2,100}$/.test(clean)) return 'Name on card must contain only unaccented uppercase letters.';
+      return '';
+    },
     'card-number': (v) => {
       const clean = v.replace(/\s+/g, '');
-      if (!/^[0-9]{13,19}$/.test(clean)) return 'Card number must contain 13 to 19 digits.';
-      if (!isValidLuhn(clean)) return 'Invalid card number checksum.';
+      if (clean.length < 15) return 'Card number must be at least 15 digits.';
+      if (clean.length > 19) return 'Card number cannot exceed 19 digits.';
+      if (!/^[0-9]{15,19}$/.test(clean)) return 'Card number must contain only numbers (15 to 19 digits).';
       return '';
     },
     'card-expiry': (v) => {
-      const m = v.match(/^(0[1-9]|1[0-2])\/([0-9]{2})$/);
+      const clean = v.trim();
+      const m = clean.match(/^(\d{1,2})\/(\d{2,4})$/);
       if (!m) return 'Enter expiry in MM/YY format.';
-      const now = new Date();
-      const expYear = 2000 + parseInt(m[2], 10);
-      const expMonth = parseInt(m[1], 10);
-      const expiryDate = new Date(expYear, expMonth, 0, 23, 59, 59);
-      if (expiryDate < now) return 'Card has already expired.';
+      const month = parseInt(m[1], 10);
+      if (month < 1 || month > 12) return 'Invalid expiry month (01–12).';
       return '';
     },
-    'card-cvc': (v) => (/^[0-9]{3,4}$/.test(v.trim()) ? '' : 'Security code must be 3 or 4 digits.')
+    'card-cvc': (v) => (/^[0-9]{2,6}$/.test(v.trim()) ? '' : 'Security code must be digits (e.g. 3 or 4 digits).')
   };
 
   function getOrCreateErrorElement(input) {
@@ -169,6 +180,10 @@
 
   function restoreDraft() {
     try {
+      const countryEl = document.getElementById('country');
+      if (countryEl && !countryEl.value) {
+        countryEl.value = 'vn';
+      }
       const raw = sessionStorage.getItem(DRAFT_KEY);
       if (!raw) return;
       const draft = JSON.parse(raw);
@@ -178,6 +193,9 @@
           el.value = draft[id];
         }
       });
+      if (countryEl && !countryEl.value) {
+        countryEl.value = 'vn';
+      }
     } catch (e) {}
   }
 
@@ -186,6 +204,19 @@
   }
 
   // --- Error Prevention Input Masking ---
+  const cardNameInput = document.getElementById('card-name');
+  if (cardNameInput) {
+    cardNameInput.addEventListener('input', (e) => {
+      e.target.value = e.target.value
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .replace(/[^a-zA-Z\s]/g, '')
+        .toUpperCase();
+    });
+  }
+
   const cardNumberInput = document.getElementById('card-number');
   if (cardNumberInput) {
     cardNumberInput.addEventListener('input', (e) => {
@@ -199,7 +230,7 @@
     cardExpiryInput.addEventListener('input', (e) => {
       let digits = e.target.value.replace(/\D/g, '').slice(0, 4);
       if (digits.length >= 3) {
-        digits = `${digits.slice(0, 2)}/${digits.slice(2)}`;
+        digits = `${digits.slice(0, 2)}/${digits.slice(2, 4)}`;
       }
       e.target.value = digits;
     });
@@ -208,7 +239,7 @@
   const cardCvcInput = document.getElementById('card-cvc');
   if (cardCvcInput) {
     cardCvcInput.addEventListener('input', (e) => {
-      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 4);
+      e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
     });
   }
 
@@ -289,8 +320,8 @@
       e.preventDefault();
 
       if (!isLoggedIn) {
-        showToast('Please log in to place an order.', 'error');
-        setTimeout(() => { window.location.href = 'Login.html'; }, 1200);
+        showToast('Please log in to place an order. <a href="Login.html" class="playnex-toast__link">Log In -&gt;</a>', 'error');
+        setTimeout(() => { window.location.href = 'Login.html'; }, 2000);
         return;
       }
 
@@ -331,12 +362,20 @@
           body: payload
         });
 
+        if (res && res.order) {
+          try {
+            sessionStorage.setItem('playnex_last_order', JSON.stringify(res.order));
+            localStorage.setItem('playnex_last_order', JSON.stringify(res.order));
+          } catch (e) {}
+        }
+
         clearDraft();
         localStorage.removeItem('playnex_cart_cache');
         showToast('Order confirmed successfully!', 'success');
 
         setTimeout(() => {
-          window.location.href = `confirmation.html?order=${encodeURIComponent(res.order.id)}`;
+          const orderId = (res && res.order && res.order.id) ? res.order.id : '';
+          window.location.href = orderId ? `confirmation.html?order=${encodeURIComponent(orderId)}` : 'confirmation.html';
         }, 500);
       } catch (err) {
         submitBtn.disabled = false;

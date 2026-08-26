@@ -123,10 +123,13 @@ router.post('/:productId/move-to-cart', (req, res) => {
   }
 
   // Add to cart
+  const isDigital = product.category === 'digital' || !product.category;
   const cart = getCart(req.userId);
   const existingCartItem = cart.find(l => l.productId === productId);
   if (existingCartItem) {
-    existingCartItem.qty = Math.min(10, existingCartItem.qty + 1);
+    if (!isDigital) {
+      existingCartItem.qty += 1;
+    }
   } else {
     cart.push({ productId, qty: 1, variant: product.variant });
   }

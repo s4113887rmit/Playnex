@@ -136,6 +136,7 @@
   let heroTimer = null;
   const heroStage = document.getElementById('hero-stage');
   let heroCardElements = [];
+  let heroDotElements = [];
 
   function initHeroCarousel() {
     if (!heroStage) return;
@@ -149,6 +150,36 @@
     `).join('');
 
     heroCardElements = Array.from(heroStage.querySelectorAll('.hero-card'));
+
+    const heroVisual = document.getElementById('hero-visual');
+    let heroDotsContainer = document.getElementById('hero-dots');
+    if (!heroDotsContainer && heroVisual) {
+      heroDotsContainer = document.createElement('div');
+      heroDotsContainer.id = 'hero-dots';
+      heroDotsContainer.className = 'hero__dots';
+      heroDotsContainer.setAttribute('role', 'tablist');
+      heroDotsContainer.setAttribute('aria-label', 'Featured games pagination');
+      heroVisual.appendChild(heroDotsContainer);
+    }
+
+    if (heroDotsContainer) {
+      heroDotsContainer.innerHTML = heroGames.map((game, idx) => `
+        <button type="button" class="hero__dot${idx === 0 ? ' is-active' : ''}" data-index="${idx}" role="tab" aria-label="Go to slide ${idx + 1}: ${game.title}" aria-selected="${idx === 0 ? 'true' : 'false'}"></button>
+      `).join('');
+
+      heroDotElements = Array.from(heroDotsContainer.querySelectorAll('.hero__dot'));
+
+      heroDotElements.forEach((dot) => {
+        dot.addEventListener('click', (e) => {
+          e.preventDefault();
+          const targetIndex = parseInt(dot.dataset.index, 10);
+          if (!isNaN(targetIndex) && targetIndex !== currentHeroIndex) {
+            updateHeroCarousel(targetIndex, true);
+            startHeroTimer();
+          }
+        });
+      });
+    }
 
     updateHeroCarousel(0, false);
     startHeroTimer();
@@ -172,7 +203,6 @@
       });
     }
 
-    const heroVisual = document.getElementById('hero-visual');
     if (heroVisual) {
       heroVisual.addEventListener('mouseenter', stopHeroTimer);
       heroVisual.addEventListener('mouseleave', startHeroTimer);
@@ -212,6 +242,13 @@
       }
     });
 
+    // Update pagination dots
+    heroDotElements.forEach((dot, i) => {
+      const isActive = i === currentHeroIndex;
+      dot.classList.toggle('is-active', isActive);
+      dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
+    });
+
     const activeGame = heroGames[currentHeroIndex];
     const heroContent = document.getElementById('hero-content');
 
@@ -234,6 +271,7 @@
     const tagsEl = document.getElementById('hero-tags');
     const buyBtn = document.getElementById('hero-buy-btn');
     const wishBtn = document.getElementById('hero-wishlist-btn');
+    let cartBtn = document.getElementById('hero-cart-btn');
 
     if (titleEl) titleEl.textContent = game.title;
     if (descEl) descEl.textContent = game.desc;
@@ -251,6 +289,27 @@
       const priceText = game.price === 0 ? 'Claim now — Free' : `Buy now — $${Number(game.price).toFixed(2)}`;
       buyBtn.textContent = priceText;
       buyBtn.href = game.href || `listing.html?game=${game.id}`;
+    }
+
+    if (!cartBtn) {
+      const heroActions = document.querySelector('.hero__actions');
+      if (heroActions) {
+        cartBtn = document.createElement('button');
+        cartBtn.type = 'button';
+        cartBtn.id = 'hero-cart-btn';
+        cartBtn.className = 'btn btn--outline btn--large';
+        cartBtn.setAttribute('data-action', 'add-to-cart');
+        cartBtn.textContent = 'Add to cart';
+        if (wishBtn) {
+          heroActions.insertBefore(cartBtn, wishBtn);
+        } else {
+          heroActions.appendChild(cartBtn);
+        }
+      }
+    }
+
+    if (cartBtn) {
+      cartBtn.dataset.id = game.id;
     }
 
     if (wishBtn) {
@@ -337,7 +396,7 @@
     const merchSort = merchSortEl ? merchSortEl.value : 'title';
 
     const digital = applySort(
-      allProducts.filter(p => p.category === 'digital' && matchesSearch(p)),
+      allProducts.filter(p => p.category === 'digital' && p.image && p.image.trim() !== '' && matchesSearch(p)),
       digitalSort
     );
     const physical = applySort(
@@ -367,7 +426,13 @@
         api('/api/products'),
         api('/api/wishlist').catch(() => ({ items: [] }))
       ]);
-      allProducts = productsData;
+      // Only keep real games with images and legitimate physical products
+      allProducts = (productsData || []).filter(p => {
+        if (p.category === 'digital') {
+          return p.image && p.image.trim() !== '';
+        }
+        return true;
+      });
       wishlistIds = new Set((wishlistData.items || []).map(item => item.id));
       render();
     } catch (err) {
@@ -533,9 +598,9 @@
       try {
         await api('/api/cart', {
           method: 'POST',
-          body: { productId: 'ruinport-chronicles', qty: 1 }
+          body: { productId: 'death-standing', qty: 1 }
         });
-        showToast('Claimed Ruinport Chronicles for free!', 'success');
+        showToast('Claimed Death Stranding for your cart!', 'success');
         setTimeout(() => {
           window.location.href = 'cart.html';
         }, 600);

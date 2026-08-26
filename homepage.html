@@ -100,6 +100,7 @@
 
       <div class="hero__actions">
         <a href="listing.html?game=elden-ring" class="btn btn--primary btn--large" id="hero-buy-btn">Buy now — $59.99</a>
+        <button type="button" class="btn btn--outline btn--large" id="hero-cart-btn" data-action="add-to-cart" data-id="elden-ring">Add to cart</button>
         <button type="button" class="btn btn--outline btn--large" id="hero-wishlist-btn" data-action="wishlist" data-id="elden-ring">Add to wishlist</button>
       </div>
     </div>
@@ -111,6 +112,9 @@
         <!-- Injected and managed dynamically by homepage.js -->
       </div>
       <button type="button" class="hero__nav hero__nav--next" id="hero-next-btn" aria-label="Next game">&rsaquo;</button>
+      <div class="hero__dots" id="hero-dots" role="tablist" aria-label="Featured games">
+        <!-- Dots injected and managed dynamically by homepage.js -->
+      </div>
     </div>
 
   </section>
@@ -120,8 +124,8 @@
   <section class="promo-strip">
     <div class="promo-strip__inner">
       <div class="promo-strip__text">
-        <span class="promo-strip__label">Free this week</span>
-        <span class="promo-strip__title">Ruinport Chronicles</span>
+        <span class="promo-strip__label">Featured deal</span>
+        <span class="promo-strip__title">Death Stranding</span>
       </div>
       <span class="promo-strip__timer">4 days left</span>
       <a href="cart.html" class="btn btn--primary btn--small">Claim now</a>
@@ -272,14 +276,14 @@
       <li>
         <article class="card">
           <div class="card__art card__art--3">
-            <a href="listing.html?game=death-standing" aria-label="View Death Standing detail page">
-              <img src="public/img/deathstandposter.jpg" alt="Death Standing poster">
+            <a href="listing.html?game=death-standing" aria-label="View Death Stranding detail page">
+              <img src="public/img/deathstandposter.jpg" alt="Death Stranding poster">
             </a>
-            <button class="card__wishlist" aria-label="Add Death Standing to wishlist" type="button" data-action="wishlist" data-id="death-standing">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Death Stranding to wishlist" type="button" data-action="wishlist" data-id="death-standing">&hearts;</button>
           </div>
           <div class="card__body">
-            <h3 class="card__title"><a href="listing.html?game=death-standing">Death Standing</a></h3>
-            <p class="card__meta">Shooter · PC, Console</p>
+            <h3 class="card__title"><a href="listing.html?game=death-standing">Death Stranding</a></h3>
+            <p class="card__meta">Action · PC, Console</p>
             <div class="card__price"><span class="card__price-now">$24.99</span></div>
             <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="death-standing">Add to cart</button>
           </div>
@@ -308,72 +312,75 @@
 
       <li>
         <article class="card">
-          <div class="card__art card__art--merch-1">
+          <div class="card__art card__art--1">
             <span class="card__badge card__badge--merch">Physical</span>
-            <button class="card__wishlist" aria-label="Add Embercrown throne figure to wishlist" type="button" data-action="wishlist" data-id="embercrown-throne-figure">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Elden Ring - Malenia Collector Figure to wishlist" type="button" data-action="wishlist" data-id="elden-ring-figure">&hearts;</button>
           </div>
           <div class="card__body">
-            <h3 class="card__title">Embercrown throne figure</h3>
+            <h3 class="card__title">Elden Ring - Malenia Collector Figure</h3>
             <p class="card__meta">Collectible · 28cm</p>
             <div class="card__price"><span class="card__price-now">$64.00</span></div>
-            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="embercrown-throne-figure">Add to cart</button>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="elden-ring-figure">Add to cart</button>
           </div>
         </article>
       </li>
 
       <li>
         <article class="card">
-          <div class="card__art card__art--merch-2">
+          <div class="card__art card__art--2">
             <span class="card__badge card__badge--merch">Physical</span>
-            <button class="card__wishlist" aria-label="Add Nightfall Protocol hoodie to wishlist" type="button" data-action="wishlist" data-id="nightfall-hoodie">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Cyberpunk 2077 Samurai Hoodie to wishlist" type="button" data-action="wishlist" data-id="cyberpunk-hoodie">&hearts;</button>
           </div>
           <div class="card__body">
-            <h3 class="card__title">Nightfall Protocol hoodie</h3>
+            <h3 class="card__title">Cyberpunk 2077 Samurai Hoodie</h3>
             <p class="card__meta">Apparel · S–XXL</p>
             <div class="card__price"><span class="card__price-now">$52.00</span></div>
-            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="nightfall-hoodie">Add to cart</button>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="cyberpunk-hoodie">Add to cart</button>
           </div>
         </article>
       </li>
 
       <li>
-<article class="card">
-        <div class="card__art card__art--merch-3">
-          <span class="card__badge card__badge--merch">Physical</span>
-          <button class="card__wishlist" aria-label="Add Ruinport Chronicles vinyl soundtrack to wishlist" type="button" data-action="wishlist" data-id="ruinport-vinyl">&hearts;</button>
-        </div>
-        <div class="card__body">
-          <h3 class="card__title">Ruinport Chronicles vinyl</h3>
-          <p class="card__meta">Soundtrack · 2xLP</p>
-          <div class="card__price"><span class="card__price-now">$38.00</span></div>
-        </div>
-      </article>
+        <article class="card">
+          <div class="card__art card__art--3">
+            <span class="card__badge card__badge--merch">Physical</span>
+            <button class="card__wishlist" aria-label="Add The Witcher 3: Wild Hunt Vinyl OST to wishlist" type="button" data-action="wishlist" data-id="witcher-3-vinyl">&hearts;</button>
+          </div>
+          <div class="card__body">
+            <h3 class="card__title">The Witcher 3: Wild Hunt Vinyl OST</h3>
+            <p class="card__meta">Soundtrack · 2xLP</p>
+            <div class="card__price"><span class="card__price-now">$38.00</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="witcher-3-vinyl">Add to cart</button>
+          </div>
+        </article>
       </li>
 
       <li>
         <article class="card">
-          <div class="card__art card__art--merch-4">
+          <div class="card__art card__art--4">
             <span class="card__badge card__badge--merch">Physical</span>
-            <button class="card__wishlist" aria-label="Add Ironvale Racers keycap set to wishlist" type="button" data-action="wishlist" data-id="ironvale-racers-keycap">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Hollow Knight Artisan Keycap Set to wishlist" type="button" data-action="wishlist" data-id="hollow-knight-keycap">&hearts;</button>
           </div>
           <div class="card__body">
-            <h3 class="card__title">Ironvale Racers keycap set</h3>
+            <h3 class="card__title">Hollow Knight Artisan Keycap Set</h3>
             <p class="card__meta">Accessory · 12 keys</p>
             <div class="card__price"><span class="card__price-now">$29.00</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="hollow-knight-keycap">Add to cart</button>
           </div>
         </article>
       </li>
 
       <li>
         <article class="card">
-          <div class="card__art card__art--merch-5">
+          <div class="card__art card__art--5">
             <span class="card__badge card__badge--merch">Physical</span>
-            <button class="card__wishlist" aria-label="Add Emberkeep Tactics art book to wishlist" type="button" data-action="wishlist" data-id="emberkeep-artbook">&hearts;</button>
+            <button class="card__wishlist" aria-label="Add Ghost of Tsushima Official Art Book to wishlist" type="button" data-action="wishlist" data-id="ghost-of-tsushima-artbook">&hearts;</button>
           </div>
           <div class="card__body">
-            <h3 class="card__title">Emberkeep Tactics art book</h3>
-            <p class="card__meta">Hardcover · 180 pages</p>
+            <h3 class="card__title">Ghost of Tsushima Official Art Book</h3>
+            <p class="card__meta">Hardcover · 160 pages</p>
             <div class="card__price"><span class="card__price-now">$34.00</span></div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="ghost-of-tsushima-artbook">Add to cart</button>
           </div>
         </article>
       </li>
@@ -387,15 +394,15 @@
   <section class="editorial">
     <article class="editorial__card editorial__card--blog">
       <span class="eyebrow">From the blog</span>
-      <h2>Behind the throne: designing Embercrown's four kingdoms</h2>
-      <p>The Embercrown Saga art team on turning four rival factions into four distinct kingdoms you can actually feel the difference between.</p>
+      <h2>Behind the Lands Between: World Design of Elden Ring</h2>
+      <p>Exploring how FromSoftware crafted the vast open world of the Lands Between with layered storytelling and memorable encounters.</p>
       <a href="/blog" class="text-link">Read the post<span aria-hidden="true"> &rarr;</span></a>
     </article>
 
     <article class="editorial__card editorial__card--forum">
       <span class="eyebrow">Community</span>
       <h2>Forum highlight</h2>
-      <p class="forum-thread__title">"Best kingdom to side with on a first run?"</p>
+      <p class="forum-thread__title">"Best build to start with on a first Elden Ring playthrough?"</p>
       <p class="forum-thread__meta">128 replies · updated 2 hours ago</p>
       <a href="forum.html" class="text-link">Join the discussion<span aria-hidden="true"> &rarr;</span></a>
     </article>

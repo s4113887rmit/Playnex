@@ -667,8 +667,8 @@ function timeAgo(ts) {
 let forumThreads = [
   {
     id: 1,
-    title: "[Nightfall Protocol] Troubleshooting LAN connectivity for SEA players",
-    content: "We run a Nightfall Protocol server for SEA players over Radmin VPN. Lately we see heavy TPS drops whenever a player uses a specific datapack ability. Any tips on profiling the tick loop?",
+    title: "[Cyberpunk 2077] Troubleshooting PC performance on latest patch",
+    content: "Running Cyberpunk 2077 with ray tracing enabled. Lately seeing frame drops in heavy crowds. Any tips on optimizing settings?",
     author: "darknexus",
     authorId: null,
     tag: "support",
@@ -700,8 +700,8 @@ let forumThreads = [
   },
   {
     id: 2,
-    title: "[Embercrown Saga] Collector's Edition Throne Figure Review",
-    content: "Just received the Embercrown Saga Collector's Edition throne figure. Sharing photos and thoughts on build quality, paint application, and packaging.",
+    title: "[Elden Ring] Malenia Collector's Edition Figure Review",
+    content: "Just received the Elden Ring Malenia Collector's Edition figure. Sharing photos and thoughts on build quality, paint application, and packaging.",
     author: "cyber_fan",
     authorId: null,
     tag: "review",
@@ -1258,6 +1258,7 @@ function slugifyGame(name) {
 const GAME_SLUG_ALIASES = {
   "red-dead-redemption-2": 4,
   "death-standing": 8,
+  "death-stranding": 8,
   "cyberpunk": 2,
   "witcher-3": 9
 };
