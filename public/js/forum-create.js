@@ -20,6 +20,25 @@ document.addEventListener('DOMContentLoaded', () => {
   if (localStorage.getItem('draftCategory')) categoryInput.value = localStorage.getItem('draftCategory');
   if (localStorage.getItem('draftContent')) contentInput.value = localStorage.getItem('draftContent');
 
+  // 1.5 Auto-prefix the title with the selected game, e.g. "[Elden Ring]"
+  const gameLabel = (value) => {
+    if (!value || value === 'other') return '';
+    const option = gameInput.querySelector(`option[value="${value}"]`);
+    return option ? option.textContent : value;
+  };
+
+  const BRACKET_RE = /^\[[^\]]*\]\s*/;
+
+  const syncTitlePrefix = () => {
+    const label = gameLabel(gameInput.value);
+    const rest = titleInput.value.replace(BRACKET_RE, '').trim();
+    titleInput.value = label ? (rest ? `[${label}] ${rest}` : `[${label}]`) : rest;
+  };
+
+  syncTitlePrefix();
+  gameInput.addEventListener('change', syncTitlePrefix);
+  titleInput.addEventListener('input', syncTitlePrefix);
+
   // 2. Auto-save to localStorage as the user types or selects options
   form.addEventListener('input', (e) => {
     if (e.target.id === 'thread-title') localStorage.setItem('draftTitle', e.target.value);
@@ -39,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
       errorSpan.style.marginTop = '4px';
       field.parentNode.insertBefore(errorSpan, field.nextSibling);
     }
-    
+
     if (field.value.trim() === '') {
       field.style.borderColor = '#e74c3c';
       errorSpan.textContent = errorMessage;

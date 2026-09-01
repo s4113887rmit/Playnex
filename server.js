@@ -654,6 +654,7 @@ app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async 
 
 // --- FORUM MODULE: IN-MEMORY DATA ---
 function timeAgo(ts) {
+  if (!ts || isNaN(ts)) return "Just now";
   const diff = Date.now() - ts;
   const mins = Math.floor(diff / 60000);
   if (mins < 1) return "Just now";
@@ -667,8 +668,8 @@ function timeAgo(ts) {
 let forumThreads = [
   {
     id: 1,
-    title: "[Nightfall Protocol] Troubleshooting LAN connectivity for SEA players",
-    content: "We run a Nightfall Protocol server for SEA players over Radmin VPN. Lately we see heavy TPS drops whenever a player uses a specific datapack ability. Any tips on profiling the tick loop?",
+    title: "[Elden Ring] Fixing co-op connection failures",
+    content: "Me and a friend keep failing to summon each other for co-op in Elden Ring. We're both on the same NAT type, passwords match, but the connection keeps timing out. Any tips on fixing this?",
     author: "darknexus",
     authorId: null,
     tag: "support",
@@ -700,7 +701,7 @@ let forumThreads = [
   },
   {
     id: 2,
-    title: "[Embercrown Saga] Collector's Edition Throne Figure Review",
+    title: "[The Witcher 3: Wild Hunt] Game of the Year Edition Review",
     content: "Just received the Embercrown Saga Collector's Edition throne figure. Sharing photos and thoughts on build quality, paint application, and packaging.",
     author: "cyber_fan",
     authorId: null,
@@ -788,7 +789,9 @@ app.post('/api/threads', async (req, res) => {
     replies: 0,
     views: 0,
     lastPostAuthor: authorName,
-    lastPostTime: "Just now"
+    lastPostTime: "Just now",
+    createdAt: Date.now(),
+    lastPostAt: Date.now()
   };
 
   // Save it to our temporary "database"
