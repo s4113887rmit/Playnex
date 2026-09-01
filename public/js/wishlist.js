@@ -5,7 +5,7 @@
  *   - Dynamic saved-item count in the page header
  *   - Dynamic filter counts (All / Digital / Physical / Purchased)
  *   - Polished empty states (fully empty wishlist vs. no matches for a filter)
- *   - Move to cart, remove from wishlist
+ *   - Add to cart, remove from wishlist
  *   - Dynamic "Recommended for you" shelf:
  *       * Prioritizes real games with images over placeholder items
  *       * Random order on each page refresh/load
@@ -51,7 +51,7 @@
     const detailUrl = item.href || `listing.html?game=${item.id}`;
 
     const actionButtons = `
-      <button type="button" class="btn btn--primary btn--small" data-action="move-to-cart" data-id="${item.id}">Move to cart</button>
+      <button type="button" class="btn btn--primary btn--small" data-action="add-to-cart" data-id="${item.id}">Add to cart</button>
       <button type="button" class="btn btn--ghost btn--small" data-action="remove" data-id="${item.id}">Remove</button>`;
 
     const imgTag = item.image
@@ -291,15 +291,15 @@
   // Action event delegation on wishlist grid
   if (grid) {
     grid.addEventListener('click', async (e) => {
-      // 1. Move to cart
-      const moveBtn = e.target.closest('[data-action="move-to-cart"]');
+      // 1. Add to cart
+      const moveBtn = e.target.closest('[data-action="add-to-cart"], [data-action="move-to-cart"]');
       if (moveBtn) {
         if (!requireLogin()) return;
         const productId = moveBtn.dataset.id;
         moveBtn.disabled = true;
         try {
           await api(`/api/wishlist/${productId}/move-to-cart`, { method: 'POST' });
-          showToast('Moved item to cart!', 'success');
+          showToast('Added item to cart!', 'success');
           await loadWishlist();
         } catch (err) {
           showToast(err.message, 'error');

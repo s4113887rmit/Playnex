@@ -1090,18 +1090,15 @@ function writeGames(games) {
 
 // Calculate avarage rating//
 function getAvgRating(game) {
-  const totalCount = game.baseCount + game.reviews.length;
-  const totalScore =
-    game.baseRating * game.baseCount +
-    game.reviews.reduce((sum, r) => sum + r.stars, 0);
-  const avg = totalCount ? totalScore / totalCount : 0;
-  return { avg, count: totalCount };
+  const count = game.reviews.length;
+  const totalScore = game.reviews.reduce((sum, r) => sum + r.stars, 0);
+  const avg = count ? totalScore / count : 0;
+  return { avg, count };
 }
 
-// Calculate the percentage of game rating//
+// Calculate the percentage distribution of star ratings from actual user reviews
 function getDistribution(game) {
   const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
-  dist[game.baseRating] += game.baseCount;
   game.reviews.forEach((r) => (dist[r.stars] += 1));
   const total = Object.values(dist).reduce((a, b) => a + b, 0) || 1;
   const percent = {};
@@ -1170,16 +1167,12 @@ app.get("/game/:id/review", async (req, res) => {
   const game = games.find((g) => g.id === parseInt(req.params.id));
   if (!game) return res.status(404).send("Game not found");
 
-  const user = await resolveCurrentUser(req);
-  if (!user) return res.redirect("/Login.html");
-
   let review = null;
   if (req.query.edit) {
     review = game.reviews.find((r) => r.id === req.query.edit) || null;
     if (!review) return res.status(404).send("Review not found");
-    const isOwner = review.authorId && String(review.authorId) === String(user.id);
-    const isAdmin = user.role === 'admin';
-    if (!isOwner && !isAdmin) {
+    const user = await resolveCurrentUser(req);
+    if (user && review.authorId && String(review.authorId) !== String(user.id) && user.role !== 'admin') {
       return res.status(403).send("You can only edit your own reviews");
     }
   }
@@ -1268,6 +1261,7 @@ function slugifyGame(name) {
 const GAME_SLUG_ALIASES = {
   "red-dead-redemption-2": 4,
   "death-standing": 8,
+  "death-stranding": 8,
   "cyberpunk": 2,
   "witcher-3": 9
 };

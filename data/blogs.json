@@ -1,8 +1,8 @@
 [
   {
-    "id": "post-embercrown-saga",
-    "title": "Behind the Design of Embercrown Saga",
-    "summary": "Our art team breaks down the visual development process behind this year's most anticipated RPG.",
+    "id": "post-elden-ring-design",
+    "title": "Behind the Design of Elden Ring's Vast World",
+    "summary": "Exploring the visual development and world architecture behind the Lands Between.",
     "content": "## Point 1\n\nThe iconic solo pirate adventure returns with Assassin's Creed Black Flag Resynced, launching on July 9, 2026. Sail the Caribbean as Edward Kenway during the Golden Age of Piracy in this faithfully enhanced remake featuring stunning visuals, upgraded gameplay, and new content.\n\nAssassin's Creed Black Flag Resynced (a title with 0 colons in it anywhere, apparently) has only been out for a day, and it's already sold two million copies. That's real good! We learned this today via an Ubisoft press release that also highlights its critical and streaming success. Seems like folks like this game, and want to play it! Cool! I wonder if it's any more or less popular than other Assassin's Creed titles?\n\n## Point 2\n\nAssassin's Creed Mirage is in a similar boat, with Ubisoft reporting that it had surpassed 10 million players following its Valley of Memory update, but that again doesn't tell us how many copies it actually sold given its availability on Ubisoft+.\n\nAssassin's Creed Valhalla had the best launch sales of any Assassin's Creed game up to that point according to Ubisoft, but we don't know how many that was because we don't know how many copies any of the others sold over the same period Ubisoft is counting here.\n\n## Conclusion\n\nBlack Flag Resynced sold two million copies in a day. That sounds pretty impressive, and it probably is if Ubisoft is owning up to a certain amount of unit sales for the first time in over a decade. But I think the only real conclusion I can draw from it is that people really like Black Flag, and always have.",
     "tags": [
       "Design",
@@ -13,7 +13,7 @@
     "authorName": "Khanh Nguyen",
     "authorId": null,
     "date": "2026-07-14T09:00:00.000Z",
-    "views": 329,
+    "views": 330,
     "comments": [
       {
         "id": "comment-1",
@@ -25,9 +25,9 @@
     ]
   },
   {
-    "id": "post-nightfall-protocol",
-    "title": "Nightfall Protocol: What We Learned from the Beta",
-    "summary": "Community feedback shaped the final release in ways we never expected. Here is the full story.",
+    "id": "post-ghost-of-tsushima",
+    "title": "Ghost of Tsushima: Perfecting the Katana Combat",
+    "summary": "How fluid combat mechanics and cinema-inspired stances brought feudal Japan to life.",
     "content": "## Beta by the numbers\n\nOur closed beta ran for three weeks and drew more than forty thousand players. The response was humbling and, frankly, a little overwhelming. We tracked every crash report, every balance complaint and every gushing fan letter.\n\n## What changed\n\nThe biggest surprise was the stealth takedown system. We expected players to struggle with the timing window, but the data showed the opposite problem: it was too forgiving, and players could chain takedowns without consequence. We tightened the window and added a detection cooldown.\n\n## Going forward\n\nLaunch is only a few weeks away. Every change we shipped in response to the beta has been through a full QA pass, and we cannot wait to see how the community reacts to the final build.",
     "tags": [
       "Beta",

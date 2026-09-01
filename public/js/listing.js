@@ -43,8 +43,8 @@
 
   function requireLogin(event) {
     if (!isLoggedIn()) {
-      event.preventDefault();
-      window.Playnex.showToast('Please log in to continue.', 'info');
+      if (event) event.preventDefault();
+      window.Playnex.showToast('Please log in to continue. <a href="Login.html" class="playnex-toast__link">Log In -&gt;</a>', 'info');
       return false;
     }
     return true;
