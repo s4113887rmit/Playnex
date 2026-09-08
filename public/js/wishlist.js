@@ -91,9 +91,9 @@
       ? `<span class="card__price-old">${money(item.oldPrice)}</span><span class="card__price-now">${money(item.price)}</span>`
       : `<span class="card__price-now">${item.price === 0 ? 'Free' : money(item.price)}</span>`;
 
-    const badge = item.badge
-      ? `<span class="card__badge${item.category === 'physical' ? ' card__badge--merch' : (item.badge === 'New' ? ' card__badge--new' : '')}">${item.badge}</span>`
-      : (item.category === 'physical' ? '<span class="card__badge card__badge--merch">Physical</span>' : '');
+    const badge = item.badge && item.badge !== 'Physical'
+      ? `<span class="card__badge${item.badge === 'New' ? ' card__badge--new' : ''}">${item.badge}</span>`
+      : '';
 
     const imgTag = item.image
       ? `<img src="${item.image}" alt="${item.title} poster" loading="lazy">`
@@ -341,6 +341,7 @@
             body: { productId }
           });
           showToast('Added item to your wishlist!', 'info');
+          if (window.Playnex.blinkWishlistIcon) window.Playnex.blinkWishlistIcon();
           await loadWishlist();
         } catch (err) {
           showToast(err.message, err.status === 409 ? 'info' : 'error');

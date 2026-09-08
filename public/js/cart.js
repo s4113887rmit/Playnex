@@ -230,7 +230,6 @@
           body: { qty }
         });
         render(data.items);
-        showToast('Quantity updated.', 'success');
       } catch (err) {
         showToast(err.message, 'error');
         loadCart();

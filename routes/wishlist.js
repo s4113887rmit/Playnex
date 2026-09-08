@@ -93,6 +93,11 @@ router.delete('/:productId', (req, res) => {
   }
 
   list.splice(index, 1);
+
+  // Keep wishlist statistics accurate (never below zero)
+  const removedStats = getStats(productId);
+  removedStats.wishlistCount = Math.max(0, removedStats.wishlistCount - 1);
+
   const items = list.map(withWishlistDetails).filter(Boolean);
   const totalValue = items.reduce((sum, p) => sum + p.price, 0);
 
@@ -136,6 +141,10 @@ router.post('/:productId/move-to-cart', (req, res) => {
 
   // Remove from wishlist
   wishlist.splice(wIndex, 1);
+
+  // Keep wishlist statistics accurate (never below zero)
+  const wStats = getStats(productId);
+  wStats.wishlistCount = Math.max(0, wStats.wishlistCount - 1);
 
   // Update stats
   const stats = getStats(productId);

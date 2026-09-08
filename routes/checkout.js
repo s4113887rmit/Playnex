@@ -85,6 +85,8 @@ function validateCheckout(body) {
   const rawCardNumber = (payment.cardNumber || '').replace(/\s+/g, '');
   if (!rawCardNumber || !/^[0-9]{15,19}$/.test(rawCardNumber)) {
     errors.cardNumber = 'Card number must be between 15 and 19 digits.';
+  } else if (!isValidLuhn(rawCardNumber)) {
+    errors.cardNumber = 'Card number is invalid. Please check the digits and try again.';
   }
 
   const expiry = (payment.expiry || '').trim();
@@ -95,6 +97,14 @@ function validateCheckout(body) {
     const month = parseInt(expiryMatch[1], 10);
     if (month < 1 || month > 12) {
       errors.expiry = 'Invalid expiry month (01–12).';
+    } else {
+      // A card is valid through the last day of its expiry month.
+      const rawYear = parseInt(expiryMatch[2], 10);
+      const fullYear = rawYear < 100 ? 2000 + rawYear : rawYear;
+      const expiryEnd = new Date(fullYear, month, 1); // first moment after the expiry month
+      if (expiryEnd.getTime() <= Date.now()) {
+        errors.expiry = 'This card has expired. Please use a valid card.';
+      }
     }
   }
 

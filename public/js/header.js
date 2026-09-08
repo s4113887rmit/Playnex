@@ -25,7 +25,11 @@
     }
 
     var wrapper = document.querySelector('.topbar__actions');
-    if (!wrapper || wrapper.getAttribute('data-auth-synced') === 'true') return;
+    if (!wrapper) return;
+    if (wrapper.getAttribute('data-auth-synced') === 'true') {
+      wrapper.style.visibility = 'visible';
+      return;
+    }
 
     if (!user) {
       localStorage.removeItem('playnex_user');
@@ -297,7 +301,10 @@
   }
 
   function init() {
+    var actions = document.querySelector('.topbar__actions');
+    if (actions) actions.style.visibility = 'hidden';
     updateHeader();
+    if (actions) actions.style.visibility = 'visible';
     initSearchAdvanced();
   }
 

@@ -108,6 +108,11 @@ router.put('/:productId', (req, res) => {
     return res.status(404).json({ error: 'Item not found in your cart.' });
   }
 
+  const product = products.find(p => p.id === productId);
+  if (!product) {
+    return res.status(404).json({ error: `Product "${productId}" does not exist in the catalogue.` });
+  }
+
   const isDigital = product.category === 'digital' || !product.category;
   line.qty = isDigital ? 1 : quantity;
   if (variant) line.variant = variant;

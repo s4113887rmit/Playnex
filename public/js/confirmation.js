@@ -87,7 +87,11 @@
           order = data.order;
         }
       } catch (err) {
-        console.warn('Could not fetch order from API:', err);
+        if (err && err.status === 404) {
+          // Expected case: unknown/stale order id — show the fallback state quietly.
+        } else {
+          console.error('Unexpected error loading order from API:', err);
+        }
       }
     }
 

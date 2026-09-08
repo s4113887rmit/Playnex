@@ -1295,9 +1295,14 @@ function renderListing(req, res) {
   slug = slug || slugifyGame(game.name);
   const { avg, count } = getAvgRating(game);
   const distribution = getDistribution(game);
-  const related = games.filter((g) => g.id !== game.id).slice(0, 4);
-
-  res.render("listing", { game, avg, count, distribution, related, slug });
+  const fcGameIds = new Set([10, 11, 12, 13]);
+  const related = fcGameIds.has(game.id)
+    ? games.filter((g) => fcGameIds.has(g.id) && g.id !== game.id).slice(0, 3)
+    : games.filter((g) => g.id !== game.id).slice(0, 4);
+  // Newly released titles that are temporarily free as part of the launch promotion.
+  const newReleaseFreeIds = new Set([4, 13]); // Red Dead Redemption II, EA Sports FC 26
+  const isNewReleaseFree = newReleaseFreeIds.has(game.id);
+  res.render("listing", { game, avg, count, distribution, related, slug, isNewReleaseFree });
 }
 
 app.get("/listing.html", renderListing);

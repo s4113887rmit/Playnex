@@ -141,8 +141,8 @@
     "description": "A sprawling Western tale of loyalty, conviction, and the price of infamy.",
     "longDescription": "Red Dead Redemption II follows Arthur Morgan through a breathtaking western saga, blending cinematic storytelling with legendary open-world exploration and slow-burn survival tension.",
     "image": "/img/reddeadposter.jpg",
-    "price": 49.99,
-    "oldPrice": null,
+    "price": 0,
+    "oldPrice": 49.99,
     "platforms": [
       "PC"
     ],
@@ -404,5 +404,97 @@
         "image": ""
       }
     ]
+  },
+  {
+    "id": 10,
+    "name": "EA Sports FC 23",
+    "genre": "Sports",
+    "releaseDate": "30/09/2022",
+    "description": "Experience football's biggest moments with authentic clubs, players, and competitions.",
+    "longDescription": "EA Sports FC 23 delivers a complete football experience with authentic teams, competitive matches, and a wide range of ways to build and play your club. Step onto the pitch and shape every matchday moment.",
+    "image": "/img/fc23.webp",
+    "price": 19.99,
+    "oldPrice": 59.99,
+    "platforms": ["PS4", "PS5"],
+    "type": "Physical",
+    "availability": "In stock",
+    "edition": "Standard edition",
+    "included": "Full game disc for PS4 / PS5",
+    "features": [
+      "Authentic football clubs and players",
+      "Competitive online matches",
+      "Career and tournament modes",
+      "Physical disc for PS4 and PS5"
+    ],
+    "reviews": []
+  },
+  {
+    "id": 11,
+    "name": "EA Sports FC 24",
+    "genre": "Sports",
+    "releaseDate": "29/09/2023",
+    "description": "Build your club and compete across an authentic global football experience.",
+    "longDescription": "EA Sports FC 24 brings the world's game to life with authentic football presentation, competitive modes, and a deep club-building experience. Develop your squad and compete across every season.",
+    "image": "/img/fc24.jpeg",
+    "price": 29.99,
+    "oldPrice": 69.99,
+    "platforms": ["PS4", "PS5"],
+    "type": "Physical",
+    "availability": "In stock",
+    "edition": "Standard edition",
+    "included": "Full game disc for PS4 / PS5",
+    "features": [
+      "Global football competition",
+      "Squad-building and club progression",
+      "Online seasons and tournaments",
+      "Authentic match presentation"
+    ],
+    "reviews": []
+  },
+  {
+    "id": 12,
+    "name": "EA Sports FC 25",
+    "genre": "Sports",
+    "releaseDate": "27/09/2024",
+    "description": "Take control of your club with new ways to compete and play together.",
+    "longDescription": "EA Sports FC 25 combines a deep football catalogue with flexible ways to compete. Manage your club, refine your tactics, and take on friends and rivals in a fast-moving football season.",
+    "image": "/img/fc25.jpeg",
+    "price": 39.99,
+    "oldPrice": 69.99,
+    "platforms": ["PS4", "PS5"],
+    "type": "Physical",
+    "availability": "In stock",
+    "edition": "Standard edition",
+    "included": "Full game disc for PS4 / PS5",
+    "features": [
+      "Tactical club management",
+      "Competitive online football",
+      "Career and seasonal challenges",
+      "Large roster of authentic teams"
+    ],
+    "reviews": []
+  },
+  {
+    "id": 13,
+    "name": "EA Sports FC 26",
+    "genre": "Sports",
+    "releaseDate": "26/09/2025",
+    "description": "Play the latest EA Sports FC experience with modern football and updated squads.",
+    "longDescription": "EA Sports FC 26 offers the latest football season with updated squads, authentic competitions, and a broad selection of competitive and career modes. Create your football story on and off the pitch.",
+    "image": "/img/fc26.avif",
+    "price": 0,
+    "oldPrice": 59.99,
+    "platforms": ["PS4", "PS5"],
+    "type": "Physical",
+    "availability": "In stock",
+    "edition": "Standard edition",
+    "included": "Full game disc for PS4 / PS5",
+    "features": [
+      "Latest squads and competitions",
+      "Authentic football atmosphere",
+      "Career and online modes",
+      "Physical disc for PS4 and PS5"
+    ],
+    "reviews": []
   }
 ]
