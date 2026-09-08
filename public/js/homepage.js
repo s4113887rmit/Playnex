@@ -283,7 +283,7 @@
     }
 
     if (buyBtn) {
-      const priceText = game.price === 0 ? 'Claim now — Free' : `Buy now — $${Number(game.price).toFixed(2)}`;
+      const priceText = `Buy now — $${Number(game.price).toFixed(2)}`;
       buyBtn.textContent = priceText;
       buyBtn.href = game.href || `listing.html?game=${game.id}`;
     }
@@ -337,8 +337,8 @@
 
   function cardHTML(p) {
     const priceHTML = p.oldPrice
-      ? `<span class="card__price-old">${money(p.oldPrice)}</span><span class="card__price-now">${p.price === 0 ? 'Free' : money(p.price)}</span>`
-      : `<span class="card__price-now">${p.price === 0 ? 'Free' : money(p.price)}</span>`;
+      ? `<span class="card__price-old">${money(p.oldPrice)}</span><span class="card__price-now">${money(p.price)}</span>`
+      : `<span class="card__price-now">${money(p.price)}</span>`;
 
     const badge = p.badge && p.badge !== 'Physical'
       ? `<span class="card__badge${p.badge === 'New' ? ' card__badge--new' : ''}">${p.badge}</span>`
