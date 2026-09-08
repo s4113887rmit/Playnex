@@ -293,6 +293,12 @@
       cartSubtotal = data.subtotal;
       cartTotal = data.total;
 
+      const hasPhysical = items.some(i => i.product && i.product.category === 'physical');
+      const deliveryFieldset = form ? form.querySelector('fieldset') : null;
+      if (deliveryFieldset && !hasPhysical) {
+        deliveryFieldset.style.display = 'none';
+      }
+
       if (headerCountEl) {
         headerCountEl.textContent = `${data.itemCount} items · ${money(data.total)}`;
       }

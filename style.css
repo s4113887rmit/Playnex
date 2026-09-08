@@ -1904,6 +1904,7 @@ img {
   display: flex;
   gap: 8px;
   margin-top: 18px;
+  align-items: center;
 }
 
 .promo-form input {
@@ -1911,8 +1912,17 @@ img {
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 4px;
-  padding: 9px 10px;
+  padding: 12px 14px;
   font-size: 13px;
+  height: 42px;
+  box-sizing: border-box;
+}
+
+.promo-form .btn {
+  height: 42px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  margin-top: -1px;
 }
 
 /* ---------- checkout forms ---------- */

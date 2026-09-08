@@ -125,7 +125,7 @@
     clearTimeout(toast._timeout);
     toast._timeout = setTimeout(() => {
       toast.classList.remove('is-visible');
-    }, type === 'info' ? 3500 : 3200);
+    }, 2000);
 
     toast.onmouseenter = () => {
       clearTimeout(toast._timeout);
