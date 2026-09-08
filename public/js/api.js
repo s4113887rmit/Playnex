@@ -45,14 +45,14 @@
     return data;
   }
 
-  // Login guard: when logged out, shows a centered "please log in" notice
-  // with a clickable underlined "Log In" link and returns false so caller can abort.
+  // Login guard: when logged out, redirects to login page with return URL
   function requireLogin() {
     const user = (window.Playnex && typeof window.Playnex.getCurrentUser === 'function')
       ? window.Playnex.getCurrentUser()
       : null;
     if (user) return true;
-    showToast('Please log in to continue. <a href="Login.html" class="playnex-toast__link">Log In -&gt;</a>', 'info');
+    const returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+    window.location.href = 'Login.html?return=' + returnTo;
     return false;
   }
 

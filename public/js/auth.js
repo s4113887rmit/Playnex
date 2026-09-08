@@ -430,7 +430,9 @@
           }));
           sessionStorage.removeItem('playnex_draft_login');
           showServerMsg('login', 'Welcome, ' + (result.data.user.name || result.data.user.username) + '! Logged in successfully.', 'success');
-          setTimeout(function () { window.location.href = 'homepage.html'; }, 1000);
+          var params = new URLSearchParams(window.location.search);
+          var returnTo = params.get('return');
+          setTimeout(function () { window.location.href = returnTo ? decodeURIComponent(returnTo) : 'homepage.html'; }, 1000);
         } else {
           localStorage.removeItem('playnex_user');
           showServerMsg('login', result.data.error, 'error');
