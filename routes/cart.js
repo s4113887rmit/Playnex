@@ -7,7 +7,9 @@ async function withProductDetails(line) {
   const product = await Product.findOne({ id: line.productId }).lean();
   if (!product) return null;
   return {
-    ...line,
+    productId: line.productId,
+    qty: line.qty,
+    variant: line.variant || '',
     product,
     lineTotal: Number((product.price * line.qty).toFixed(2))
   };

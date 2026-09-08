@@ -10,7 +10,7 @@ const orderItemSchema = new mongoose.Schema({
 }, { _id: true });
 
 const orderSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+  userId: { type: String, required: true },
   items: [orderItemSchema],
   subtotal: { type: Number, required: true },
   shipping: { type: Number, default: 0 },

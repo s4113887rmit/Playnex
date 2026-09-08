@@ -14,6 +14,7 @@ const Product = require('./models/Product');
 const app = express();
 
 app.set("view engine", "ejs");
+app.set("trust proxy", 1);
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
