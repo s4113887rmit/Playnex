@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema({
+  _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+  id: { type: String, default: function () { return 'r_' + Date.now(); } },
   author: { type: String, required: true, trim: true },
   authorId: { type: String, default: null },
   date: { type: String, required: true },
@@ -8,7 +10,7 @@ const reviewSchema = new mongoose.Schema({
   title: { type: String, required: true, trim: true, maxlength: 200 },
   content: { type: String, required: true, trim: true, maxlength: 2000 },
   image: { type: String, default: '' }
-}, { _id: true });
+});
 
 const gameSchema = new mongoose.Schema({
   id: { type: Number, required: true, unique: true },

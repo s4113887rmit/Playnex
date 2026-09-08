@@ -503,6 +503,7 @@
         });
         addBtn.textContent = 'Added ✓';
         showToast('Added item to your cart!', 'success');
+        if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
         setTimeout(() => {
           addBtn.textContent = originalText;
           addBtn.disabled = false;
@@ -571,6 +572,7 @@
           body: { productId: 'death-standing', qty: 1 }
         });
         showToast('Claimed Death Stranding for your cart!', 'success');
+        if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
         setTimeout(() => {
           window.location.href = 'cart.html';
         }, 600);

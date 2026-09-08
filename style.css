@@ -4091,24 +4091,25 @@ header {
 /* rating bar */
 
 .rating-bars {
-  width: 1000px;
-  max-width: 1000px;
+  width: 100%;
   background: #0d0d1a;
-  padding: 10;
+  padding: 16px;
+  border-radius: 8px;
 }
 
 .rating-row {
   display: flex;
   align-items: center;
-  gap: 30px;
-  margin: 10px;
+  gap: 16px;
+  margin: 8px 0;
 }
 
 .rating-label {
-  width: 12px;
+  width: 20px;
   color: #ffffff;
-  font-size: 40px;
-  margin-top: -10px;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
 }
 
 .bar-track {
@@ -4130,14 +4131,13 @@ header {
 
 .detailreview {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
-  gap: 100px;
+  gap: 48px;
   justify-content: center;
-  max-width: 2000px;
-  margin: 100px auto;
+  max-width: 900px;
+  margin: 60px auto;
   border: 1px solid #26243c;
-  width: fit-content;
   padding: 40px;
   background: #100f1e;
   border-radius: 8px;
@@ -4896,11 +4896,6 @@ a.btn.is-disabled {
   font-size: 80%;
   color: var(--text-muted);
   margin-top: 4px;
-}
-
-.new-thread-form textarea {
-  resize: vertical;
-  min-height: 60px;
 }
 
 .new-thread-form #image-preview,

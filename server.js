@@ -1137,7 +1137,7 @@ app.get("/game/:id/review", async (req, res) => {
     if (!game) return res.status(404).send("Game not found");
     let review = null;
     if (req.query.edit) {
-      review = game.reviews.find((r) => r.id === req.query.edit) || null;
+      review = game.reviews.find((r) => String(r._id) === String(req.query.edit)) || null;
       if (!review) return res.status(404).send("Review not found");
       const user = await resolveCurrentUser(req);
       if (user && review.authorId && String(review.authorId) !== String(user.id) && user.role !== 'admin') {
@@ -1159,7 +1159,7 @@ app.post("/game/:id/review", async (req, res) => {
     const { title, content, rating, image, reviewId } = req.body;
     const errors = validateReviewInput(title, content, rating);
     if (errors.length) {
-      const reviewObj = reviewId ? game.reviews.find((r) => r.id === reviewId) : null;
+      const reviewObj = reviewId ? game.reviews.find((r) => String(r._id) === String(reviewId)) : null;
       return res.status(400).render("writegamereview", { game: game.toObject(), review: reviewObj, errors });
     }
     let imagePath = (image || "").trim();
@@ -1168,7 +1168,7 @@ app.post("/game/:id/review", async (req, res) => {
       if (saved) imagePath = saved;
     }
     if (reviewId) {
-      const review = game.reviews.id(reviewId);
+      const review = game.reviews.find((r) => String(r._id) === String(reviewId));
       if (!review) return res.status(404).send("Review not found");
       const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
       const isAdmin = user && user.role === 'admin';
@@ -1191,7 +1191,7 @@ app.post("/game/:id/review", async (req, res) => {
       });
     }
     await game.save();
-    res.redirect("/game/" + game.id);
+    res.redirect("/listing.html?game=" + slugifyGame(game.name));
   } catch (err) {
     res.status(500).send("Failed to save review");
   }
@@ -1201,15 +1201,15 @@ app.post("/game/:id/review/:reviewId/delete", async (req, res) => {
   try {
     const game = await Game.findOne({ id: parseInt(req.params.id) });
     if (!game) return res.status(404).send("Game not found");
-    const review = game.reviews.id(req.params.reviewId);
+    const review = game.reviews.find((r) => String(r._id) === String(req.params.reviewId));
     if (!review) return res.status(404).send("Review not found");
     const user = await resolveCurrentUser(req);
     const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
     const isAdmin = user && user.role === 'admin';
     if (!isOwner && !isAdmin) return res.status(403).send("You can only delete your own reviews");
-    game.reviews.pull(req.params.reviewId);
+    game.reviews.pull(review._id);
     await game.save();
-    res.redirect("/game/" + game.id);
+    res.redirect("/listing.html?game=" + slugifyGame(game.name));
   } catch (err) {
     res.status(500).send("Failed to delete review");
   }

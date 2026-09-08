@@ -136,8 +136,8 @@
               <div class="comment-meta">
                 <span class="author"><%= r.author %></span>
                 <span class="date"><%= r.date %></span>
-                <a href="/game/<%= game.id %>/review?edit=<%= r.id %>" class="comment-action review-owner-action" data-author-id="<%= r.authorId || '' %>">Edit</a>
-                <form method="POST" action="/game/<%= game.id %>/review/<%= r.id %>/delete"
+                <a href="/game/<%= game.id %>/review?edit=<%= r._id %>" class="comment-action review-owner-action" data-author-id="<%= r.authorId || '' %>">Edit</a>
+                <form method="POST" action="/game/<%= game.id %>/review/<%= r._id %>/delete"
                       class="delete-review-form review-owner-action" data-author-id="<%= r.authorId || '' %>" style="display:inline">
                   <input type="hidden" name="userId" class="review-delete-user-id" value="">
                   <button type="submit" class="comment-action comment-action--danger">Delete</button>

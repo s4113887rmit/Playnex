@@ -364,6 +364,7 @@
         });
         addBtn.textContent = 'Added ✓';
         showToast('Added item to your cart!', 'success');
+        if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
         setTimeout(() => {
           addBtn.textContent = originalText;
           addBtn.disabled = false;

@@ -71,6 +71,9 @@
           if (path === '/api/wishlist' && window.Playnex.blinkWishlistIcon) {
             window.Playnex.blinkWishlistIcon();
           }
+          if (path === '/api/cart' && window.Playnex.syncCartBadge) {
+            window.Playnex.syncCartBadge();
+          }
         })
         .catch(function (err) {
           window.Playnex.showToast(err.message || 'Something went wrong.', 'error');
@@ -151,6 +154,7 @@
         body: { productId: slug, qty: 1 }
       })
         .then(function () {
+          if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
           window.location.href = 'checkout.html';
         })
         .catch(function (err) {
