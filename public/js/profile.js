@@ -448,7 +448,7 @@
         list.innerHTML = html;
       })
       .catch(function () {
-        console.log('Could not load purchase history');
+        console.error('Could not load purchase history');
       });
   }
 })();
