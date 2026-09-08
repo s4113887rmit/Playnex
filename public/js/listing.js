@@ -68,6 +68,9 @@
       })
         .then(function () {
           window.Playnex.showToast(doneMessage, 'success');
+          if (path === '/api/wishlist' && window.Playnex.blinkWishlistIcon) {
+            window.Playnex.blinkWishlistIcon();
+          }
         })
         .catch(function (err) {
           window.Playnex.showToast(err.message || 'Something went wrong.', 'error');
@@ -111,6 +114,7 @@
           .then(function () {
             updateWishBtn(true);
             window.Playnex.showToast('Added to your wishlist.', 'info');
+            if (window.Playnex.blinkWishlistIcon) window.Playnex.blinkWishlistIcon();
           })
           .catch(function (err) {
             window.Playnex.showToast(err.message || 'Something went wrong.', 'error');
@@ -130,6 +134,30 @@
   });
 
   if (buyNowBtn) {
-    buyNowBtn.addEventListener('click', requireLogin);
+    buyNowBtn.addEventListener('click', function (event) {
+      if (!requireLogin(event)) return;
+      if (!slug) {
+        event.preventDefault();
+        window.Playnex.showToast('Game not found in the catalogue.', 'error');
+        return;
+      }
+      // Add the currently viewed product to the cart first, then go to checkout.
+      event.preventDefault();
+      var original = buyNowBtn.textContent;
+      buyNowBtn.disabled = true;
+      buyNowBtn.textContent = 'Adding...';
+      window.Playnex.api('/api/cart', {
+        method: 'POST',
+        body: { productId: slug, qty: 1 }
+      })
+        .then(function () {
+          window.location.href = 'checkout.html';
+        })
+        .catch(function (err) {
+          buyNowBtn.disabled = false;
+          buyNowBtn.textContent = original;
+          window.Playnex.showToast(err.message || 'Could not add the product to your cart.', 'error');
+        });
+    });
   }
 })();

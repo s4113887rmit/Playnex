@@ -103,6 +103,7 @@
       if (clean.length < 15) return 'Card number must be at least 15 digits.';
       if (clean.length > 19) return 'Card number cannot exceed 19 digits.';
       if (!/^[0-9]{15,19}$/.test(clean)) return 'Card number must contain only numbers (15 to 19 digits).';
+      if (!isValidLuhn(clean)) return 'Card number is invalid. Please check the digits and try again.';
       return '';
     },
     'card-expiry': (v) => {
@@ -111,6 +112,11 @@
       if (!m) return 'Enter expiry in MM/YY format.';
       const month = parseInt(m[1], 10);
       if (month < 1 || month > 12) return 'Invalid expiry month (01–12).';
+      // A card is valid through the last day of its expiry month.
+      const rawYear = parseInt(m[2], 10);
+      const fullYear = rawYear < 100 ? 2000 + rawYear : rawYear;
+      const expiryEnd = new Date(fullYear, month, 1); // first moment after the expiry month
+      if (expiryEnd.getTime() <= Date.now()) return 'This card has expired. Please use a valid card.';
       return '';
     },
     'card-cvc': (v) => (/^[0-9]{2,6}$/.test(v.trim()) ? '' : 'Security code must be digits (e.g. 3 or 4 digits).')

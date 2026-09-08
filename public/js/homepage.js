@@ -1,6 +1,6 @@
 /**
  * homepage.js — Dynamic homepage logic for Playnex.
- * Renders digital & merchandise shelves dynamically, supports live search, category toggles, sorting, and cart/wishlist additions.
+ * Renders digital & merchandise shelves dynamically, supports live search, sorting, and cart/wishlist additions.
  */
 (function () {
   'use strict';
@@ -9,13 +9,10 @@
 
   let allProducts = [];
   let wishlistIds = new Set();
-  let activeCategory = 'all'; // 'all' | 'digital' | 'physical'
   let searchTerm = '';
 
   const newReleasesList = document.querySelector('#new-releases .shelf__row');
   const merchList = document.querySelector('#merch .shelf__row');
-  const newSection = document.getElementById('new-releases');
-  const merchSection = document.getElementById('merch');
   const searchInput = document.getElementById('site-search');
 
   // ==========================================
@@ -340,12 +337,12 @@
 
   function cardHTML(p) {
     const priceHTML = p.oldPrice
-      ? `<span class="card__price-old">${money(p.oldPrice)}</span><span class="card__price-now">${money(p.price)}</span>`
+      ? `<span class="card__price-old">${money(p.oldPrice)}</span><span class="card__price-now">${p.price === 0 ? 'Free' : money(p.price)}</span>`
       : `<span class="card__price-now">${p.price === 0 ? 'Free' : money(p.price)}</span>`;
 
-    const badge = p.badge
-      ? `<span class="card__badge${p.category === 'physical' ? ' card__badge--merch' : (p.badge === 'New' ? ' card__badge--new' : '')}">${p.badge}</span>`
-      : (p.category === 'physical' ? '<span class="card__badge card__badge--merch">Physical</span>' : '');
+    const badge = p.badge && p.badge !== 'Physical'
+      ? `<span class="card__badge${p.badge === 'New' ? ' card__badge--new' : ''}">${p.badge}</span>`
+      : '';
 
     const imgTag = p.image
       ? `<img src="${p.image}" alt="${p.title} poster" loading="lazy">`
@@ -391,23 +388,28 @@
 
   function render() {
     const digitalSortEl = document.getElementById('sort-digital');
-    const merchSortEl = document.getElementById('sort-merch');
     const digitalSort = digitalSortEl ? digitalSortEl.value : 'title';
-    const merchSort = merchSortEl ? merchSortEl.value : 'title';
 
-    const digital = applySort(
+    const sortedDigitalProducts = applySort(
       allProducts.filter(p => p.category === 'digital' && p.image && p.image.trim() !== '' && matchesSearch(p)),
       digitalSort
     );
-    const physical = applySort(
-      allProducts.filter(p => p.category === 'physical' && matchesSearch(p)),
-      merchSort
-    );
+    const digitalProducts = [
+      ...sortedDigitalProducts.filter(p => p.badge === 'New'),
+      ...sortedDigitalProducts.filter(p => p.badge !== 'New')
+    ];
+    const fc26 = allProducts.find(p => p.id === 'ea-sports-fc-26' && matchesSearch(p));
+    const digital = fc26 ? [fc26, ...digitalProducts] : digitalProducts;
+
+    const physicalProducts = allProducts.filter(p => p.category === 'physical' && matchesSearch(p));
+    const featuredFc26 = physicalProducts.find(p => p.id === 'ea-sports-fc-26');
+    const otherPhysical = physicalProducts.filter(p => p.id !== 'ea-sports-fc-26');
+    const physical = (featuredFc26 ? [featuredFc26, ...otherPhysical] : otherPhysical).slice(0, 5);
 
     if (newReleasesList) {
       newReleasesList.innerHTML = digital.length
         ? digital.map(cardHTML).join('')
-        : '<li class="shelf-empty">No digital games match your search.</li>';
+        : '<li class="shelf-empty">No games match your search.</li>';
     }
 
     if (merchList) {
@@ -415,9 +417,6 @@
         ? physical.map(cardHTML).join('')
         : '<li class="shelf-empty">No physical merch matches your search.</li>';
     }
-
-    if (newSection) newSection.style.display = activeCategory === 'physical' ? 'none' : '';
-    if (merchSection) merchSection.style.display = activeCategory === 'digital' ? 'none' : '';
   }
 
   async function loadProducts() {
@@ -474,36 +473,6 @@
       });
     }
   }
-
-  // Category filter tabs in subnav
-  document.querySelectorAll('.subnav__link').forEach(link => {
-    const href = link.getAttribute('href');
-    if (href === 'homepage.html' || href === 'homepage.html#') {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        activeCategory = 'all';
-        document.querySelectorAll('.subnav__link').forEach(l => l.classList.remove('is-active'));
-        link.classList.add('is-active');
-        render();
-      });
-    } else if (href === 'shopping.html?cat=digital') {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        activeCategory = 'digital';
-        document.querySelectorAll('.subnav__link').forEach(l => l.classList.remove('is-active'));
-        link.classList.add('is-active');
-        render();
-      });
-    } else if (href === 'shopping.html?cat=merch') {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        activeCategory = 'physical';
-        document.querySelectorAll('.subnav__link').forEach(l => l.classList.remove('is-active'));
-        link.classList.add('is-active');
-        render();
-      });
-    }
-  });
 
   // Hero action buttons (Buy now & Add to wishlist) require login
   const heroBuyBtn = document.querySelector('.hero__actions .btn--primary');
@@ -577,6 +546,7 @@
             body: { productId }
           });
           wishlistIds.add(productId);
+          if (window.Playnex.blinkWishlistIcon) window.Playnex.blinkWishlistIcon();
           document.querySelectorAll(`[data-action="wishlist"][data-id="${productId}"]`).forEach(btn => {
             btn.classList.add('is-saved');
             if (btn.id === 'hero-wishlist-btn') btn.textContent = 'Saved in wishlist';

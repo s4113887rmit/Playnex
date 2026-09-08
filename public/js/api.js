@@ -56,6 +56,16 @@
     return false;
   }
 
+  // Blink every wishlist navigation icon after an item is added.
+  function blinkWishlistIcon() {
+    document.querySelectorAll('a.icon-btn[href="wishlist.html"], a.icon-btn[href*="wishlist.html"], a.icon-btn[aria-label*="Wishlist"]').forEach((icon) => {
+      icon.classList.remove('wishlist-nav--blink');
+      void icon.offsetWidth;
+      icon.classList.add('wishlist-nav--blink');
+      icon.addEventListener('animationend', () => icon.classList.remove('wishlist-nav--blink'), { once: true });
+    });
+  }
+
   // Update topbar cart icon badge count
   function updateCartBadge(count) {
     const totalCount = Number(count) || 0;
@@ -133,6 +143,7 @@
   window.Playnex.showToast = showToast;
   window.Playnex.requireLogin = requireLogin;
   window.Playnex.updateCartBadge = updateCartBadge;
+  window.Playnex.blinkWishlistIcon = blinkWishlistIcon;
   window.Playnex.syncCartBadge = syncCartBadge;
 
   if (document.readyState === 'loading') {

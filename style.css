@@ -311,6 +311,7 @@ img {
 }
 
 .topbar__actions {
+  visibility: hidden;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -572,6 +573,21 @@ img {
 .icon-btn:hover {
   color: var(--text);
   background: var(--surface-2);
+}
+
+.wishlist-nav--blink,
+.wishlist-nav--blink svg {
+  animation: wishlist-nav-blink 0.8s ease-in-out 2;
+}
+
+.wishlist-nav--blink svg {
+  color: inherit;
+  stroke: currentColor;
+}
+
+@keyframes wishlist-nav-blink {
+ 0%, 100% { color: var(--text-muted); transform: scale(1); }
+ 50% { color: #ef4444 !important; transform: scale(1.18); }
 }
 
 .icon-btn.is-active {
@@ -1062,6 +1078,36 @@ img {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 20px;
+}
+
+#merch .shelf__row > li,
+#merch .shelf__row .card {
+  height: auto;
+}
+
+#merch .shelf__row .card {
+  display: block;
+}
+
+#merch .shelf__row .card__body {
+  display: block;
+  padding-bottom: 12px;
+}
+
+#merch .shelf__row .card__title {
+  min-height: 2.4em;
+}
+
+#merch .shelf__row .card__add {
+  margin-top: 12px;
+}
+
+#merch .shelf__row .card[data-id="ea-sports-fc-26"] .card__add {
+  margin-top: 18px;
+}
+
+#merch .shelf__row .card[data-id="ea-sports-fc-26"] .card__body {
+  padding-bottom: 18px;
 }
 
 .card {
@@ -2272,6 +2318,11 @@ img {
   font-size: 1rem;
   color: var(--text-muted);
   text-decoration: line-through;
+}
+.listing-free-note {
+  font-size: 0.85rem;
+  color: var(--accent);
+  line-height: 1.4;
 }
 
 .listing-hero__description {

@@ -28,12 +28,12 @@
 
   function cardHTML(p) {
     const priceHTML = p.oldPrice
-      ? `<span class="card__price-old">${money(p.oldPrice)}</span><span class="card__price-now">${money(p.price)}</span>`
+      ? `<span class="card__price-old">${money(p.oldPrice)}</span><span class="card__price-now">${p.price === 0 ? 'Free' : money(p.price)}</span>`
       : `<span class="card__price-now">${p.price === 0 ? 'Free' : money(p.price)}</span>`;
 
-    const badge = p.badge
-      ? `<span class="card__badge${p.category === 'physical' ? ' card__badge--merch' : (p.badge === 'New' ? ' card__badge--new' : '')}">${p.badge}</span>`
-      : (p.category === 'physical' ? '<span class="card__badge card__badge--merch">Physical</span>' : '');
+    const badge = p.badge && p.badge !== 'Physical'
+      ? `<span class="card__badge${p.badge === 'New' ? ' card__badge--new' : ''}">${p.badge}</span>`
+      : '';
 
     const imgTag = p.image
       ? `<img src="${p.image}" alt="${p.title} poster" loading="lazy">`
@@ -108,8 +108,9 @@
       // Platform filter
       if (filters.platforms.length > 0) {
         const matchesPlatform = filters.platforms.some(plat => {
-          if (plat === 'pc') return p.platform.toLowerCase().includes('pc');
-          if (plat === 'console') return p.platform.toLowerCase().includes('console');
+          const platform = (p.platform || '').toLowerCase();
+          if (plat === 'pc') return platform.includes('pc');
+          if (plat === 'console') return platform.includes('console') || platform.includes('ps4') || platform.includes('ps5') || platform.includes('xbox');
           return true;
         });
         if (!matchesPlatform) return false;
@@ -205,12 +206,21 @@
         api('/api/products'),
         api('/api/wishlist').catch(() => ({ items: [] }))
       ]);
-      // Only keep real games with poster images and legitimate physical merchandise
+      // Keep page one games and the four FC physical games for page two.
       allProducts = (productsData || []).filter(p => {
         if (p.category === 'digital') {
           return p.image && p.image.trim() !== '';
         }
-        return true;
+        return /^ea-sports-fc-(23|24|25|26)$/.test(p.id);
+      });
+      const fcOrder = ['ea-sports-fc-26', 'ea-sports-fc-25', 'ea-sports-fc-24', 'ea-sports-fc-23'];
+      allProducts.sort((a, b) => {
+        const aIndex = fcOrder.indexOf(a.id);
+        const bIndex = fcOrder.indexOf(b.id);
+        if (aIndex === -1 && bIndex === -1) return 0;
+        if (aIndex === -1) return -1;
+        if (bIndex === -1) return 1;
+        return aIndex - bIndex;
       });
       wishlistIds = new Set((wishlistData.items || []).map(item => item.id));
 
@@ -392,6 +402,7 @@
             body: { productId }
           });
           wishlistIds.add(productId);
+          if (window.Playnex.blinkWishlistIcon) window.Playnex.blinkWishlistIcon();
           document.querySelectorAll(`[data-action="wishlist"][data-id="${productId}"]`).forEach(btn => {
             btn.classList.add('is-saved');
           });

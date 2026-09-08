@@ -44,6 +44,9 @@
             <% } else { %>
               <span id="listing-old-price" class="listing-price listing-price--old"></span>
             <% } %>
+            <% if (isNewReleaseFree) { %>
+              <span class="listing-free-note">Free for a limited time as part of our new release promotion.</span>
+            <% } %>
           </div>
 
           <p id="listing-description" class="listing-hero__description"><%= game.description %></p>
