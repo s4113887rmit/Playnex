@@ -14,7 +14,7 @@
     "express": "^4.22.2",
     "express-rate-limit": "^7.4.0",
     "mongodb": "^6.9.0",
-    "mongoose": "^8.7.0",
+    "mongoose": "^8.24.4",
     "validator": "^13.12.0"
   }
 }
