@@ -11,6 +11,4 @@ const wishlistSchema = new mongoose.Schema({
   items: [wishlistItemSchema]
 }, { timestamps: true });
 
-wishlistSchema.index({ userId: 1 });
-
 module.exports = mongoose.model('Wishlist', wishlistSchema);

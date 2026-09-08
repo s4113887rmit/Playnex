@@ -11,6 +11,4 @@ const cartSchema = new mongoose.Schema({
   items: [cartItemSchema]
 }, { timestamps: true });
 
-cartSchema.index({ userId: 1 });
-
 module.exports = mongoose.model('Cart', cartSchema);
