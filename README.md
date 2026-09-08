@@ -68,6 +68,12 @@ Shared User Account module (with team):
 - `public/img/` - Product and article images
 - `server.js` - Express server, shared modules, and module routes
 
+## Live Website
+https://playnex-m13w.onrender.com
+
+## GitHub Repository
+https://github.com/s4113887rmit/Playnex
+
 ## How to Run and Test
 
 1. Install dependencies (only once):
