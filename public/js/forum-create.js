@@ -13,12 +13,21 @@ document.addEventListener('DOMContentLoaded', () => {
   const gameInput = document.getElementById('game-selector');
   const categoryInput = document.getElementById('category');
   const contentInput = document.getElementById('post-content');
+  const imageFileInput = document.getElementById('thread-image');
+  const imageFileName = document.getElementById('thread-image-name');
+  const imagePreview = document.getElementById('thread-image-preview');
 
   // 1. Load saved drafts from localStorage when the page loads
   if (localStorage.getItem('draftTitle')) titleInput.value = localStorage.getItem('draftTitle');
   if (localStorage.getItem('draftGame')) gameInput.value = localStorage.getItem('draftGame');
   if (localStorage.getItem('draftCategory')) categoryInput.value = localStorage.getItem('draftCategory');
   if (localStorage.getItem('draftContent')) contentInput.value = localStorage.getItem('draftContent');
+  const draftImage = localStorage.getItem('draftImage');
+  if (draftImage) {
+    imageFileName.textContent = 'Recovered from draft';
+    imagePreview.src = draftImage;
+    imagePreview.style.display = 'block';
+  }
 
   // 1.5 Auto-prefix the title with the selected game, e.g. "[Elden Ring]"
   const gameLabel = (value) => {
@@ -45,6 +54,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.target.id === 'game-selector') localStorage.setItem('draftGame', e.target.value);
     if (e.target.id === 'category') localStorage.setItem('draftCategory', e.target.value);
     if (e.target.id === 'post-content') localStorage.setItem('draftContent', e.target.value);
+  });
+
+  // 2.5 Image upload: preview the chosen file and store it as a data URL
+  let threadImage = draftImage;
+
+  imageFileInput.addEventListener('change', () => {
+    const file = imageFileInput.files[0];
+    if (!file) return;
+    imageFileName.textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      threadImage = reader.result; // data:image/...;base64,....
+      imagePreview.src = reader.result;
+      imagePreview.style.display = 'block';
+      localStorage.setItem('draftImage', reader.result);
+    };
+    reader.readAsDataURL(file);
   });
 
   // 3. Live Form Validation (Visual Feedback)
@@ -87,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
         title: titleInput.value,
         game: gameInput.value,
         category: categoryInput.value,
-        content: contentInput.value
+        content: contentInput.value,
+        image: threadImage
       };
 
       try {
@@ -107,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
           localStorage.removeItem('draftGame');
           localStorage.removeItem('draftCategory');
           localStorage.removeItem('draftContent');
+          localStorage.removeItem('draftImage');
 
           // Redirect the user back to the main forum page to see their new post
           window.location.href = 'forum.html';

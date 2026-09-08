@@ -3309,7 +3309,10 @@ img {
 .thread-post-content { flex: 1; display: flex; flex-direction: column; }
 .thread-post-body { font-size: 14px; line-height: 1.6; color: var(--text); flex: 1; margin-bottom: 24px; }
 .thread-post-body pre { background: var(--surface-2); padding: 12px; border-radius: 4px; border: 1px solid var(--border); overflow-x: auto; font-family: monospace; font-size: 13px; margin: 12px 0; }
+.thread-post-image { display: block; max-width: 100%; border-radius: 6px; border: 1px solid var(--border); margin-top: 16px; }
 .thread-post-actions { display: flex; justify-content: flex-end; gap: 12px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+#thread-image-preview { display: block; max-width: 100%; border-radius: 6px; border: 1px solid var(--border); margin-top: 12px; }
 
 .reply-thread { margin-left: 48px; border-left: 2px solid var(--border); padding-left: 24px; }
 .rating-stars { color: #f1c40f; font-size: 14px; text-align: right; margin-bottom: 12px; }
