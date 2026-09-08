@@ -5007,5 +5007,5 @@ a.btn.is-disabled {
 
 /* rating page: toolbar spans the same width as the game grid */
 .rating-toolbar {
-  max-width: none;
+  /* inherits .blog-toolbar styles: max-width 900px, centered */
 }
