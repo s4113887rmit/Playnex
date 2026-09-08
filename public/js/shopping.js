@@ -109,9 +109,10 @@
       if (filters.platforms.length > 0) {
         const matchesPlatform = filters.platforms.some(plat => {
           const platform = (p.platform || '').toLowerCase();
-          if (plat === 'pc') return platform.includes('pc');
-          if (plat === 'console') return platform.includes('console') || platform.includes('ps4') || platform.includes('ps5') || platform.includes('xbox');
-          return true;
+          const target = plat.toLowerCase().trim();
+          if (target === 'pc') return platform.includes('pc');
+          if (target === 'console') return platform.includes('console') || platform.includes('ps4') || platform.includes('ps5') || platform.includes('xbox') || platform.includes('switch');
+          return platform.includes(target) || target.includes(platform);
         });
         if (!matchesPlatform) return false;
       }
@@ -275,6 +276,9 @@
           });
         }
         appliedFilters.platforms = getFormFilters().platforms;
+        if (appliedFilters.platforms.length === 0) {
+          appliedFilters.platforms = rawTargetPlatforms;
+        }
       }
 
       filterAndSortProducts();

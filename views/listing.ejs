@@ -32,9 +32,9 @@
           <span class="eyebrow">Featured title</span>
           <h1 id="listing-title"><%= game.name %></h1>
           <div class="listing-hero__meta">
-            <span id="listing-genre"><%= game.genre %></span>
+            <a id="listing-genre" class="listing-hero__filter-link" href="shopping.html?genre=<%= encodeURIComponent(String(game.genre || '').toLowerCase()) %>"><%= game.genre %></a>
             <span class="listing-hero__dot">•</span>
-            <span id="listing-platforms"><%= (game.platforms || []).join(", ") %></span>
+            <a id="listing-platforms" class="listing-hero__filter-link" href="shopping.html?platform=<%= encodeURIComponent((game.platforms || []).join(',').toLowerCase()) %>"><%= (game.platforms || []).join(", ") %></a>
           </div>
 
           <div class="listing-hero__pricing">
