@@ -235,7 +235,7 @@ function handleMemoryAuth(req, res, route) {
     if (user) {
       user.passwordResetToken = crypto.randomBytes(32).toString('hex');
       user.passwordResetExpires = Date.now() + 60 * 60 * 1000;
-      console.log('Password reset token for ' + lowerEmail + ': ' + user.passwordResetToken);
+      // Token generated for password reset
     }
     return res.json({ message: 'If that email is registered, a reset link has been sent.' });
   }
@@ -425,7 +425,7 @@ app.post('/api/auth/forgot-password', authLimiter, authGuard('forgot-password'),
     user.passwordResetExpires = Date.now() + 60 * 60 * 1000;
     await user.save({ validateBeforeSave: false });
 
-    console.log('Password reset token for ' + email + ': ' + resetToken);
+    // Token generated for password reset
 
     res.status(200).json({ message: 'If that email is registered, a reset link has been sent.' });
   } catch (err) {
