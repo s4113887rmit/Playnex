@@ -1,3 +1,5 @@
+require('dotenv').config();
+require('dns').setServers(['8.8.8.8', '8.8.4.4']);
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -6,28 +8,8 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const BLOG_DATA_PATH = path.join(__dirname, 'data', 'blogs.json');
-const DATA_PATH = path.join(__dirname, 'data', 'games.json');
-
-(function loadEnv() {
-  var envPath = path.join(__dirname, '.env');
-  if (!fs.existsSync(envPath)) return;
-  var lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i].trim();
-    if (!line || line[0] === '#') continue;
-    var eq = line.indexOf('=');
-    if (eq === -1) continue;
-    var key = line.substring(0, eq).trim();
-    var value = line.substring(eq + 1).trim();
-    if (value[0] === '"' && value[value.length - 1] === '"') value = value.slice(1, -1);
-    if (value[0] === "'" && value[value.length - 1] === "'") value = value.slice(1, -1);
-    if (!process.env[key]) process.env[key] = value;
-  }
-})();
-
-const dns = require('dns');
-dns.setServers(['8.8.8.8', '1.1.1.1']);
+const Game = require('./models/Game');
+const Product = require('./models/Product');
 
 const app = express();
 
@@ -1069,26 +1051,6 @@ app.delete('/api/threads/:id/replies/:replyId', async (req, res) => {
   res.json({ message: "Reply successfully deleted." });
 });
 
-function readGames() {
-  const games = JSON.parse(fs.readFileSync(DATA_PATH, "utf-8"));
-  let changed = false;
-  games.forEach((g) => {
-    g.reviews.forEach((r) => {
-      if (!r.id) {
-        r.id = "r_" + Date.now() + Math.random().toString(36).slice(2, 8);
-        changed = true;
-      }
-    });
-  });
-  if (changed) writeGames(games);
-  return games;
-}
-
-function writeGames(games) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(games, null, 2));
-}
-
-// Calculate avarage rating//
 function getAvgRating(game) {
   const count = game.reviews.length;
   const totalScore = game.reviews.reduce((sum, r) => sum + r.stars, 0);
@@ -1096,7 +1058,6 @@ function getAvgRating(game) {
   return { avg, count };
 }
 
-// Calculate the percentage distribution of star ratings from actual user reviews
 function getDistribution(game) {
   const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
   game.reviews.forEach((r) => (dist[r.stars] += 1));
@@ -1107,159 +1068,146 @@ function getDistribution(game) {
   }
   return percent;
 }
+
 function validateReviewInput(title, content, rating) {
   const errors = [];
   const t = (title || "").trim();
   const c = (content || "").trim();
   const r = parseInt(rating);
-
   if (!t) errors.push("Cant leave blank");
-  if (t.length > 80) errors.push("Title maximum 80   characters");
+  if (t.length > 80) errors.push("Title maximum 80 characters");
   if (c.length < 10) errors.push("The content must be at least 10 characters long.");
   if (c.length > 2000) errors.push("The content must be no more than 2,000 characters long.");
   if (!Number.isInteger(r) || r < 1 || r > 5) errors.push("The rating must be between 1 and 5.");
-
   return errors;
 }
 
 // RATING
-app.get("/rating", (req, res) => {
-  let games = readGames();
-  games = games.map((g) => ({ ...g, ...getAvgRating(g) }));
-
-  const filterStar = req.query.stars ? parseInt(req.query.stars) : null;
-  const q = (req.query.search || "").toLowerCase();
-
-  let filtered = games;
-  if (filterStar) {
-    filtered = filtered.filter((g) => Math.round(g.avg) === filterStar);
+app.get("/rating", async (req, res) => {
+  try {
+    let games = await Game.find().lean();
+    games = games.map((g) => ({ ...g, id: g.id || g._id, ...getAvgRating(g) }));
+    const filterStar = req.query.stars ? parseInt(req.query.stars) : null;
+    const q = (req.query.search || "").toLowerCase();
+    let filtered = games;
+    if (filterStar) filtered = filtered.filter((g) => Math.round(g.avg) === filterStar);
+    if (q) filtered = filtered.filter((g) => g.name.toLowerCase().includes(q));
+    res.render("rating", { games: filtered, filterStar, search: req.query.search || "" });
+  } catch (err) {
+    res.render("rating", { games: [], filterStar: null, search: "" });
   }
-  if (q) {
-    filtered = filtered.filter((g) => g.name.toLowerCase().includes(q));
+});
+
+app.get("/api/games", async (req, res) => {
+  try {
+    let games = await Game.find().lean();
+    games = games.map((g) => ({ id: g.id, name: g.name, image: g.image, ...getAvgRating(g) }));
+    const q = (req.query.search || "").toLowerCase();
+    if (q) games = games.filter((g) => g.name.toLowerCase().includes(q));
+    res.json(games.map(({ id, name, image, avg }) => ({ id, name, image, avg })));
+  } catch (err) {
+    res.json([]);
   }
-
-  res.render("rating", { games: filtered, filterStar, search: req.query.search || "" });
 });
 
-app.get("/api/games", (req, res) => {
-  let games = readGames().map((g) => ({ ...g, ...getAvgRating(g) }));
-  const q = (req.query.search || "").toLowerCase();
-  if (q) games = games.filter((g) => g.name.toLowerCase().includes(q));
-  res.json(games.map(({ id, name, image, avg }) => ({ id, name, image, avg })));
+app.get("/game/:id", async (req, res) => {
+  try {
+    const game = await Game.findOne({ id: parseInt(req.params.id) }).lean();
+    if (!game) return res.status(404).send("Game not found");
+    const { avg, count } = getAvgRating(game);
+    const distribution = getDistribution(game);
+    res.render("ratinggame", { game, avg, count, distribution });
+  } catch (err) {
+    res.status(404).send("Game not found");
+  }
 });
-
-// RATINGGAME
-app.get("/game/:id", (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
-
-  const { avg, count } = getAvgRating(game);
-  const distribution = getDistribution(game);
-
-  res.render("ratinggame", { game, avg, count, distribution });
-});
-
-// Write game review
 
 app.get("/game/:id/review", async (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
-
-  let review = null;
-  if (req.query.edit) {
-    review = game.reviews.find((r) => r.id === req.query.edit) || null;
-    if (!review) return res.status(404).send("Review not found");
-    const user = await resolveCurrentUser(req);
-    if (user && review.authorId && String(review.authorId) !== String(user.id) && user.role !== 'admin') {
-      return res.status(403).send("You can only edit your own reviews");
+  try {
+    const game = await Game.findOne({ id: parseInt(req.params.id) }).lean();
+    if (!game) return res.status(404).send("Game not found");
+    let review = null;
+    if (req.query.edit) {
+      review = game.reviews.find((r) => r.id === req.query.edit) || null;
+      if (!review) return res.status(404).send("Review not found");
+      const user = await resolveCurrentUser(req);
+      if (user && review.authorId && String(review.authorId) !== String(user.id) && user.role !== 'admin') {
+        return res.status(403).send("You can only edit your own reviews");
+      }
     }
+    res.render("writegamereview", { game, review, errors: [] });
+  } catch (err) {
+    res.status(404).send("Game not found");
   }
-
-  res.render("writegamereview", { game, review, errors: [] });
 });
-
 
 app.post("/game/:id/review", async (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
-
-  const user = await resolveCurrentUser(req);
-  if (!user) return res.redirect("/Login.html");
-
-  const { title, content, rating, image, reviewId } = req.body;
-  const errors = validateReviewInput(title, content, rating);
-
-  if (errors.length) {
-    const review = reviewId ? game.reviews.find((r) => r.id === reviewId) : null;
-    return res.status(400).render("writegamereview", { game, review, errors });
+  try {
+    const game = await Game.findOne({ id: parseInt(req.params.id) });
+    if (!game) return res.status(404).send("Game not found");
+    const user = await resolveCurrentUser(req);
+    if (!user) return res.redirect("/Login.html");
+    const { title, content, rating, image, reviewId } = req.body;
+    const errors = validateReviewInput(title, content, rating);
+    if (errors.length) {
+      const reviewObj = reviewId ? game.reviews.find((r) => r.id === reviewId) : null;
+      return res.status(400).render("writegamereview", { game: game.toObject(), review: reviewObj, errors });
+    }
+    let imagePath = (image || "").trim();
+    if (imagePath.startsWith("data:image")) {
+      const saved = saveBase64Image(imagePath);
+      if (saved) imagePath = saved;
+    }
+    if (reviewId) {
+      const review = game.reviews.id(reviewId);
+      if (!review) return res.status(404).send("Review not found");
+      const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
+      const isAdmin = user && user.role === 'admin';
+      if (!isOwner && !isAdmin) return res.status(403).send("You can only edit your own reviews");
+      review.title = title.trim();
+      review.content = content.trim();
+      review.stars = parseInt(rating);
+      review.image = (image || "").trim();
+      review.date = new Date().toLocaleDateString("vi-VN") + " (edited)";
+    } else {
+      game.reviews.push({
+        id: "r_" + Date.now(),
+        author: user.name || user.username,
+        authorId: String(user.id),
+        date: new Date().toLocaleDateString("vi-VN"),
+        stars: parseInt(rating),
+        title: title.trim(),
+        content: content.trim(),
+        image: (image || "").trim(),
+      });
+    }
+    await game.save();
+    res.redirect("/game/" + game.id);
+  } catch (err) {
+    res.status(500).send("Failed to save review");
   }
-  let imagePath = (image || "").trim();
-  if (imagePath.startsWith("data:image")) {
-    const saved = saveBase64Image(imagePath);
-    if (saved) imagePath = saved;
-  }
-  if (reviewId) {
-    // update already existing review
-    const review = game.reviews.find((r) => r.id === reviewId);
+});
+
+app.post("/game/:id/review/:reviewId/delete", async (req, res) => {
+  try {
+    const game = await Game.findOne({ id: parseInt(req.params.id) });
+    if (!game) return res.status(404).send("Game not found");
+    const review = game.reviews.id(req.params.reviewId);
     if (!review) return res.status(404).send("Review not found");
+    const user = await resolveCurrentUser(req);
     const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
     const isAdmin = user && user.role === 'admin';
-    if (!isOwner && !isAdmin) {
-      return res.status(403).send("You can only edit your own reviews");
-    }
-    review.title = title.trim();
-    review.content = content.trim();
-    review.stars = parseInt(rating);
-    review.image = (image || "").trim();
-    review.date = new Date().toLocaleDateString("vi-VN") + " (edited)";
-  } else {
-    // create new review
-    game.reviews.push({
-      id: "r_" + Date.now(),
-      author: user.name || user.username,
-      authorId: String(user.id),
-      date: new Date().toLocaleDateString("vi-VN"),
-      stars: parseInt(rating),
-      title: title.trim(),
-      content: content.trim(),
-      image: (image || "").trim(),
-    });
+    if (!isOwner && !isAdmin) return res.status(403).send("You can only delete your own reviews");
+    game.reviews.pull(req.params.reviewId);
+    await game.save();
+    res.redirect("/game/" + game.id);
+  } catch (err) {
+    res.status(500).send("Failed to delete review");
   }
-
-  writeGames(games);
-  res.redirect("/game/" + game.id);
 });
 
-// delete review
-app.post("/game/:id/review/:reviewId/delete", async (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
-
-  const review = game.reviews.find((r) => r.id === req.params.reviewId);
-  if (!review) return res.status(404).send("Review not found");
-
-  const user = await resolveCurrentUser(req);
-  const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
-  const isAdmin = user && user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).send("You can only delete your own reviews");
-  }
-
-  game.reviews = game.reviews.filter((r) => r.id !== req.params.reviewId);
-  writeGames(games);
-  res.redirect("/game/" + game.id);
-});
-// Game listing (detail page)
-// Linked from the store pages as listing.html?game=<slug> and /listing/:id
 function slugifyGame(name) {
-  return String(name)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+  return String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
 const GAME_SLUG_ALIASES = {
@@ -1270,43 +1218,38 @@ const GAME_SLUG_ALIASES = {
   "witcher-3": 9
 };
 
-function findGameBySlug(games, slug) {
-  const normalized = String(slug || "").toLowerCase().trim();
-  if (!normalized) return null;
-  const byName = games.find((g) => slugifyGame(g.name) === normalized);
-  if (byName) return byName;
-  const aliasId = GAME_SLUG_ALIASES[normalized];
-  if (aliasId) return games.find((g) => g.id === aliasId);
-  return null;
-}
-
-function renderListing(req, res) {
-  const games = readGames();
-  let game = null;
-  let slug = "";
-
-  if (req.params.id) {
-    game = games.find((g) => g.id === parseInt(req.params.id));
-  } else if (req.query.game) {
-    game = findGameBySlug(games, req.query.game);
-    slug = String(req.query.game);
-  } else if (req.query.id) {
-    game = games.find((g) => g.id === parseInt(req.query.id));
+async function renderListing(req, res) {
+  try {
+    let game = null;
+    let slug = "";
+    if (req.params.id) {
+      game = await Game.findOne({ id: parseInt(req.params.id) }).lean();
+    } else if (req.query.game) {
+      const normalized = String(req.query.game).toLowerCase().trim();
+      game = await Game.findOne({ $expr: { $eq: [{ $toLower: "$name" }, normalized.replace(/-/g, " ")] } }).lean();
+      if (!game) {
+        const aliasId = GAME_SLUG_ALIASES[normalized];
+        if (aliasId) game = await Game.findOne({ id: aliasId }).lean();
+      }
+      slug = String(req.query.game);
+    } else if (req.query.id) {
+      game = await Game.findOne({ id: parseInt(req.query.id) }).lean();
+    }
+    if (!game) return res.status(404).send("Game not found");
+    slug = slug || slugifyGame(game.name);
+    const { avg, count } = getAvgRating(game);
+    const distribution = getDistribution(game);
+    const allGames = await Game.find().lean();
+    const fcGameIds = new Set([10, 11, 12, 13]);
+    const related = fcGameIds.has(game.id)
+      ? allGames.filter((g) => fcGameIds.has(g.id) && g.id !== game.id).slice(0, 3)
+      : allGames.filter((g) => g.id !== game.id).slice(0, 4);
+    const newReleaseFreeIds = new Set([4, 13]);
+    const isNewReleaseFree = newReleaseFreeIds.has(game.id);
+    res.render("listing", { game, avg, count, distribution, related, slug, isNewReleaseFree });
+  } catch (err) {
+    res.status(500).send("Failed to load listing");
   }
-
-  if (!game) return res.status(404).send("Game not found");
-
-  slug = slug || slugifyGame(game.name);
-  const { avg, count } = getAvgRating(game);
-  const distribution = getDistribution(game);
-  const fcGameIds = new Set([10, 11, 12, 13]);
-  const related = fcGameIds.has(game.id)
-    ? games.filter((g) => fcGameIds.has(g.id) && g.id !== game.id).slice(0, 3)
-    : games.filter((g) => g.id !== game.id).slice(0, 4);
-  // Newly released titles that are temporarily free as part of the launch promotion.
-  const newReleaseFreeIds = new Set([4, 13]); // Red Dead Redemption II, EA Sports FC 26
-  const isNewReleaseFree = newReleaseFreeIds.has(game.id);
-  res.render("listing", { game, avg, count, distribution, related, slug, isNewReleaseFree });
 }
 
 app.get("/listing.html", renderListing);
@@ -1318,15 +1261,16 @@ app.listen(PORT, () => {
 });
 
 // Sitemap
-app.get('/sitemap', (req, res) => {
+app.get('/sitemap', async (req, res) => {
   try {
-    const games = JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'));
-    const blogPosts = JSON.parse(fs.readFileSync(BLOG_DATA_PATH, 'utf-8'));
+    const Blog = require('./models/Blog');
+    const games = await Game.find().select('id name').lean();
+    const blogPosts = await Blog.find().select('_id title').lean();
     const threads = forumThreads;
 
     res.render('sitemap', {
       games: games.map(g => ({ id: g.id, name: g.name })),
-      blogPosts: blogPosts.map(p => ({ id: p.id, title: p.title })),
+      blogPosts: blogPosts.map(p => ({ id: p._id, title: p.title })),
       threads: threads.map(t => ({ id: t.id, title: t.title }))
     });
   } catch (err) {

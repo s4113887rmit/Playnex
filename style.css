@@ -3089,6 +3089,130 @@ img {
   color: var(--accent);
 }
 
+.purchases-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.purchases-empty {
+  color: var(--text-muted);
+  font-size: 14px;
+  padding: 20px;
+  text-align: center;
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+.purchase-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.purchase-card__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--surface-3);
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.purchase-card__id {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  font-family: monospace;
+}
+
+.purchase-card__date {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.purchase-card__status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: capitalize;
+  margin-left: auto;
+}
+
+.purchase-card__status--completed {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.purchase-card__status--pending {
+  background: rgba(251, 191, 36, 0.15);
+  color: #fbbf24;
+}
+
+.purchase-card__items {
+  padding: 12px 16px;
+}
+
+.purchase-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.purchase-item:last-child {
+  border-bottom: none;
+}
+
+.purchase-item__img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--surface-3);
+}
+
+.purchase-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.purchase-item__title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.purchase-item__qty {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.purchase-item__price {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.purchase-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-3);
+}
+
+.purchase-card__total {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
 @media (max-width: 860px) {
   .achieve-board__grid {
     grid-template-columns: 1fr;

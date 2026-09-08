@@ -1,61 +1,54 @@
 /**
- * store.js — In-memory datastore for Assessment 2.
- * Keyed by userId so every user has their own isolated Cart, Wishlist, and Order history.
+ * store.js — MongoDB-backed datastore for Assessment 3.
+ * Uses Cart, Wishlist, Order models for persistent storage.
  */
 
-const carts = {};      // { [userId]: [{ productId, qty, variant }] }
-const wishlists = {};  // { [userId]: [{ productId, addedAt, purchased }] }
-const orders = {};     // { [orderId]: order }
+const mongoose = require('mongoose');
+const Cart = require('../models/Cart');
+const Wishlist = require('../models/Wishlist');
+const Order = require('../models/Order');
 
-// Global wishlist & cart counters for statistics
-const productStats = {}; // { [productId]: { wishlistCount: number, cartCount: number, purchasedCount: number } }
+async function getCart(userId) {
+  let cart = await Cart.findOne({ userId });
+  if (!cart) {
+    cart = await Cart.create({ userId, items: [] });
+  }
+  return cart;
+}
 
-let nextOrderNumber = 48213;
+async function getWishlist(userId) {
+  let wishlist = await Wishlist.findOne({ userId });
+  if (!wishlist) {
+    wishlist = await Wishlist.create({ userId, items: [] });
+  }
+  return wishlist;
+}
+
+async function saveOrder(order) {
+  const id = `PLX-${Date.now()}`;
+  const record = await Order.create({
+    userId: order.userId,
+    items: order.items,
+    subtotal: order.subtotal,
+    shipping: order.shipping,
+    total: order.total,
+    shippingInfo: order.shippingInfo,
+    paymentInfo: order.paymentInfo,
+    status: 'completed'
+  });
+  return { id: record._id, ...order, createdAt: record.createdAt };
+}
+
+async function getOrder(id) {
+  return await Order.findById(id).lean();
+}
+
+async function getAllOrders(userId) {
+  return await Order.find({ userId }).sort({ createdAt: -1 }).lean();
+}
 
 function getStats(productId) {
-  if (!productStats[productId]) {
-    productStats[productId] = { wishlistCount: 0, cartCount: 0, purchasedCount: 0 };
-  }
-  return productStats[productId];
-}
-
-function getCart(userId) {
-  if (!carts[userId]) {
-    // Initial demo default cart for realistic testing if newly created
-    carts[userId] = [];
-  }
-  return carts[userId];
-}
-
-function getWishlist(userId) {
-  if (!wishlists[userId]) {
-    wishlists[userId] = [];
-  }
-  return wishlists[userId];
-}
-
-function saveOrder(order) {
-  const id = `PLX-${nextOrderNumber++}`;
-  const record = { id, ...order, createdAt: new Date().toISOString() };
-  orders[id] = record;
-  
-  // Update purchase statistics
-  if (Array.isArray(order.items)) {
-    order.items.forEach(item => {
-      const stats = getStats(item.productId || (item.product && item.product.id));
-      stats.purchasedCount += (item.qty || 1);
-    });
-  }
-  
-  return record;
-}
-
-function getOrder(id) {
-  return orders[id] || null;
-}
-
-function getAllOrders(userId) {
-  return Object.values(orders).filter(o => o.userId === userId);
+  return { wishlistCount: 0, cartCount: 0, purchasedCount: 0 };
 }
 
 module.exports = {

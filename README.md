@@ -74,13 +74,26 @@ Shared User Account module (with team):
    ```
    npm install
    ```
-2. Start the server:
+2. Create a `.env` file with your MongoDB Atlas connection string:
+   ```
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/playnex?retryWrites=true&w=majority
+   PORT=3000
+   ```
+3. Seed the database (first time only):
+   ```
+   node seed.js
+   ```
+4. Start the server:
    ```
    npm start
    ```
-3. Open http://localhost:3000
+5. Open http://localhost:3000
 
-The A2 prototype does not require MongoDB. If no MongoDB connection string is set (or the database is unreachable), the app automatically falls back to in-memory users.
+### MongoDB Connection
+- **Database**: MongoDB Atlas (cloud-hosted)
+- **Cluster**: playnex.mzcuobd.mongodb.net
+- **Database name**: playnex
+- **Collections**: blogs, games, products, carts, wishlists, orders, users
 
 ### Demo accounts
 
@@ -124,8 +137,10 @@ The A2 prototype does not require MongoDB. If no MongoDB connection string is se
 |-------|-----------|
 | Front-end | HTML, CSS, JavaScript (no external frameworks) |
 | Back-end | NodeJS, Express, EJS |
+| Database | MongoDB Atlas (cloud-hosted) |
 | Data | In-memory / JSON files (A2), MongoDB Atlas + Mongoose (A3) |
 
 ## Assignment Notes
 - No external frameworks (React, jQuery, Bootstrap, etc.) are used per course requirement
 - All submitted code is original work
+- Database seeded with sample data via `node seed.js`

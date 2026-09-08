@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const products = require('../data/products');
-const { getCart, getStats } = require('../data/store');
+const Product = require('../models/Product');
+const { getCart } = require('../data/store');
 
-function withProductDetails(line) {
-  const product = products.find(p => p.id === line.productId);
+async function withProductDetails(line) {
+  const product = await Product.findOne({ id: line.productId }).lean();
   if (!product) return null;
   return {
     ...line,
@@ -33,163 +33,178 @@ function calculateTotals(items, promoDiscount = 0) {
   };
 }
 
-// GET /api/cart — get current user's cart
-router.get('/', (req, res) => {
-  const cart = getCart(req.userId);
-  const items = cart.map(withProductDetails).filter(Boolean);
-  const totals = calculateTotals(items);
-  res.json({ items, ...totals });
-});
-
-// POST /api/cart — add item to cart (or increase quantity)
-router.post('/', (req, res) => {
-  const { productId, qty, variant } = req.body;
-  const quantity = Number(qty) || 1;
-
-  if (!productId || typeof productId !== 'string') {
-    return res.status(400).json({ error: 'Product ID is required and must be a valid string.' });
-  }
-
-  if (!Number.isInteger(quantity) || quantity < 1) {
-    return res.status(400).json({ error: 'Quantity must be a whole number greater than 0.' });
-  }
-
-  const product = products.find(p => p.id === productId);
-  if (!product) {
-    return res.status(404).json({ error: `Product "${productId}" does not exist in the catalogue.` });
-  }
-
-  const isDigital = product.category === 'digital' || !product.category;
-
-  const cart = getCart(req.userId);
-  const existing = cart.find(l => l.productId === productId);
-
-  if (existing) {
-    if (!isDigital) {
-      existing.qty += quantity;
+// GET /api/cart
+router.get('/', async (req, res) => {
+  try {
+    const cart = await getCart(req.userId);
+    const items = [];
+    for (const line of cart.items) {
+      const detail = await withProductDetails(line);
+      if (detail) items.push(detail);
     }
-    if (variant) existing.variant = variant;
-  } else {
-    cart.push({
-      productId,
-      qty: isDigital ? 1 : quantity,
-      variant: variant || product.variant
+    const totals = calculateTotals(items);
+    res.json({ items, ...totals });
+  } catch (err) {
+    res.json({ items: [], subtotal: 0, shipping: 0, tax: 0, discount: 0, total: 0, itemCount: 0 });
+  }
+});
+
+// POST /api/cart
+router.post('/', async (req, res) => {
+  try {
+    const { productId, qty, variant } = req.body;
+    const quantity = Number(qty) || 1;
+
+    if (!productId || typeof productId !== 'string') {
+      return res.status(400).json({ error: 'Product ID is required.' });
+    }
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({ error: 'Quantity must be a whole number greater than 0.' });
+    }
+
+    const product = await Product.findOne({ id: productId }).lean();
+    if (!product) {
+      return res.status(404).json({ error: `Product "${productId}" does not exist.` });
+    }
+
+    const isDigital = product.category === 'digital' || !product.category;
+    const cart = await getCart(req.userId);
+    const existing = cart.items.find(l => l.productId === productId);
+
+    if (existing) {
+      if (!isDigital) existing.qty += quantity;
+      if (variant) existing.variant = variant;
+    } else {
+      cart.items.push({
+        productId,
+        qty: isDigital ? 1 : quantity,
+        variant: variant || product.variant
+      });
+    }
+    await cart.save();
+
+    const items = [];
+    for (const line of cart.items) {
+      const detail = await withProductDetails(line);
+      if (detail) items.push(detail);
+    }
+    const totals = calculateTotals(items);
+
+    res.status(201).json({
+      message: `${product.title} added to your cart successfully.`,
+      items,
+      ...totals
     });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add to cart.' });
   }
-
-  // Update product stats
-  const stats = getStats(productId);
-  stats.cartCount += quantity;
-
-  const items = cart.map(withProductDetails).filter(Boolean);
-  const totals = calculateTotals(items);
-
-  res.status(201).json({
-    message: `${product.title} added to your cart successfully.`,
-    items,
-    ...totals
-  });
 });
 
-// PUT /api/cart/:productId — update quantity of a cart item
-router.put('/:productId', (req, res) => {
-  const { productId } = req.params;
-  const { qty, variant } = req.body;
-  const quantity = Number(qty);
+// PUT /api/cart/:productId
+router.put('/:productId', async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const { qty, variant } = req.body;
+    const quantity = Number(qty);
 
-  if (!Number.isInteger(quantity) || quantity < 1) {
-    return res.status(400).json({ error: 'Quantity must be a whole number greater than 0.' });
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({ error: 'Quantity must be a whole number greater than 0.' });
+    }
+
+    const cart = await getCart(req.userId);
+    const line = cart.items.find(l => l.productId === productId);
+    if (!line) return res.status(404).json({ error: 'Item not found in your cart.' });
+
+    const product = await Product.findOne({ id: productId }).lean();
+    if (!product) return res.status(404).json({ error: `Product "${productId}" does not exist.` });
+
+    const isDigital = product.category === 'digital' || !product.category;
+    line.qty = isDigital ? 1 : quantity;
+    if (variant) line.variant = variant;
+    await cart.save();
+
+    const items = [];
+    for (const c of cart.items) {
+      const detail = await withProductDetails(c);
+      if (detail) items.push(detail);
+    }
+    const totals = calculateTotals(items);
+
+    res.json({ message: 'Cart item updated successfully.', items, ...totals });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update cart.' });
   }
-
-  const cart = getCart(req.userId);
-  const line = cart.find(l => l.productId === productId);
-
-  if (!line) {
-    return res.status(404).json({ error: 'Item not found in your cart.' });
-  }
-
-  const product = products.find(p => p.id === productId);
-  if (!product) {
-    return res.status(404).json({ error: `Product "${productId}" does not exist in the catalogue.` });
-  }
-
-  const isDigital = product.category === 'digital' || !product.category;
-  line.qty = isDigital ? 1 : quantity;
-  if (variant) line.variant = variant;
-
-  const items = cart.map(withProductDetails).filter(Boolean);
-  const totals = calculateTotals(items);
-
-  res.json({
-    message: 'Cart item updated successfully.',
-    items,
-    ...totals
-  });
 });
 
-// DELETE /api/cart/:productId — remove item from cart
-router.delete('/:productId', (req, res) => {
-  const { productId } = req.params;
-  const cart = getCart(req.userId);
-  const index = cart.findIndex(l => l.productId === productId);
+// DELETE /api/cart/:productId
+router.delete('/:productId', async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const cart = await getCart(req.userId);
+    const index = cart.items.findIndex(l => l.productId === productId);
+    if (index === -1) return res.status(404).json({ error: 'Item not found in your cart.' });
 
-  if (index === -1) {
-    return res.status(404).json({ error: 'Item not found in your cart.' });
+    cart.items.splice(index, 1);
+    await cart.save();
+
+    const items = [];
+    for (const line of cart.items) {
+      const detail = await withProductDetails(line);
+      if (detail) items.push(detail);
+    }
+    const totals = calculateTotals(items);
+
+    res.json({ message: 'Item removed from cart.', items, ...totals });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to remove item.' });
   }
-
-  cart.splice(index, 1);
-  const items = cart.map(withProductDetails).filter(Boolean);
-  const totals = calculateTotals(items);
-
-  res.json({
-    message: 'Item removed from cart.',
-    items,
-    ...totals
-  });
 });
 
-// DELETE /api/cart — clear entire cart
-router.delete('/', (req, res) => {
-  const cart = getCart(req.userId);
-  cart.length = 0;
-  res.json({
-    message: 'Cart cleared.',
-    items: [],
-    ...calculateTotals([])
-  });
+// DELETE /api/cart
+router.delete('/', async (req, res) => {
+  try {
+    const cart = await getCart(req.userId);
+    cart.items = [];
+    await cart.save();
+    res.json({ message: 'Cart cleared.', items: [], ...calculateTotals([]) });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to clear cart.' });
+  }
 });
 
-// POST /api/cart/promo — validate and apply promo code
-router.post('/promo', (req, res) => {
-  const { code } = req.body;
-  if (!code || typeof code !== 'string') {
-    return res.status(400).json({ error: 'Please enter a promo code.' });
+// POST /api/cart/promo
+router.post('/promo', async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code || typeof code !== 'string') {
+      return res.status(400).json({ error: 'Please enter a promo code.' });
+    }
+
+    const cleanCode = code.trim().toUpperCase();
+    let discount = 0;
+    if (cleanCode === 'PLAYNEX10') discount = 0.10;
+    else if (cleanCode === 'PLAYNEX20') discount = 0.20;
+    else if (cleanCode === 'FREESHIP') discount = 0.05;
+    else return res.status(400).json({ error: 'Invalid or expired promo code.' });
+
+    const cart = await getCart(req.userId);
+    const items = [];
+    for (const line of cart.items) {
+      const detail = await withProductDetails(line);
+      if (detail) items.push(detail);
+    }
+    const totals = calculateTotals(items, discount);
+
+    res.json({
+      message: `Promo code ${cleanCode} applied (${(discount * 100)}% discount)!`,
+      promoCode: cleanCode,
+      discountPercent: discount * 100,
+      items,
+      ...totals
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to apply promo.' });
   }
-
-  const cleanCode = code.trim().toUpperCase();
-  let discount = 0;
-
-  if (cleanCode === 'PLAYNEX10') {
-    discount = 0.10; // 10% off
-  } else if (cleanCode === 'PLAYNEX20') {
-    discount = 0.20; // 20% off
-  } else if (cleanCode === 'FREESHIP') {
-    discount = 0.05; // 5% discount
-  } else {
-    return res.status(400).json({ error: 'Invalid or expired promo code.' });
-  }
-
-  const cart = getCart(req.userId);
-  const items = cart.map(withProductDetails).filter(Boolean);
-  const totals = calculateTotals(items, discount);
-
-  res.json({
-    message: `Promo code ${cleanCode} applied (${(discount * 100)}% discount)!`,
-    promoCode: cleanCode,
-    discountPercent: discount * 100,
-    items,
-    ...totals
-  });
 });
 
 module.exports = router;
