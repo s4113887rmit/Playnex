@@ -721,6 +721,7 @@ function publicThread(t) {
     views: t.views,
     lastPostAuthor: t.lastPostAuthor,
     lastPostTime: timeAgo(t.lastPostAt),
+    image: t.image,
     createdAt: t.createdAt,
     lastPostAt: t.lastPostAt
   };
@@ -734,7 +735,7 @@ app.get('/api/threads', (req, res) => {
 
 // POST: Create a new forum thread
 app.post('/api/threads', async (req, res) => {
-  const { title, game, category, content } = req.body;
+  const { title, game, category, content, image } = req.body;
 
   const user = await resolveCurrentUser(req);
   if (!user) {
@@ -751,6 +752,10 @@ app.post('/api/threads', async (req, res) => {
   if (!content || content.trim() === '') {
     return res.status(400).json({ error: "Post content cannot be empty." });
   }
+  if (content.length > 5000) {
+    return res.status(400).json({ error: "Post content must be at most 5000 characters." });
+  }
+  const sanitizedImage = (typeof image === 'string' && image.startsWith('data:image/')) ? image.slice(0, 300000) : undefined;
 
   // Determine the tag class based on the category for styling
   let tagClass = "tag--general";
@@ -772,6 +777,7 @@ app.post('/api/threads', async (req, res) => {
     views: 0,
     lastPostAuthor: authorName,
     lastPostTime: "Just now",
+    image: sanitizedImage,
     createdAt: Date.now(),
     lastPostAt: Date.now()
   };
@@ -959,6 +965,9 @@ app.put('/api/threads/:id', async (req, res) => {
 
   thread.title = title;
   thread.content = content;
+  if (typeof req.body.image === 'string' && req.body.image.startsWith('data:image/')) {
+    thread.image = req.body.image.slice(0, 300000);
+  }
   thread.lastPostAt = Date.now();
 
   res.json({ message: "Thread updated successfully.", thread: publicThread(thread) });

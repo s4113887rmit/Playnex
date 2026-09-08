@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <p>${escapeHtml(post.timeAgo || '')}</p>
         </div>
         <div class="thread-post-content">
-          <div class="thread-post-body">${escapeHtml(post.content)}</div>
+          <div class="thread-post-body">${escapeHtml(post.content)}${post.image ? `<img class="thread-post-image" src="${escapeHtml(post.image)}" alt="">` : ''}</div>
           <div class="thread-post-actions">${manageHtml}</div>
         </div>
       </article>`;
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <h1>${escapeHtml(thread.title)}</h1>
         <p class="thread-meta">Posted by ${escapeHtml(thread.author)} · ${escapeHtml(thread.lastPostTime)} · ${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</p>
       </div>
-      ${postTemplate({ id: 'main', author: thread.author, authorId: thread.authorId, content: thread.content, timeAgo: thread.lastPostTime }, true)}
+      ${postTemplate({ id: 'main', author: thread.author, authorId: thread.authorId, content: thread.content, image: thread.image, timeAgo: thread.lastPostTime }, true)}
     `;
 
     (thread.posts || []).forEach((p) => {
