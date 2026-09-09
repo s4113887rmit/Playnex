@@ -2751,7 +2751,7 @@ img {
   background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: 8px;
-  padding: 32px;
+  padding: 40px;
 }
 
 .profile-section h2 {
@@ -2924,8 +2924,7 @@ img {
 }
 
 .profile-body-static {
-  max-width: 680px;
-  margin: 0 auto;
+  /* full width inside .profile-layout */
 }
 
 .profile-divider {
