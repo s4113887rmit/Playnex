@@ -1,17 +1,12 @@
 /**
  * wishlist.js — Dynamic wishlist controller for Playnex.
  * Features:
- *   - Live client-side search, sort, and filtering (All / Digital / Physical / Purchased)
+ *   - Live client-side search, sort, and filtering (All / Digital / Physical / History)
  *   - Dynamic saved-item count in the page header
- *   - Dynamic filter counts (All / Digital / Physical / Purchased)
- *   - Polished empty states (fully empty wishlist vs. no matches for a filter)
- *   - Add to cart, remove from wishlist
- *   - Dynamic "Recommended for you" shelf:
- *       * Prioritizes real games with images over placeholder items
- *       * Random order on each page refresh/load
- *       * Excludes items already in the user's wishlist
- *       * Clicking on any recommended item navigates to its description page
- *       * Wishlist button allows quick addition to wishlist
+ *   - Dynamic filter counts
+ *   - History/Bin: soft-deleted items can be restored or permanently deleted
+ *   - Add to cart, remove from wishlist (moves to bin)
+ *   - Dynamic "Recommended for you" shelf
  *   - Total wishlist value displayed subtly below the grid
  *   - Seamless server & local synchronization scoped to current user.
  */
@@ -27,8 +22,10 @@
   const filterBtns = document.querySelectorAll('[data-wishlist-filter]');
   const countEls = document.querySelectorAll('[data-wishlist-count]');
   const recommendedGrid = document.getElementById('recommended-list') || document.querySelector('.shelf .shelf__row');
+  const sortWrapper = document.querySelector('.wishlist-sort');
 
   let rawWishlistData = { items: [], totalCount: 0, savedCount: 0, totalValue: 0 };
+  let historyData = { items: [], itemCount: 0 };
   let allProducts = [];
   let currentFilter = 'all';
 
@@ -43,6 +40,19 @@
       [arr[i], arr[j]] = [arr[j], arr[i]];
     }
     return arr;
+  }
+
+  function timeAgo(dateStr) {
+    if (!dateStr) return '';
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return days + 'd ago';
+    return new Date(dateStr).toLocaleDateString();
   }
 
   function cardHTML(item) {
@@ -68,17 +78,48 @@
             <span class="card__badge${item.category === 'physical' ? ' card__badge--merch' : ''}">${badgeText}</span>
           </div>
           <div class="wishlist-card__body">
-            <p class="wishlist-card__meta">${item.genre} · ${item.platform}</p>
+            <p class="wishlist-card__meta">${item.genre} &middot; ${item.platform}</p>
             <h3 class="wishlist-card__title"><a href="${detailUrl}">${item.title}</a></h3>
             <p class="wishlist-card__price">${item.price === 0 ? 'Free' : money(item.price)}</p>
 
             <div class="wishlist-card__stats">
-              <span>${stats.wishlistCount || 1} in wishlists</span> •
+              <span>${stats.wishlistCount || 1} in wishlists</span> &bull;
               <span>${stats.cartCount || 0} added to cart</span>
             </div>
 
             <div class="wishlist-card__actions">
               ${actionButtons}
+            </div>
+          </div>
+        </article>
+      </li>`;
+  }
+
+  function historyCardHTML(item) {
+    const detailUrl = item.href || `listing.html?game=${item.id}`;
+    const imgTag = item.image
+      ? `<img src="${item.image}" alt="${item.title} poster">`
+      : `<div class="card__placeholder-art">${item.title.charAt(0)}</div>`;
+    const addedStr = timeAgo(item.addedAt);
+    const removedStr = timeAgo(item.removedAt);
+
+    return `
+      <li>
+        <article class="card wishlist-card wishlist-card--history" data-id="${item.id}">
+          <div class="card__art ${item.art || 'card__art--1'} wishlist-card__art">
+            <a href="${detailUrl}" aria-label="View ${item.title} details">
+              ${imgTag}
+            </a>
+            <span class="card__badge card__badge--removed">Removed</span>
+          </div>
+          <div class="wishlist-card__body">
+            <p class="wishlist-card__meta">${item.genre} &middot; ${item.platform}</p>
+            <h3 class="wishlist-card__title"><a href="${detailUrl}">${item.title}</a></h3>
+            <p class="wishlist-card__price">${item.price === 0 ? 'Free' : money(item.price)}</p>
+            <p class="wishlist-card__history-info">Added ${addedStr} &bull; Removed ${removedStr}</p>
+            <div class="wishlist-card__actions">
+              <button type="button" class="btn btn--primary btn--small" data-action="restore" data-id="${item.id}">Restore</button>
+              <button type="button" class="btn btn--ghost btn--small" data-action="permanent-delete" data-id="${item.id}">Delete permanently</button>
             </div>
           </div>
         </article>
@@ -111,7 +152,7 @@
           </div>
           <div class="card__body">
             <h3 class="card__title"><a href="${detailUrl}">${item.title}</a></h3>
-            <p class="card__meta">${item.genre} · ${item.platform}</p>
+            <p class="card__meta">${item.genre} &middot; ${item.platform}</p>
             <div class="card__price">${priceHTML}</div>
           </div>
         </article>
@@ -121,7 +162,6 @@
   function emptyStateHTML() {
     const items = rawWishlistData.items || [];
     if (items.length === 0) {
-      // Genuinely empty wishlist — full polished empty state
       return `
         <li class="wishlist-empty">
           <svg class="wishlist-empty__icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -132,7 +172,6 @@
           <a href="shopping.html" class="btn btn--primary wishlist-empty__cta">Explore games &rarr;</a>
         </li>`;
     }
-    // Wishlist has items but the selected filter matches none
     return `
       <li class="shelf-empty">
         No wishlist items found for the selected filter.
@@ -140,17 +179,26 @@
       </li>`;
   }
 
+  function historyEmptyHTML() {
+    return `
+      <li class="wishlist-empty">
+        <svg class="wishlist-empty__icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 20.5S3 14.9 3 8.9C3 5.9 5.4 3.5 8.4 3.5c1.7 0 3.3.8 4.3 2.1a5.3 5.3 0 0 1 4.3-2.1C20 3.5 21.5 5.9 21.5 8.9c0 6-9.5 11.6-9.5 11.6z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+        </svg>
+        <h2 class="wishlist-empty__title">No removed items</h2>
+        <p class="wishlist-empty__text">Items you remove from your wishlist will appear here.<br>You can restore them or delete them permanently.</p>
+      </li>`;
+  }
+
   function getFilteredAndSortedItems() {
     let items = [...(rawWishlistData.items || [])];
 
-    // Filter
     if (currentFilter === 'digital') {
       items = items.filter(i => i.category === 'digital');
     } else if (currentFilter === 'physical') {
       items = items.filter(i => i.category === 'physical');
     }
 
-    // Sort
     const sortVal = sortSelect ? sortSelect.value : 'default';
     if (sortVal === 'title') {
       items.sort((a, b) => a.title.localeCompare(b.title));
@@ -168,7 +216,7 @@
     const savedCount = items.length;
 
     if (countHeader) {
-      countHeader.textContent = `${savedCount} item${savedCount === 1 ? '' : 's'} saved`;
+      countHeader.textContent = `${savedCount} item${savedCount === 1 ? '' : ''} saved`;
     }
   }
 
@@ -177,7 +225,8 @@
     const counts = {
       all: items.length,
       digital: items.filter(i => i.category === 'digital').length,
-      physical: items.filter(i => i.category === 'physical').length
+      physical: items.filter(i => i.category === 'physical').length,
+      history: historyData.itemCount || 0
     };
 
     countEls.forEach(el => {
@@ -204,8 +253,6 @@
 
     const wishlistIds = new Set((rawWishlistData.items || []).map(item => item.id));
 
-    // Exclude any game already in the user's wishlist
-    // Prioritize real games with images over placeholder games without images
     const realGamesWithImages = allProducts.filter(p => {
       return p.image && p.image.trim() !== '' && !wishlistIds.has(p.id);
     });
@@ -214,11 +261,9 @@
       return (!p.image || p.image.trim() === '') && !wishlistIds.has(p.id);
     });
 
-    // Randomize candidates on each refresh/render
     const shuffledReal = shuffle(realGamesWithImages);
     const shuffledOthers = shuffle(otherProducts);
 
-    // Pick recommended items, prioritizing real games with images
     let recommendedList = shuffledReal.slice(0, 5);
     if (recommendedList.length < 5) {
       const needed = 5 - recommendedList.length;
@@ -234,18 +279,33 @@
   }
 
   function render() {
-    const displayItems = getFilteredAndSortedItems();
-
-    if (grid) {
-      grid.innerHTML = displayItems.length
-        ? displayItems.map(cardHTML).join('')
-        : emptyStateHTML();
+    if (currentFilter === 'history') {
+      // Show history/bin view
+      if (grid) {
+        const items = historyData.items || [];
+        grid.innerHTML = items.length
+          ? items.map(historyCardHTML).join('')
+          : historyEmptyHTML();
+      }
+      if (sortWrapper) sortWrapper.style.display = 'none';
+      if (recommendedGrid) recommendedGrid.closest('.shelf').style.display = 'none';
+      if (totalEl) totalEl.textContent = '';
+    } else {
+      // Show normal wishlist view
+      const displayItems = getFilteredAndSortedItems();
+      if (grid) {
+        grid.innerHTML = displayItems.length
+          ? displayItems.map(cardHTML).join('')
+          : emptyStateHTML();
+      }
+      if (sortWrapper) sortWrapper.style.display = '';
+      if (recommendedGrid) recommendedGrid.closest('.shelf').style.display = '';
+      renderRecommended();
+      updateTotal();
     }
 
     updateHeader();
     updateFilterCounts();
-    updateTotal();
-    renderRecommended();
   }
 
   async function loadWishlist() {
@@ -257,13 +317,25 @@
     }
   }
 
+  async function loadHistory() {
+    try {
+      historyData = await api('/api/wishlist/history');
+      updateFilterCounts();
+      if (currentFilter === 'history') render();
+    } catch (err) {
+      console.error('Error fetching wishlist history:', err);
+    }
+  }
+
   async function init() {
     try {
-      const [wishlistData, productsData] = await Promise.all([
+      const [wishlistData, historyResult, productsData] = await Promise.all([
         api('/api/wishlist').catch(() => ({ items: [], totalCount: 0, savedCount: 0, totalValue: 0 })),
+        api('/api/wishlist/history').catch(() => ({ items: [], itemCount: 0 })),
         api('/api/products').catch(() => [])
       ]);
       rawWishlistData = wishlistData;
+      historyData = historyResult;
       allProducts = productsData;
       render();
     } catch (err) {
@@ -300,7 +372,7 @@
         try {
           await api(`/api/wishlist/${productId}/move-to-cart`, { method: 'POST' });
           showToast('Added item to cart!', 'success');
-          await loadWishlist();
+          await Promise.all([loadWishlist(), loadHistory()]);
         } catch (err) {
           showToast(err.message, 'error');
           moveBtn.disabled = false;
@@ -308,7 +380,7 @@
         return;
       }
 
-      // 2. Remove from wishlist
+      // 2. Remove from wishlist (soft-delete to bin)
       const removeBtn = e.target.closest('[data-action="remove"]');
       if (removeBtn) {
         if (!requireLogin()) return;
@@ -316,9 +388,43 @@
         try {
           await api(`/api/wishlist/${productId}`, { method: 'DELETE' });
           showToast('Removed item from wishlist.', 'info');
-          await loadWishlist();
+          await Promise.all([loadWishlist(), loadHistory()]);
         } catch (err) {
           showToast(err.message, 'error');
+        }
+        return;
+      }
+
+      // 3. Restore from bin
+      const restoreBtn = e.target.closest('[data-action="restore"]');
+      if (restoreBtn) {
+        if (!requireLogin()) return;
+        const productId = restoreBtn.dataset.id;
+        restoreBtn.disabled = true;
+        try {
+          await api(`/api/wishlist/history/${productId}/restore`, { method: 'POST' });
+          showToast('Item restored to wishlist!', 'success');
+          await Promise.all([loadWishlist(), loadHistory()]);
+        } catch (err) {
+          showToast(err.message, 'error');
+          restoreBtn.disabled = false;
+        }
+        return;
+      }
+
+      // 4. Permanent delete from bin
+      const permDeleteBtn = e.target.closest('[data-action="permanent-delete"]');
+      if (permDeleteBtn) {
+        if (!requireLogin()) return;
+        const productId = permDeleteBtn.dataset.id;
+        permDeleteBtn.disabled = true;
+        try {
+          await api(`/api/wishlist/history/${productId}`, { method: 'DELETE' });
+          showToast('Item permanently deleted.', 'info');
+          await loadHistory();
+        } catch (err) {
+          showToast(err.message, 'error');
+          permDeleteBtn.disabled = false;
         }
       }
     });
@@ -327,7 +433,6 @@
   // Action event delegation on recommended shelf
   if (recommendedGrid) {
     recommendedGrid.addEventListener('click', async (e) => {
-      // 1. Add to wishlist button on recommended card
       const wishBtn = e.target.closest('[data-action="add-to-wishlist"]');
       if (wishBtn) {
         e.stopPropagation();
@@ -350,7 +455,6 @@
         return;
       }
 
-      // 2. Click anywhere on recommended card -> navigate to description page
       const card = e.target.closest('.recommended-card');
       if (card && !e.target.closest('button') && !e.target.closest('a')) {
         const href = card.dataset.href;

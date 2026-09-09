@@ -440,6 +440,11 @@
           }
           html += '</div>';
           html += '<div class="purchase-card__footer">';
+          html += '<div class="purchase-card__breakdown">';
+          html += '<span>Subtotal: $' + (order.subtotal || 0).toFixed(2) + '</span>';
+          html += '<span>Shipping: $' + (order.shipping || 0).toFixed(2) + '</span>';
+          html += '<span>Tax: $' + (order.tax || 0).toFixed(2) + '</span>';
+          html += '</div>';
           html += '<span class="purchase-card__total">Total: $' + (order.total || 0).toFixed(2) + '</span>';
           html += '</div>';
           html += '</div>';

@@ -25,12 +25,12 @@ async function getWishlist(userId) {
 }
 
 async function saveOrder(order) {
-  const id = `PLX-${Date.now()}`;
   const record = await Order.create({
     userId: order.userId,
     items: order.items,
     subtotal: order.subtotal,
     shipping: order.shipping,
+    tax: order.tax || 0,
     total: order.total,
     shippingInfo: order.shippingInfo,
     paymentInfo: order.paymentInfo,

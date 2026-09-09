@@ -1697,6 +1697,34 @@ img {
   font-size: 12px;
 }
 
+.wishlist-card--history {
+  opacity: 0.8;
+}
+
+.wishlist-card--history:hover {
+  opacity: 1;
+}
+
+.card__badge--removed {
+  background: var(--text-muted);
+  color: var(--surface-1);
+}
+
+.wishlist-card__history-info {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin: 4px 0 10px 0;
+}
+
+.purchase-card__breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
 .section-title {
   max-width: 1400px;
   margin: 0 auto;

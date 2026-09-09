@@ -35,6 +35,21 @@ async function withWishlistDetails(entry) {
   };
 }
 
+async function withRemovedDetails(entry) {
+  const productId = entry.productId;
+  const addedAt = entry.addedAt;
+  const removedAt = entry.removedAt;
+
+  const product = await findItem(productId);
+  if (!product) return null;
+
+  return {
+    ...product,
+    addedAt,
+    removedAt
+  };
+}
+
 // GET /api/wishlist
 router.get('/', async (req, res) => {
   try {
@@ -58,6 +73,21 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /api/wishlist/history (removed items bin)
+router.get('/history', async (req, res) => {
+  try {
+    const wishlist = await getWishlist(req.userId);
+    const items = [];
+    for (const entry of (wishlist.removedItems || [])) {
+      const detail = await withRemovedDetails(entry);
+      if (detail) items.push(detail);
+    }
+    res.json({ items, itemCount: items.length });
+  } catch (err) {
+    res.json({ items: [], itemCount: 0 });
+  }
+});
+
 // POST /api/wishlist
 router.post('/', async (req, res) => {
   try {
@@ -75,6 +105,12 @@ router.post('/', async (req, res) => {
     const existing = wishlist.items.find(e => (typeof e === 'string' ? e : e.productId) === productId);
     if (existing) {
       return res.status(409).json({ error: 'Product is already in your wishlist.' });
+    }
+
+    // Remove from bin if it was there
+    const removedIndex = (wishlist.removedItems || []).findIndex(e => e.productId === productId);
+    if (removedIndex !== -1) {
+      wishlist.removedItems.splice(removedIndex, 1);
     }
 
     wishlist.items.push({ productId, addedAt: new Date().toISOString(), purchased: false });
@@ -118,6 +154,15 @@ router.post('/:productId/move-to-cart', async (req, res) => {
     }
     await cart.save();
 
+    // Move to bin before removing from active list
+    const entry = wishlist.items[index];
+    if (!wishlist.removedItems) wishlist.removedItems = [];
+    wishlist.removedItems.unshift({
+      productId,
+      addedAt: entry.addedAt || new Date(),
+      removedAt: new Date()
+    });
+
     wishlist.items.splice(index, 1);
     await wishlist.save();
 
@@ -145,7 +190,7 @@ router.post('/:productId/purchase', async (req, res) => {
   }
 });
 
-// DELETE /api/wishlist/:productId
+// DELETE /api/wishlist/:productId (soft-delete: move to bin)
 router.delete('/:productId', async (req, res) => {
   try {
     const { productId } = req.params;
@@ -154,12 +199,71 @@ router.delete('/:productId', async (req, res) => {
     if (index === -1) {
       return res.status(404).json({ error: 'Product not found in your wishlist.' });
     }
+
+    const entry = wishlist.items[index];
+    if (!wishlist.removedItems) wishlist.removedItems = [];
+    wishlist.removedItems.unshift({
+      productId,
+      addedAt: entry.addedAt || new Date(),
+      removedAt: new Date()
+    });
+
     wishlist.items.splice(index, 1);
     await wishlist.save();
 
     res.json({ message: 'Item removed from wishlist.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to remove item.' });
+  }
+});
+
+// POST /api/wishlist/history/:productId/restore (restore from bin)
+router.post('/history/:productId/restore', async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const wishlist = await getWishlist(req.userId);
+    const removedItems = wishlist.removedItems || [];
+    const index = removedItems.findIndex(e => e.productId === productId);
+    if (index === -1) {
+      return res.status(404).json({ error: 'Product not found in bin.' });
+    }
+
+    // Check if already in active wishlist
+    const alreadyActive = wishlist.items.find(e => (typeof e === 'string' ? e : e.productId) === productId);
+    if (alreadyActive) {
+      // Just remove from bin
+      removedItems.splice(index, 1);
+      await wishlist.save();
+      return res.json({ message: 'Item is already in your wishlist.' });
+    }
+
+    removedItems.splice(index, 1);
+    wishlist.items.push({ productId, addedAt: new Date().toISOString(), purchased: false });
+    await wishlist.save();
+
+    res.json({ message: 'Item restored to your wishlist.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to restore item.' });
+  }
+});
+
+// DELETE /api/wishlist/history/:productId (permanent delete from bin)
+router.delete('/history/:productId', async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const wishlist = await getWishlist(req.userId);
+    const removedItems = wishlist.removedItems || [];
+    const index = removedItems.findIndex(e => e.productId === productId);
+    if (index === -1) {
+      return res.status(404).json({ error: 'Product not found in bin.' });
+    }
+
+    removedItems.splice(index, 1);
+    await wishlist.save();
+
+    res.json({ message: 'Item permanently deleted.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete item.' });
   }
 });
 
