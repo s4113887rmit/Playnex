@@ -43,8 +43,11 @@
       .then(function (data) {
         var found = (data.items || []).some(function (item) { return item.productId === slug; });
         if (found) {
-          cartBtn.textContent = 'Already in cart';
-          cartBtn.disabled = true;
+          var isDigital = cartBtn.dataset.type === 'Digital';
+          if (isDigital) {
+            cartBtn.textContent = 'Already in cart';
+            cartBtn.disabled = true;
+          }
         }
       })
       .catch(function () { });

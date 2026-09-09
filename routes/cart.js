@@ -76,12 +76,16 @@ router.post('/', async (req, res) => {
       return res.status(404).json({ error: `Product "${productId}" does not exist.` });
     }
 
-    const isDigital = product.category === 'digital' || !product.category;
+    const isDigital = product.category === 'digital' || product.type === 'Digital' || !product.category;
     const cart = await getCart(req.userId);
     const existing = cart.items.find(l => l.productId === productId);
 
     if (existing) {
-      if (!isDigital) existing.qty += quantity;
+      if (isDigital) {
+        // Digital items: already in cart, don't add again
+        return res.status(409).json({ error: 'This digital item is already in your cart.' });
+      }
+      existing.qty += quantity;
       if (variant) existing.variant = variant;
     } else {
       cart.items.push({

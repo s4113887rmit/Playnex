@@ -434,6 +434,7 @@
       });
       wishlistIds = new Set((wishlistData.items || []).map(item => item.id));
       render();
+      refreshCart();
     } catch (err) {
       console.error('Failed to load products:', err);
     }
@@ -455,8 +456,37 @@
     } catch {}
   }
 
+  async function refreshCart() {
+    try {
+      const cartData = await api('/api/cart').catch(() => ({ items: [] }));
+      const cartIds = new Set((cartData.items || []).map(item => item.productId));
+      document.querySelectorAll('[data-action="add-to-cart"]').forEach(btn => {
+        const id = btn.dataset.id;
+        if (id && cartIds.has(id)) {
+          const product = allProducts.find(p => p.id === id);
+          const isDigital = product && (product.category === 'digital' || product.type === 'Digital');
+          if (isDigital) {
+            btn.textContent = 'Already in cart';
+            btn.disabled = true;
+          }
+        }
+      });
+      const heroCartBtn = document.getElementById('hero-cart-btn');
+      if (heroCartBtn && heroCartBtn.dataset.id && cartIds.has(heroCartBtn.dataset.id)) {
+        const heroGame = heroGames[heroIndex];
+        const isDigital = heroGame && (heroGame.category === 'digital' || heroGame.type === 'Digital');
+        if (isDigital) {
+          heroCartBtn.textContent = 'Already in cart';
+          heroCartBtn.disabled = true;
+        }
+      }
+    } catch {}
+  }
+
   window.addEventListener('pageshow', refreshWishlist);
   window.addEventListener('focus', refreshWishlist);
+  window.addEventListener('pageshow', refreshCart);
+  window.addEventListener('focus', refreshCart);
 
   // Live search input
   if (searchInput) {
@@ -504,6 +534,7 @@
         addBtn.textContent = 'Added ✓';
         showToast('Added item to your cart!', 'success');
         if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
+        refreshCart();
         setTimeout(() => {
           addBtn.textContent = originalText;
           addBtn.disabled = false;

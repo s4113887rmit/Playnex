@@ -52,7 +52,7 @@
           <p id="listing-description" class="listing-hero__description"><%= game.description %></p>
 
           <div class="listing-hero__actions">
-            <button id="listing-add-cart" type="button" class="btn btn--primary btn--large" data-game-slug="<%= slug %>">Add to cart</button>
+            <button id="listing-add-cart" type="button" class="btn btn--primary btn--large" data-game-slug="<%= slug %>" data-type="<%= game.type %>">Add to cart</button>
             <button id="listing-add-wishlist" type="button" class="btn btn--outline btn--large" data-game-slug="<%= slug %>">Add to wishlist</button>
             <a id="listing-buy-now" href="checkout.html" class="btn btn--ghost btn--large">Buy now</a>
           </div>
