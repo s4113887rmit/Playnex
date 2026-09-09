@@ -4328,9 +4328,9 @@ header {
 }
 /* new thread page  */
 .new-thread-wrap {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 28px 100px;
+  padding: 0 40px 100px;
 }
 
 .new-thread-wrap h2 {
