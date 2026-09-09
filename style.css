@@ -2759,6 +2759,7 @@ img {
   font-size: 20px;
   font-weight: 600;
   margin-bottom: 8px;
+  text-align: center;
 }
 
 .profile-section__hint {
@@ -2766,10 +2767,12 @@ img {
   color: var(--text-muted);
   margin-bottom: 24px;
   line-height: 1.5;
+  text-align: center;
 }
 
 .profile-section__hint--danger {
   color: #e74c3c;
+  text-align: center;
 }
 
 .profile-form {
@@ -2777,6 +2780,8 @@ img {
   flex-direction: column;
   gap: 18px;
   max-width: 480px;
+  margin: 0 auto;
+}
 }
 
 .profile-form .form-group {
