@@ -81,8 +81,8 @@
   const validators = {
     'full-name': (v) => {
       const clean = v.trim();
-      if (clean.length < 2) return 'Please enter your full name.';
-      if (!/^[a-zA-Z\u00C0-\u1EF9\\s]{2,100}$/.test(clean)) return 'Name must contain only letters and spaces.';
+      if (clean.length < 2) return 'Please enter your full name (e.g. Nguyễn Văn A).';
+      if (!/^[a-zA-ZÀ-ỹ\s]{2,100}$/.test(clean)) return 'Name must contain only letters and spaces.';
       return '';
     },
     'phone': (v) => {
@@ -99,8 +99,8 @@
     'country': (v) => (v ? '' : 'Please select delivery country (Vietnam).'),
     'card-name': (v) => {
       const clean = v.trim();
-      if (clean.length < 2) return 'Enter the cardholder name.';
-      if (!/^[a-zA-Z\u00C0-\u1EF9\s]{2,100}$/.test(clean)) return 'Name must contain only letters and spaces.';
+      if (clean.length < 2) return 'Enter the cardholder name (e.g. NGUYEN VAN A).';
+      if (!/^[a-zA-ZÀ-ỹ\s]{2,100}$/.test(clean)) return 'Name must contain only letters and spaces.';
       return '';
     },
     'card-number': (v) => {
