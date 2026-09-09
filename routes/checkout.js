@@ -1,7 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
+const Game = require('../models/Game');
 const { getCart, saveOrder, getOrder, getAllOrders } = require('../data/store');
+
+async function findItem(productId) {
+  let item = await Product.findOne({ id: productId }).lean();
+  if (!item) item = await Game.findOne({ id: productId }).lean();
+  return item;
+}
 
 function isValidLuhn(numberStr) {
   const digits = numberStr.replace(/\D/g, '');
@@ -88,7 +95,7 @@ router.post('/', async (req, res) => {
 
     const items = [];
     for (const line of cart.items) {
-      const product = await Product.findOne({ id: line.productId }).lean();
+      const product = await findItem(line.productId);
       if (!product) continue;
       items.push({
         productId: line.productId,

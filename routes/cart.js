@@ -1,10 +1,17 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
+const Game = require('../models/Game');
 const { getCart } = require('../data/store');
 
+async function findItem(productId) {
+  let item = await Product.findOne({ id: productId }).lean();
+  if (!item) item = await Game.findOne({ id: productId }).lean();
+  return item;
+}
+
 async function withProductDetails(line) {
-  const product = await Product.findOne({ id: line.productId }).lean();
+  const product = await findItem(line.productId);
   if (!product) return null;
   return {
     productId: line.productId,
@@ -64,7 +71,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Quantity must be a whole number greater than 0.' });
     }
 
-    const product = await Product.findOne({ id: productId }).lean();
+    const product = await findItem(productId);
     if (!product) {
       return res.status(404).json({ error: `Product "${productId}" does not exist.` });
     }
@@ -117,7 +124,7 @@ router.put('/:productId', async (req, res) => {
     const line = cart.items.find(l => l.productId === productId);
     if (!line) return res.status(404).json({ error: 'Item not found in your cart.' });
 
-    const product = await Product.findOne({ id: productId }).lean();
+    const product = await findItem(productId);
     if (!product) return res.status(404).json({ error: `Product "${productId}" does not exist.` });
 
     const isDigital = product.category === 'digital' || !product.category;

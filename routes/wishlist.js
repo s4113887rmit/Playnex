@@ -1,14 +1,21 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
+const Game = require('../models/Game');
 const { getWishlist, getCart, getStats } = require('../data/store');
+
+async function findItem(productId) {
+  let item = await Product.findOne({ id: productId }).lean();
+  if (!item) item = await Game.findOne({ id: productId }).lean();
+  return item;
+}
 
 async function withWishlistDetails(entry) {
   const productId = typeof entry === 'string' ? entry : entry.productId;
   const purchased = typeof entry === 'object' ? !!entry.purchased : false;
   const addedAt = typeof entry === 'object' && entry.addedAt ? entry.addedAt : new Date().toISOString();
 
-  const product = await Product.findOne({ id: productId }).lean();
+  const product = await findItem(productId);
   if (!product) return null;
 
   return {
@@ -50,7 +57,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Product ID is required.' });
     }
 
-    const product = await Product.findOne({ id: productId }).lean();
+    const product = await findItem(productId);
     if (!product) {
       return res.status(404).json({ error: `Product "${productId}" does not exist.` });
     }
@@ -90,7 +97,7 @@ router.post('/:productId/move-to-cart', async (req, res) => {
       return res.status(404).json({ error: 'Product not found in your wishlist.' });
     }
 
-    const product = await Product.findOne({ id: productId }).lean();
+    const product = await findItem(productId);
     if (!product) return res.status(404).json({ error: 'Product not found.' });
 
     const cart = await getCart(req.userId);
