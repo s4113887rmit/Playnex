@@ -6,7 +6,16 @@ const { getCart } = require('../data/store');
 
 async function findItem(productId) {
   let item = await Product.findOne({ id: productId }).lean();
-  if (!item) item = await Game.findOne({ id: productId }).lean();
+  if (!item) {
+    const numId = parseInt(productId);
+    if (!isNaN(numId)) {
+      item = await Game.findOne({ id: numId }).lean();
+    }
+  }
+  if (!item) {
+    const normalized = String(productId).toLowerCase().replace(/-/g, ' ');
+    item = await Game.findOne({ $expr: { $eq: [{ $toLower: "$name" }, normalized] } }).lean();
+  }
   return item;
 }
 
