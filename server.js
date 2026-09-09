@@ -1225,7 +1225,8 @@ const GAME_SLUG_ALIASES = {
   "death-standing": 8,
   "death-stranding": 8,
   "cyberpunk": 2,
-  "witcher-3": 9
+  "witcher-3": 9,
+  "the-witcher-3": 9
 };
 
 async function renderListing(req, res) {
