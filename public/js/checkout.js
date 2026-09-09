@@ -1,4 +1,4 @@
-/**
+﻿/**
  * checkout.js — Full Checkout controller for Playnex.
  * Features:
  *   - Live & responsive form validation on input & blur
@@ -79,7 +79,12 @@
 
   // Validation rules tailored for Vietnam
   const validators = {
-    'full-name': (v) => (v.trim().length >= 2 ? '' : 'Please enter your full name (e.g. Nguyễn Văn A).'),
+    'full-name': (v) => {
+      const clean = v.trim();
+      if (clean.length < 2) return 'Please enter your full name.';
+      if (!/^[a-zA-Z\u00C0-\u1EF9\\s]{2,100}$/.test(clean)) return 'Name must contain only letters and spaces.';
+      return '';
+    },
     'phone': (v) => {
       const clean = v.trim().replace(/[\s().-]/g, '');
       const isVN = /^(?:(?:\+84|84|0)[35789]\d{8}|(?:\+84|84|0)2\d{9}|[0-9]{9,11})$/.test(clean);
@@ -94,8 +99,8 @@
     'country': (v) => (v ? '' : 'Please select delivery country (Vietnam).'),
     'card-name': (v) => {
       const clean = v.trim();
-      if (clean.length < 2) return 'Enter the cardholder name (e.g. NGUYEN VAN A).';
-      if (!/^[A-Z\s]{2,100}$/.test(clean)) return 'Name on card must contain only unaccented uppercase letters.';
+      if (clean.length < 2) return 'Enter the cardholder name.';
+      if (!/^[a-zA-Z\u00C0-\u1EF9\s]{2,100}$/.test(clean)) return 'Name must contain only letters and spaces.';
       return '';
     },
     'card-number': (v) => {
