@@ -210,11 +210,16 @@ router.post('/api/threads/:id/replies', async (req, res) => {
     }
 
     const authorName = user.name || user.username;
+    const replyImage =
+      typeof req.body.image === 'string' && req.body.image.startsWith('data:image/')
+        ? req.body.image.slice(0, 300000)
+        : null;
+
     thread.replies.push({
       author: authorName,
       authorId: userIdOf(user),
       content,
-      image: null,
+      image: replyImage,
       deleted: false,
       createdAt: new Date()
     });

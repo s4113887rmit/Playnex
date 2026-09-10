@@ -2,7 +2,6 @@ require('dotenv').config();
 try { require('dns').setServers(['8.8.8.8', '8.8.4.4']); } catch (e) {}
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
 const session = require('express-session');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
@@ -15,20 +14,53 @@ const app = express();
 
 app.set("view engine", "ejs");
 app.set("trust proxy", 1);
-app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Baseline security headers. These run before the static handlers, because a
+// served file ends the request and later middleware would never execute.
+app.use(function (req, res, next) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Static assets are served from public/ and from the project root so that the
+// HTML pages, stylesheet and images resolve. Server-side code and configuration
+// must never be downloadable, so those paths are refused before the root
+// static handler runs.
+const BLOCKED_STATIC_DIRS = /^\/(models|routes|middleware|data|node_modules|\.git|\.vscode)(\/|$)/i;
+const BLOCKED_ROOT_FILE = /^\/[^/]+\.(js|json|ya?ml|md|lock|log)$/i;
+
+app.use(function (req, res, next) {
+  if (BLOCKED_STATIC_DIRS.test(req.path) || BLOCKED_ROOT_FILE.test(req.path)) {
+    return res.status(404).send('Not found');
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname)));
 
-// Session middleware
-const sessionSecret = process.env.SESSION_SECRET || 'playnex-session-secret-' + Date.now();
+// Session middleware. The secret should be supplied through SESSION_SECRET; a
+// random fallback is used so that an unset value is never predictable.
+const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+if (!process.env.SESSION_SECRET) {
+  console.warn('SESSION_SECRET is not set. A random secret was generated, so logins will not survive a restart.');
+}
+
 app.use(session({
   secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
+    sameSite: 'lax',
+    // 'auto' marks the cookie Secure only when the request actually arrived over
+    // HTTPS. In production TLS terminates at the proxy and trust proxy makes
+    // req.secure true, while local HTTP development still works.
+    secure: 'auto',
     maxAge: 24 * 60 * 60 * 1000 // 24 hours
   }
 }));
