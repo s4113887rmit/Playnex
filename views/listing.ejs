@@ -135,7 +135,7 @@
             <div class="comment-content">
               <div class="comment-meta">
                 <span class="author"><%= r.author %></span>
-                <span class="date"><%= r.date %></span>
+                <span class="date"><%= r.date ? new Date(r.date).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '' %><%= r.editedAt ? ' (edited)' : '' %></span>
                 <a href="/game/<%= game.id %>/review?edit=<%= r._id %>" class="comment-action review-owner-action" data-author-id="<%= r.authorId || '' %>">Edit</a>
                 <form method="POST" action="/game/<%= game.id %>/review/<%= r._id %>/delete"
                       class="delete-review-form review-owner-action" data-author-id="<%= r.authorId || '' %>" style="display:inline">

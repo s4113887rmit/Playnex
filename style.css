@@ -4435,6 +4435,16 @@ header {
     margin-left: 24px;
     margin-right: 24px;
   }
+  .detailreview {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin: 24px 12px;
+    padding: 20px;
+  }
+  .rating-bars {
+    width: 100%;
+    box-sizing: border-box;
+  }
 }
 
 @media (min-width: 3000px) {

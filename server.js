@@ -284,7 +284,8 @@ function authGuard(route) {
 
 // Resolve the logged-in user for modules that need ownership (blog, reviews)
 async function resolveCurrentUser(req) {
-  const userId = (req.body && req.body.userId) || req.userId || req.header('x-user-id') || '';
+  // Prefer server-side session (set on login)
+  const userId = (req.session && req.session.userId) || (req.body && req.body.userId) || req.userId || '';
   if (!userId || userId === 'guest-user') return null;
 
   const mem = memoryUsers.findMemoryUser((u) => u.id === userId);
@@ -1111,12 +1112,16 @@ function validateReviewInput(title, content, rating) {
   const errors = [];
   const t = (title || "").trim();
   const c = (content || "").trim();
-  const r = parseInt(rating);
+  const rawRating = parseFloat(rating);
+  if (Number.isNaN(rawRating) || rawRating < 1 || rawRating > 5) {
+    errors.push("The rating must be between 1 and 5.");
+  } else if (!Number.isInteger(rawRating)) {
+    errors.push("The rating must be a whole number (1-5).");
+  }
   if (!t) errors.push("Cant leave blank");
   if (t.length > 80) errors.push("Title maximum 80 characters");
   if (c.length < 10) errors.push("The content must be at least 10 characters long.");
   if (c.length > 2000) errors.push("The content must be no more than 2,000 characters long.");
-  if (!Number.isInteger(r) || r < 1 || r > 5) errors.push("The rating must be between 1 and 5.");
   return errors;
 }
 
@@ -1206,13 +1211,19 @@ app.post("/game/:id/review", async (req, res) => {
       review.content = content.trim();
       review.stars = parseInt(rating);
       review.image = (image || "").trim();
-      review.date = new Date().toLocaleDateString("vi-VN") + " (edited)";
+      review.editedAt = new Date();
     } else {
+      // Block duplicate reviews from same user on same game
+      const existingReview = game.reviews.find((r) => r.authorId && String(r.authorId) === String(user.id));
+      if (existingReview && user.role !== 'admin') {
+        const errors = ["You have already reviewed this game. You can edit your existing review instead."];
+        return res.status(400).render("writegamereview", { game: game.toObject(), review: null, errors });
+      }
       game.reviews.push({
         id: "r_" + Date.now(),
         author: user.name || user.username,
         authorId: String(user.id),
-        date: new Date().toLocaleDateString("vi-VN"),
+        date: new Date().toISOString(),
         stars: parseInt(rating),
         title: title.trim(),
         content: content.trim(),
