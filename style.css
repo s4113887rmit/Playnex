@@ -3796,6 +3796,11 @@ a {
   gap: 8px;
   flex: 1;
 }
+.searchbar--full {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto 16px auto;
+}
 .searchbar input {
   flex: 1;
   max-width: 360px;
