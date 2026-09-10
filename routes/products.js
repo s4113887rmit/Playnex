@@ -1,102 +1,102 @@
 const express = require('express');
 const router = express.Router();
-const products = require('../data/products');
-const { getStats } = require('../data/store');
+const Product = require('../models/Product');
+const { getStatsBatch } = require('../data/store');
 
-// GET /api/products — list products with optional filtering & sorting
-router.get('/', (req, res) => {
-  let list = [...products];
+const PROJECTION = '-_id -__v -createdAt -updatedAt';
 
-  const { q, category, genre, platform, price, availability, sort } = req.query;
+// GET /api/products - list products from MongoDB with filtering and sorting
+router.get('/', async (req, res) => {
+  try {
+    const { q, category, genre, platform, price, availability, sort } = req.query;
+    const query = {};
 
-  // Search filter
-  if (q && q.trim()) {
-    const term = q.trim().toLowerCase();
-    list = list.filter(p =>
-      p.title.toLowerCase().includes(term) ||
-      p.genre.toLowerCase().includes(term) ||
-      p.platform.toLowerCase().includes(term)
-    );
-  }
-
-  // Category filter ('digital' | 'physical' | 'deals' | 'free')
-  if (category && category !== 'all') {
-    if (category === 'digital' || category === 'physical') {
-      list = list.filter(p => p.category === category);
-    } else if (category === 'deals') {
-      list = list.filter(p => p.oldPrice && p.oldPrice > p.price);
-    } else if (category === 'free') {
-      list = list.filter(p => p.price === 0);
+    // Search filter
+    if (q && q.trim()) {
+      const term = q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const re = new RegExp(term, 'i');
+      query.$or = [{ title: re }, { genre: re }, { platform: re }];
     }
-  }
 
-  // Genre filter
-  if (genre) {
-    const genres = Array.isArray(genre) ? genre : [genre];
-    list = list.filter(p => genres.some(g => {
-      const pGenre = (p.genre || '').toLowerCase();
-      const target = g.toLowerCase().trim();
-      return pGenre === target || pGenre.includes(target) || target.includes(pGenre);
-    }));
-  }
+    // Category filter ('digital' | 'physical' | 'deals' | 'free')
+    if (category && category !== 'all') {
+      if (category === 'digital' || category === 'physical') {
+        query.category = category;
+      } else if (category === 'deals') {
+        query.$expr = { $gt: ['$oldPrice', '$price'] };
+      } else if (category === 'free') {
+        query.price = 0;
+      }
+    }
 
-  // Platform filter
-  if (platform) {
-    const platforms = Array.isArray(platform) ? platform : [platform];
-    list = list.filter(p => platforms.some(plat => p.platform.toLowerCase().includes(plat.toLowerCase())));
-  }
+    // Genre filter
+    if (genre) {
+      const genres = Array.isArray(genre) ? genre : [genre];
+      query.genre = { $in: genres.map((g) => new RegExp(g.trim(), 'i')) };
+    }
 
-  // Price filter
-  if (price) {
-    const prices = Array.isArray(price) ? price : [price];
-    list = list.filter(p => {
-      return prices.some(pr => {
-        if (pr === 'under-25') return p.price < 25;
-        if (pr === '25-50') return p.price >= 25 && p.price <= 50;
-        if (pr === 'over-50') return p.price > 50;
-        return true;
+    // Platform filter
+    if (platform) {
+      const platforms = Array.isArray(platform) ? platform : [platform];
+      query.platform = { $in: platforms.map((p) => new RegExp(p.trim(), 'i')) };
+    }
+
+    // Price filter
+    if (price) {
+      const prices = Array.isArray(price) ? price : [price];
+      const clauses = [];
+      prices.forEach((pr) => {
+        if (pr === 'under-25') clauses.push({ price: { $lt: 25 } });
+        else if (pr === '25-50') clauses.push({ price: { $gte: 25, $lte: 50 } });
+        else if (pr === 'over-50') clauses.push({ price: { $gt: 50 } });
       });
-    });
-  }
-
-  // Availability filter
-  if (availability) {
-    const avails = Array.isArray(availability) ? availability : [availability];
-    list = list.filter(p => avails.some(a => (p.availability || 'in-stock') === a));
-  }
-
-  // Sorting
-  if (sort) {
-    if (sort === 'title' || sort === 'name') {
-      list.sort((a, b) => a.title.localeCompare(b.title));
-    } else if (sort === 'price-asc' || sort === 'price-low') {
-      list.sort((a, b) => a.price - b.price);
-    } else if (sort === 'price-desc' || sort === 'price-high') {
-      list.sort((a, b) => b.price - a.price);
-    } else if (sort === 'newest') {
-      list.sort((a, b) => (b.releaseYear || 0) - (a.releaseYear || 0));
+      if (clauses.length) query.$and = (query.$and || []).concat([{ $or: clauses }]);
     }
+
+    // Availability filter
+    if (availability) {
+      const avails = Array.isArray(availability) ? availability : [availability];
+      query.availability = { $in: avails };
+    }
+
+    // Sorting
+    const sortMap = {
+      title: { title: 1 },
+      name: { title: 1 },
+      'price-asc': { price: 1 },
+      'price-low': { price: 1 },
+      'price-desc': { price: -1 },
+      'price-high': { price: -1 },
+      newest: { releaseYear: -1 },
+      year: { releaseYear: -1 }
+    };
+
+    let list = await Product.find(query).select(PROJECTION).sort(sortMap[sort] || { title: 1 }).lean();
+
+    // Attach cross-collection statistics
+    const stats = await getStatsBatch(list.map((p) => p.id));
+    const enriched = list.map((p) => ({ ...p, stats: stats[p.id] || { wishlistCount: 0, cartCount: 0, purchasedCount: 0 } }));
+
+    res.json(enriched);
+  } catch (err) {
+    console.error('Failed to list products:', err);
+    res.json([]);
   }
-
-  // Attach stats to products
-  const enriched = list.map(p => ({
-    ...p,
-    stats: getStats(p.id)
-  }));
-
-  res.json(enriched);
 });
 
-// GET /api/products/:id — get product by id
-router.get('/:id', (req, res) => {
-  const product = products.find(p => p.id === req.params.id);
-  if (!product) {
-    return res.status(404).json({ error: `Product with id "${req.params.id}" not found.` });
+// GET /api/products/:id - get a single product by id
+router.get('/:id', async (req, res) => {
+  try {
+    const product = await Product.findOne({ id: req.params.id }).select(PROJECTION).lean();
+    if (!product) {
+      return res.status(404).json({ error: `Product with id "${req.params.id}" not found.` });
+    }
+    const stats = await getStatsBatch([product.id]);
+    res.json({ ...product, stats: stats[product.id] || { wishlistCount: 0, cartCount: 0, purchasedCount: 0 } });
+  } catch (err) {
+    console.error('Failed to load product:', err);
+    res.status(500).json({ error: 'Failed to load product.' });
   }
-  res.json({
-    ...product,
-    stats: getStats(product.id)
-  });
 });
 
 module.exports = router;

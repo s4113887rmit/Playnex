@@ -1,6 +1,7 @@
 /**
- * store.js — MongoDB-backed datastore for Assessment 3.
- * Uses Cart, Wishlist, Order models for persistent storage.
+ * store.js - MongoDB-backed datastore for Assessment 3.
+ * Uses Cart, Wishlist and Order models for persistent storage, and
+ * computes real cross-collection statistics for wishlist items.
  */
 
 const mongoose = require('mongoose');
@@ -47,8 +48,63 @@ async function getAllOrders(userId) {
   return await Order.find({ userId }).sort({ createdAt: -1 }).lean();
 }
 
-function getStats(productId) {
-  return { wishlistCount: 0, cartCount: 0, purchasedCount: 0 };
+const EMPTY_STATS = { wishlistCount: 0, cartCount: 0, purchasedCount: 0 };
+
+function toMap(rows) {
+  const map = {};
+  rows.forEach((row) => {
+    map[row._id] = row.count;
+  });
+  return map;
+}
+
+/**
+ * Compute wishlist, cart and purchase statistics for a set of product ids.
+ * Runs three aggregations in total rather than one query per product.
+ */
+async function getStatsBatch(productIds) {
+  const ids = (productIds || []).map(String);
+  if (!ids.length || mongoose.connection.readyState !== 1) return {};
+
+  const [wishRow, cartRows, orderRows] = await Promise.all([
+    Wishlist.aggregate([
+      { $unwind: '$items' },
+      { $match: { 'items.productId': { $in: ids } } },
+      { $group: { _id: '$items.productId', count: { $sum: 1 } } }
+    ]),
+    Cart.aggregate([
+      { $unwind: '$items' },
+      { $match: { 'items.productId': { $in: ids } } },
+      { $group: { _id: '$items.productId', count: { $sum: '$items.qty' } } }
+    ]),
+    Order.aggregate([
+      { $unwind: '$items' },
+      { $match: { 'items.productId': { $in: ids } } },
+      { $group: { _id: '$items.productId', count: { $sum: '$items.qty' } } }
+    ])
+  ]);
+
+  const wishMap = toMap(wishRow);
+  const cartMap = toMap(cartRows);
+  const orderMap = toMap(orderRows);
+
+  const stats = {};
+  ids.forEach((id) => {
+    stats[id] = {
+      wishlistCount: wishMap[id] || 0,
+      cartCount: cartMap[id] || 0,
+      purchasedCount: orderMap[id] || 0
+    };
+  });
+  return stats;
+}
+
+/**
+ * Statistics for a single item, used by the wishlist and cart routes.
+ */
+async function getStats(productId) {
+  const stats = await getStatsBatch([productId]);
+  return stats[String(productId)] || { ...EMPTY_STATS };
 }
 
 module.exports = {
@@ -57,5 +113,6 @@ module.exports = {
   saveOrder,
   getOrder,
   getAllOrders,
-  getStats
+  getStats,
+  getStatsBatch
 };

@@ -31,7 +31,7 @@ async function withWishlistDetails(entry) {
     ...product,
     purchased,
     addedAt,
-    stats: getStats(productId)
+    stats: await getStats(productId)
   };
 }
 

@@ -10,7 +10,6 @@ const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const Game = require('./models/Game');
-const Product = require('./models/Product');
 
 const app = express();
 
@@ -52,6 +51,14 @@ app.use('/api/checkout', checkoutRouter);
 // Blog module (EJS pages at /blog + JSON API at /api/blogs)
 const blogsRouter = require('./routes/blogs');
 app.use('/', blogsRouter);
+
+// Discussion Forum module (MongoDB-backed threads and replies)
+const threadsRouter = require('./routes/threads');
+app.use('/', threadsRouter);
+
+// Administration module (MongoDB-backed user management)
+const adminRouter = require('./routes/admin');
+app.use('/', adminRouter);
 
 app.get('/', function (req, res) {
   res.redirect('/homepage.html');
@@ -282,28 +289,8 @@ function authGuard(route) {
   };
 }
 
-// Resolve the logged-in user for modules that need ownership (blog, reviews)
-async function resolveCurrentUser(req) {
-  // Prefer server-side session (set on login)
-  const userId = (req.session && req.session.userId) || (req.body && req.body.userId) || req.userId || '';
-  if (!userId || userId === 'guest-user') return null;
-
-  const mem = memoryUsers.findMemoryUser((u) => u.id === userId);
-  if (mem) {
-    if (mem.isLocked || !mem.isActive) return null;
-    return mem;
-  }
-
-  if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(userId)) {
-    try {
-      const user = await User.findById(userId);
-      if (user && !user.isLocked && user.isActive) return user;
-    } catch (err) {
-      return null;
-    }
-  }
-  return null;
-}
+// Resolve the logged-in user for modules that need ownership (reviews)
+const { resolveCurrentUser } = require('./middleware/resolveUser');
 
 async function seedDemoAccounts() {
   const demoAccounts = [
@@ -664,432 +651,12 @@ app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async 
   }
 });
 
-// --- FORUM MODULE: IN-MEMORY DATA ---
-function timeAgo(ts) {
-  if (!ts || isNaN(ts)) return "Just now";
-  const diff = Date.now() - ts;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return mins + " min ago";
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
-  const days = Math.floor(hours / 24);
-  return days + " day" + (days > 1 ? "s" : "") + " ago";
-}
-
-let forumThreads = [
-  {
-    id: 1,
-    title: "[Elden Ring] Fixing co-op connection failures",
-    content: "Me and a friend keep failing to summon each other for co-op in Elden Ring. We're both on the same NAT type, passwords match, but the connection keeps timing out. Any tips on fixing this?",
-    author: "darknexus",
-    authorId: null,
-    tag: "support",
-    tagClass: "tag--support",
-    replies: 2,
-    views: 1200,
-    lastPostAuthor: "script_master",
-    createdAt: Date.now() - 3 * 60 * 60 * 1000,
-    lastPostAt: Date.now() - 2 * 60 * 60 * 1000,
-    deleted: false,
-    posts: [
-      {
-        id: "p1",
-        author: "script_master",
-        authorId: null,
-        content: "Checking scoreboard logic every tick for every connected player over a VPN will drain your TPS. Schedule the check on an event trigger instead of looping it, and verify your VPN routing is not adding packet loss.",
-        createdAt: Date.now() - 2 * 60 * 60 * 1000,
-        deleted: false
-      },
-      {
-        id: "p2",
-        author: "netguru",
-        authorId: null,
-        content: "Also profile with /tick health to confirm the source. Radmin LAN mode usually adds only 2-5ms; a datapack loop is the likely culprit.",
-        createdAt: Date.now() - 90 * 60 * 1000,
-        deleted: false
-      }
-    ]
-  },
-  {
-    id: 2,
-    title: "[The Witcher 3: Wild Hunt] Game of the Year Edition Review",
-    content: "Just received the Embercrown Saga Collector's Edition throne figure. Sharing photos and thoughts on build quality, paint application, and packaging.",
-    author: "cyber_fan",
-    authorId: null,
-    tag: "review",
-    tagClass: "tag--review",
-    replies: 1,
-    views: 3400,
-    lastPostAuthor: "merch_guy",
-    createdAt: Date.now() - 6 * 60 * 60 * 1000,
-    lastPostAt: Date.now() - 5 * 60 * 60 * 1000,
-    deleted: false,
-    posts: [
-      {
-        id: "p3",
-        author: "merch_guy",
-        authorId: null,
-        content: "Paint application is clean on mine too. The throne base is heavier than expected, which is great for display stability.",
-        createdAt: Date.now() - 5 * 60 * 60 * 1000,
-        deleted: false
-      }
-    ]
-  }
-];
-
-function publicThread(t) {
-  return {
-    id: t.id,
-    title: t.title,
-    content: t.content,
-    author: t.author,
-    authorId: t.authorId,
-    tag: t.tag,
-    tagClass: t.tagClass,
-    replies: t.replies,
-    views: t.views,
-    lastPostAuthor: t.lastPostAuthor,
-    lastPostTime: timeAgo(t.lastPostAt),
-    image: t.image,
-    createdAt: t.createdAt,
-    lastPostAt: t.lastPostAt
-  };
-}
-
-// GET: Retrieve all forum threads
-app.get('/api/threads', (req, res) => {
-  const visible = forumThreads.filter((t) => !t.deleted).map(publicThread);
-  res.json(visible);
-});
-
-// POST: Create a new forum thread
-app.post('/api/threads', async (req, res) => {
-  const { title, game, category, content, image } = req.body;
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to create a thread." });
-  }
-
-  // Server-Side Validation
-  if (!title || title.trim() === '') {
-    return res.status(400).json({ error: "Thread title is strictly required." });
-  }
-  if (!category || category.trim() === '') {
-    return res.status(400).json({ error: "A category selection is required." });
-  }
-  if (!content || content.trim() === '') {
-    return res.status(400).json({ error: "Post content cannot be empty." });
-  }
-  if (content.length > 5000) {
-    return res.status(400).json({ error: "Post content must be at most 5000 characters." });
-  }
-  const sanitizedImage = (typeof image === 'string' && image.startsWith('data:image/')) ? image.slice(0, 300000) : undefined;
-
-  // Determine the tag class based on the category for styling
-  let tagClass = "tag--general";
-  if (category === "support") tagClass = "tag--support";
-  if (category === "review") tagClass = "tag--review";
-
-  const authorName = user.name || user.username;
-
-  // Create the new thread object
-  const newThread = {
-    id: forumThreads.length + 1,
-    title: title,
-    content: content,
-    author: authorName,
-    authorId: String(user.id),
-    tag: category,
-    tagClass: tagClass,
-    replies: 0,
-    views: 0,
-    lastPostAuthor: authorName,
-    lastPostTime: "Just now",
-    image: sanitizedImage,
-    createdAt: Date.now(),
-    lastPostAt: Date.now()
-  };
-
-  // Save it to our temporary "database"
-  forumThreads.unshift(newThread); // unshift adds it to the top of the array
-
-  // Send a success response back to the client
-  res.status(201).json({ message: "Thread created successfully!", thread: newThread });
-});
-
-// ==========================================
-// ADMIN MODULE: IN-MEMORY DATA & ROUTES
-// ==========================================
-
-let adminUsers = [
-  {
-    id: 1,
-    username: "John_A",
-    status: "normal",
-    joined: "Jan 12, 2026",
-    avatarSeed: "Ngyuen",
-    flags: "0 active flags"
-  },
-  {
-    id: 2,
-    username: "jane_B",
-    status: "normal",
-    joined: "Mar 05, 2026",
-    avatarSeed: "Dang",
-    flags: "1 resolved warning"
-  },
-  {
-    id: 3,
-    username: "spammer_99",
-    status: "locked",
-    lockedDate: "Jul 21, 2026",
-    avatarSeed: "Spam",
-    reason: "Forum Abuse"
-  }
-];
-
-// GET: Retrieve all users for the dashboard
-app.get('/api/users', async (req, res) => {
-  const user = await resolveCurrentUser(req);
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: "Administrator access required." });
-  }
-  res.json(adminUsers);
-});
-
-// GET: Retrieve a single user by ID
-app.get('/api/users/:id', async (req, res) => {
-  const user = await resolveCurrentUser(req);
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: "Administrator access required." });
-  }
-  const userId = parseInt(req.params.id);
-  const targetUser = adminUsers.find(u => u.id === userId);
-  if (!targetUser) {
-    return res.status(404).json({ error: "User not found." });
-  }
-  res.json(targetUser);
-});
-
-// POST: Toggle user lock status
-app.post('/api/users/:id/toggle-lock', async (req, res) => {
-  const user = await resolveCurrentUser(req);
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: "Administrator access required." });
-  }
-  // Grab the ID from the URL and convert it to an integer
-  const userId = parseInt(req.params.id);
-
-  // Find the specific user in our in-memory array
-  const targetUser = adminUsers.find(u => u.id === userId);
-
-  // Server-side validation: Make sure the user actually exists
-  if (!targetUser) {
-    return res.status(404).json({ error: "User not found." });
-  }
-
-  // Toggle the status
-  if (targetUser.status === 'normal') {
-    targetUser.status = 'locked';
-    targetUser.lockedDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-    targetUser.reason = req.body.reason || "Manual Admin Lock";
-  } else {
-    targetUser.status = 'normal';
-    // Clean up locked properties
-    delete targetUser.lockedDate;
-    delete targetUser.reason;
-  }
-
-  res.json({ message: `User status successfully updated to ${targetUser.status}`, user: targetUser });
-});
-// GET: Retrieve a single thread by ID
-app.get('/api/threads/:id', (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  res.json({
-    ...publicThread(thread),
-    posts: (thread.posts || [])
-      .filter((p) => !p.deleted)
-      .map((p) => ({
-        id: p.id,
-        author: p.author,
-        authorId: p.authorId,
-        content: p.content,
-        createdAt: p.createdAt,
-        timeAgo: timeAgo(p.createdAt)
-      }))
-  });
-});
-
-// POST: Reply to a thread
-app.post('/api/threads/:id/replies', async (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to reply." });
-  }
-
-  const content = (req.body.content || "").trim();
-  if (!content) {
-    return res.status(400).json({ error: "Reply content cannot be empty." });
-  }
-  if (content.length > 2000) {
-    return res.status(400).json({ error: "Reply content must be at most 2000 characters." });
-  }
-
-  const reply = {
-    id: "p_" + Date.now(),
-    author: user.name || user.username,
-    authorId: String(user.id),
-    content,
-    createdAt: Date.now(),
-    deleted: false
-  };
-
-  thread.posts = thread.posts || [];
-  thread.posts.push(reply);
-  thread.replies = thread.posts.filter((p) => !p.deleted).length;
-  thread.lastPostAuthor = reply.author;
-  thread.lastPostAt = reply.createdAt;
-
-  res.status(201).json({ message: "Reply posted successfully.", reply: { ...reply, timeAgo: "Just now" } });
-});
-
-// PUT: Edit a thread (owner or admin)
-app.put('/api/threads/:id', async (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to edit a thread." });
-  }
-
-  const isOwner = thread.authorId && String(thread.authorId) === String(user.id);
-  const isAdmin = user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).json({ error: "You can only edit your own threads." });
-  }
-
-  const title = (req.body.title || "").trim();
-  const content = (req.body.content || "").trim();
-  if (!title) return res.status(400).json({ error: "Thread title is strictly required." });
-  if (!content) return res.status(400).json({ error: "Post content cannot be empty." });
-  if (title.length > 150) return res.status(400).json({ error: "Thread title must be at most 150 characters." });
-  if (content.length > 5000) return res.status(400).json({ error: "Post content must be at most 5000 characters." });
-
-  thread.title = title;
-  thread.content = content;
-  if (typeof req.body.image === 'string' && req.body.image.startsWith('data:image/')) {
-    thread.image = req.body.image.slice(0, 300000);
-  }
-  thread.lastPostAt = Date.now();
-
-  res.json({ message: "Thread updated successfully.", thread: publicThread(thread) });
-});
-
-// PUT: Edit a reply (owner or admin)
-app.put('/api/threads/:id/replies/:replyId', async (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  const reply = (thread.posts || []).find((p) => p.id === req.params.replyId && !p.deleted);
-  if (!reply) {
-    return res.status(404).json({ error: "Reply not found." });
-  }
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to edit a reply." });
-  }
-
-  const isOwner = reply.authorId && String(reply.authorId) === String(user.id);
-  const isAdmin = user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).json({ error: "You can only edit your own replies." });
-  }
-
-  const content = (req.body.content || "").trim();
-  if (!content) return res.status(400).json({ error: "Reply content cannot be empty." });
-  if (content.length > 2000) return res.status(400).json({ error: "Reply content must be at most 2000 characters." });
-
-  reply.content = content;
-
-  res.json({ message: "Reply updated successfully.", reply: { ...reply, timeAgo: timeAgo(reply.createdAt) } });
-});
-
-// DELETE: Soft-delete a thread (retained for auditing)
-app.delete('/api/threads/:id', async (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to delete a thread." });
-  }
-
-  const isOwner = thread.authorId && String(thread.authorId) === String(user.id);
-  const isAdmin = user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).json({ error: "You can only delete your own threads." });
-  }
-
-  thread.deleted = true;
-  res.json({ message: "Thread successfully deleted." });
-});
-
-// DELETE: Soft-delete a reply (retained for auditing)
-app.delete('/api/threads/:id/replies/:replyId', async (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  const reply = (thread.posts || []).find((p) => p.id === req.params.replyId && !p.deleted);
-  if (!reply) {
-    return res.status(404).json({ error: "Reply not found." });
-  }
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to delete a reply." });
-  }
-
-  const isOwner = reply.authorId && String(reply.authorId) === String(user.id);
-  const isAdmin = user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).json({ error: "You can only delete your own replies." });
-  }
-
-  reply.deleted = true;
-  thread.replies = thread.posts.filter((p) => !p.deleted).length;
-  thread.lastPostAt = Date.now();
-
-  res.json({ message: "Reply successfully deleted." });
-});
-
+// ============================================================
+// FORUM & ADMIN MODULES
+// Both modules are now MongoDB-backed and live in their own routers:
+//   routes/threads.js  -> /api/threads (+ /api/threads/:id/replies)
+//   routes/admin.js    -> /api/users  (+ lock / unlock)
+// ============================================================
 function getAvgRating(game) {
   const count = game.reviews.length;
   const totalScore = game.reviews.reduce((sum, r) => sum + r.stars, 0);
@@ -1310,18 +877,19 @@ app.listen(PORT, () => {
   console.log('Playnex server running on http://localhost:' + PORT);
 });
 
-// Sitemap
+// Sitemap — generated automatically from the database
 app.get('/sitemap', async (req, res) => {
   try {
     const Blog = require('./models/Blog');
+    const Thread = require('./models/Thread');
     const games = await Game.find().select('id name').lean();
     const blogPosts = await Blog.find().select('_id title').lean();
-    const threads = forumThreads;
+    const threads = await Thread.find({ deleted: false }).select('_id title').lean();
 
     res.render('sitemap', {
       games: games.map(g => ({ id: g.id, name: g.name })),
       blogPosts: blogPosts.map(p => ({ id: p._id, title: p.title })),
-      threads: threads.map(t => ({ id: t.id, title: t.title }))
+      threads: threads.map(t => ({ id: t._id, title: t.title }))
     });
   } catch (err) {
     console.error('Error rendering sitemap:', err);
