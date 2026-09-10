@@ -131,6 +131,7 @@
 
   let currentHeroIndex = 0;
   let heroTimer = null;
+  let heroPaused = false;
   const heroStage = document.getElementById('hero-stage');
   let heroCardElements = [];
   let heroDotElements = [];
@@ -200,9 +201,43 @@
       });
     }
 
+    // Respect the user's motion preference: do not auto-advance when reduced
+    // motion is requested, and resume automatically if the preference changes.
+    const motionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    if (motionQuery && motionQuery.matches) {
+      heroPaused = true;
+    }
+
+    const pauseBtn = document.getElementById('hero-pause-btn');
+    setPauseButtonState(pauseBtn);
+
+    if (pauseBtn) {
+      pauseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        heroPaused = !heroPaused;
+        setPauseButtonState(pauseBtn);
+        if (heroPaused) stopHeroTimer();
+        else startHeroTimer();
+      });
+    }
+
+    if (motionQuery) {
+      const onMotionChange = (event) => {
+        heroPaused = event.matches;
+        setPauseButtonState(pauseBtn);
+        if (heroPaused) stopHeroTimer();
+        else startHeroTimer();
+      };
+      if (motionQuery.addEventListener) motionQuery.addEventListener('change', onMotionChange);
+      else if (motionQuery.addListener) motionQuery.addListener(onMotionChange);
+    }
+
     if (heroVisual) {
+      // Pause while the carousel is hovered or holds keyboard focus.
       heroVisual.addEventListener('mouseenter', stopHeroTimer);
-      heroVisual.addEventListener('mouseleave', startHeroTimer);
+      heroVisual.addEventListener('mouseleave', () => { if (!heroPaused) startHeroTimer(); });
+      heroVisual.addEventListener('focusin', stopHeroTimer);
+      heroVisual.addEventListener('focusout', () => { if (!heroPaused) startHeroTimer(); });
     }
   }
 
@@ -323,6 +358,7 @@
 
   function startHeroTimer() {
     stopHeroTimer();
+    if (heroPaused) return;
     heroTimer = setInterval(() => {
       updateHeroCarousel(currentHeroIndex + 1, true);
     }, 3000);
@@ -333,6 +369,13 @@
       clearInterval(heroTimer);
       heroTimer = null;
     }
+  }
+
+  function setPauseButtonState(btn) {
+    if (!btn) return;
+    btn.textContent = heroPaused ? 'Play' : 'Pause';
+    btn.setAttribute('aria-pressed', heroPaused ? 'true' : 'false');
+    btn.setAttribute('aria-label', heroPaused ? 'Play featured games carousel' : 'Pause featured games carousel');
   }
 
   function money(n) {

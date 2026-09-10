@@ -66,7 +66,11 @@ function validateBlogInput(body) {
 }
 
 async function resolveUser(req) {
-  const userId = (req.body && req.body.userId) || req.userId || req.header('x-user-id') || '';
+  // Identity comes from the server-side session only. A body userId or
+  // x-user-id header is client controlled and must not be trusted here.
+  const sessionId = req.session && req.session.userId;
+  if (!sessionId) return null;
+  const userId = String(sessionId).trim();
   if (!userId || userId === 'guest-user') return null;
 
   const mem = memoryUsers.findMemoryUser((u) => u.id === userId);
@@ -311,12 +315,13 @@ router.get('/api/blogs', async (req, res) => {
     const q = (req.query.q || '').trim();
     const tag = (req.query.tag || '').trim();
     if (q) {
+      const safe = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       query.$or = [
-        { title: { $regex: q, $options: 'i' } },
-        { summary: { $regex: q, $options: 'i' } },
-        { content: { $regex: q, $options: 'i' } },
-        { authorName: { $regex: q, $options: 'i' } },
-        { tags: { $regex: q, $options: 'i' } }
+        { title: { $regex: safe, $options: 'i' } },
+        { summary: { $regex: safe, $options: 'i' } },
+        { content: { $regex: safe, $options: 'i' } },
+        { authorName: { $regex: safe, $options: 'i' } },
+        { tags: { $regex: safe, $options: 'i' } }
       ];
     }
     if (tag) {

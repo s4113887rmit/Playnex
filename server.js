@@ -122,6 +122,14 @@ function signupValidator(body) {
   return errors;
 }
 
+// Resolve a memory-store user from the session. Used only when MongoDB is
+// unreachable, and still never trusts a client-supplied identifier.
+function memorySessionUser(req) {
+  const sessionId = req.session && req.session.userId;
+  if (!sessionId) return null;
+  return memoryUsers.findMemoryUser((u) => u.id === String(sessionId)) || null;
+}
+
 function handleMemoryAuth(req, res, route) {
   const { email, password, confirmPassword, username, name, description, profilePicture } = req.body || {};
   const lowerEmail = String(email || '').toLowerCase();
@@ -176,14 +184,14 @@ function handleMemoryAuth(req, res, route) {
   }
 
   if (route === 'profile-get') {
-    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
+    const user = memorySessionUser(req);
+    if (!user) return res.status(401).json({ error: 'You must be logged in to view your profile.' });
     return res.json(memoryUsers.publicUser(user));
   }
 
   if (route === 'profile-put') {
-    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
+    const user = memorySessionUser(req);
+    if (!user) return res.status(401).json({ error: 'You must be logged in to update your profile.' });
     const trimmedName = typeof name === 'string' ? name.trim() : '';
     const trimmedDesc = typeof description === 'string' ? description.trim() : '';
     if (name !== undefined && (!trimmedName || trimmedName.length > 100)) {
@@ -200,8 +208,8 @@ function handleMemoryAuth(req, res, route) {
   }
 
   if (route === 'change-password') {
-    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
-    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    const user = memorySessionUser(req);
+    if (!user) return res.status(401).json({ error: 'You must be logged in to change your password.' });
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
     if (!currentPassword || !newPassword || !confirmNewPassword) {
       return res.status(400).json({ error: 'All fields are required.' });
@@ -219,8 +227,8 @@ function handleMemoryAuth(req, res, route) {
   }
 
   if (route === 'change-email') {
-    const user = memoryUsers.findMemoryUser((u) => u.email === String(req.body.currentEmail || '').toLowerCase());
-    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    const user = memorySessionUser(req);
+    if (!user) return res.status(401).json({ error: 'You must be logged in to change your email.' });
     const { newEmail, password: pwd } = req.body;
     if (!newEmail || !pwd) return res.status(400).json({ error: 'All fields are required.' });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(newEmail))) {
@@ -238,12 +246,13 @@ function handleMemoryAuth(req, res, route) {
   }
 
   if (route === 'delete-account') {
-    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
-    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    const user = memorySessionUser(req);
+    if (!user) return res.status(401).json({ error: 'You must be logged in to deactivate your account.' });
     bcrypt.compare(password || '', user.password).then((isMatch) => {
       if (!isMatch) return res.status(401).json({ error: 'Password is incorrect.' });
       user.isActive = false;
       user.email = user.email + '_deactivated_' + Date.now();
+      req.session.destroy(() => {});
       res.json({ message: 'Your account has been deactivated. We are sorry to see you go.' });
     });
     return;
@@ -487,25 +496,35 @@ app.post('/api/auth/reset-password', authLimiter, authGuard('reset-password'), a
   }
 });
 
+// The logged-in user is taken from the server-side session. Client-supplied
+// identifiers such as a body email are never used to select the account.
+async function findSessionUser(req, withPassword) {
+  const sessionId = req.session && req.session.userId;
+  if (!sessionId || !mongoose.isValidObjectId(sessionId)) return null;
+  const query = User.findById(sessionId);
+  if (withPassword) query.select('+password');
+  return query;
+}
+
+function profilePayload(user) {
+  return {
+    id: user._id,
+    username: user.username,
+    name: user.name,
+    email: user.email,
+    description: user.description,
+    profilePicture: user.profilePicture,
+    role: user.role
+  };
+}
+
 app.post('/api/auth/profile', authLimiter, authGuard('profile-get'), async (req, res) => {
   try {
-    var { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-    var user = await User.findOne({ email: email.toLowerCase() });
+    var user = await findSessionUser(req);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(401).json({ error: 'You must be logged in to view your profile.' });
     }
-    res.status(200).json({
-      id: user._id,
-      username: user.username,
-      name: user.name,
-      email: user.email,
-      description: user.description,
-      profilePicture: user.profilePicture,
-      role: user.role
-    });
+    res.status(200).json(profilePayload(user));
   } catch (err) {
     console.error('Profile fetch error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
@@ -514,13 +533,10 @@ app.post('/api/auth/profile', authLimiter, authGuard('profile-get'), async (req,
 
 app.put('/api/auth/profile', authLimiter, authGuard('profile-put'), async (req, res) => {
   try {
-    var { email, name, description, profilePicture } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-    var user = await User.findOne({ email: email.toLowerCase() });
+    var { name, description, profilePicture } = req.body;
+    var user = await findSessionUser(req);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(401).json({ error: 'You must be logged in to update your profile.' });
     }
     if (name !== undefined) {
       var trimmedName = String(name).trim();
@@ -543,15 +559,7 @@ app.put('/api/auth/profile', authLimiter, authGuard('profile-put'), async (req, 
     await user.save({ validateBeforeSave: false });
     res.status(200).json({
       message: 'Profile updated successfully.',
-      user: {
-        id: user._id,
-        username: user.username,
-        name: user.name,
-        email: user.email,
-        description: user.description,
-        profilePicture: user.profilePicture,
-        role: user.role
-      }
+      user: profilePayload(user)
     });
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -565,24 +573,24 @@ app.put('/api/auth/profile', authLimiter, authGuard('profile-put'), async (req, 
 
 app.put('/api/auth/email', authLimiter, authGuard('change-email'), async (req, res) => {
   try {
-    var { currentEmail, newEmail, password } = req.body;
-    if (!currentEmail || !newEmail || !password) {
+    var { newEmail, password } = req.body;
+    if (!newEmail || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
-    var user = await User.findOne({ email: currentEmail.toLowerCase() }).select('+password');
+    var user = await findSessionUser(req, true);
     if (!user) {
-      return res.status(404).json({ error: 'Account not found' });
+      return res.status(401).json({ error: 'You must be logged in to change your email.' });
     }
     var isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ error: 'Password is incorrect' });
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      return res.status(400).json({ error: 'Please provide a valid email address' });
+    }
     var existing = await User.findOne({ email: newEmail.toLowerCase() });
     if (existing) {
       return res.status(409).json({ error: 'That email address is already in use' });
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-      return res.status(400).json({ error: 'Please provide a valid email address' });
     }
     user.email = newEmail;
     await user.save({ validateBeforeSave: false });
@@ -598,8 +606,8 @@ app.put('/api/auth/email', authLimiter, authGuard('change-email'), async (req, r
 
 app.put('/api/auth/change-password', authLimiter, authGuard('change-password'), async (req, res) => {
   try {
-    var { email, currentPassword, newPassword, confirmNewPassword } = req.body;
-    if (!email || !currentPassword || !newPassword || !confirmNewPassword) {
+    var { currentPassword, newPassword, confirmNewPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
       return res.status(400).json({ error: 'All fields are required' });
     }
     if (newPassword !== confirmNewPassword) {
@@ -608,9 +616,9 @@ app.put('/api/auth/change-password', authLimiter, authGuard('change-password'), 
     if (newPassword.length < 8) {
       return res.status(400).json({ error: 'New password must be at least 8 characters' });
     }
-    var user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    var user = await findSessionUser(req, true);
     if (!user) {
-      return res.status(404).json({ error: 'Account not found' });
+      return res.status(401).json({ error: 'You must be logged in to change your password.' });
     }
     var isMatch = await user.comparePassword(currentPassword);
     if (!isMatch) {
@@ -627,13 +635,13 @@ app.put('/api/auth/change-password', authLimiter, authGuard('change-password'), 
 
 app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async (req, res) => {
   try {
-    var { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    var { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' });
     }
-    var user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    var user = await findSessionUser(req, true);
     if (!user) {
-      return res.status(404).json({ error: 'Account not found' });
+      return res.status(401).json({ error: 'You must be logged in to deactivate your account.' });
     }
     var isMatch = await user.comparePassword(password);
     if (!isMatch) {

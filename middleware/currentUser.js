@@ -1,17 +1,21 @@
 /**
- * currentUser.js — Middleware to identify the currently active user for API requests.
- * Uses server-side session (req.session.userId) when available.
- * Falls back to x-user-id header for guest users.
+ * currentUser.js - Identifies the active user for store requests.
+ *
+ * The authoritative identity is the server-side session set at login. When no
+ * session exists, the caller is treated as a guest. The per-browser guest id is
+ * only accepted when it matches the guest id format issued by the client, so a
+ * caller can never claim to be a registered account by sending an id directly.
  */
 
+const GUEST_ID_PATTERN = /^guest_[a-z0-9]+$/;
+
 module.exports = function currentUser(req, res, next) {
-  // Prefer server-side session (set on login)
   if (req.session && req.session.userId) {
     req.userId = String(req.session.userId).trim();
     return next();
   }
-  // Fallback to header for guest users
-  const userId = req.header('x-user-id') || req.query.userId || 'guest-user';
-  req.userId = String(userId).trim();
+
+  const claimed = String(req.header('x-user-id') || req.query.userId || '').trim();
+  req.userId = GUEST_ID_PATTERN.test(claimed) ? claimed : 'guest-user';
   next();
 };

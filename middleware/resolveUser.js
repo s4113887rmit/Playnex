@@ -3,17 +3,18 @@ const User = require('../models/User');
 const memoryUsers = require('../models/memoryUsers');
 
 /**
- * Resolve the currently authenticated user.
- * Prefers the server-side session set on login, then falls back to the
- * x-user-id / body userId used by guest flows in the A2 prototype.
- * Returns null for guests, locked, or deactivated accounts.
+ * Resolve the authenticated user for ownership and role checks.
+ *
+ * Identity comes from the server-side session only. Client-supplied values such
+ * as an x-user-id header or a userId body field are never trusted here, because
+ * accepting them would let any caller act as another account, including an
+ * administrator. Returns null for guests, locked, or deactivated accounts.
  */
 async function resolveCurrentUser(req) {
-  const userId =
-    (req.session && req.session.userId) ||
-    (req.body && req.body.userId) ||
-    req.userId ||
-    '';
+  const sessionId = req.session && req.session.userId;
+  if (!sessionId) return null;
+
+  const userId = String(sessionId).trim();
   if (!userId || userId === 'guest-user') return null;
 
   const mem = memoryUsers.findMemoryUser((u) => u.id === userId);
