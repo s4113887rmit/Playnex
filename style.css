@@ -3797,9 +3797,14 @@ a {
   flex: 1;
 }
 .searchbar--full {
-  width: 100%;
-  max-width: 900px;
+  max-width: 1400px;
   margin: 0 auto 16px auto;
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+.searchbar--full input {
+  max-width: none;
+  flex: 1;
 }
 .searchbar input {
   flex: 1;
