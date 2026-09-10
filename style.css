@@ -1228,12 +1228,16 @@ img {
 
 .card__body {
   padding: 14px 14px 16px;
+  min-width: 0;
 }
 
 .card__title {
   font-size: 14px;
   font-weight: 600;
   margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .card__meta {
