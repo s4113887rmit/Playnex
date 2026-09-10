@@ -63,8 +63,15 @@
     logoutBtn.textContent = 'Log out';
     logoutBtn.addEventListener('click', function (e) {
       e.preventDefault();
-      localStorage.removeItem('playnex_user');
-      window.location.href = 'Login.html';
+      fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
+        .then(function () {
+          localStorage.removeItem('playnex_user');
+          window.location.href = 'Login.html';
+        })
+        .catch(function () {
+          localStorage.removeItem('playnex_user');
+          window.location.href = 'Login.html';
+        });
     });
 
     wrapper.insertBefore(logoutBtn, wrapper.firstElementChild);

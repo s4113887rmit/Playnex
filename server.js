@@ -3,6 +3,7 @@ try { require('dns').setServers(['8.8.8.8', '8.8.4.4']); } catch (e) {}
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const session = require('express-session');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
@@ -20,6 +21,18 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname)));
+
+// Session middleware
+const sessionSecret = process.env.SESSION_SECRET || 'playnex-session-secret-' + Date.now();
+app.use(session({
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
 
 // Current User middleware
 const currentUser = require('./middleware/currentUser');
@@ -139,6 +152,8 @@ function handleMemoryAuth(req, res, route) {
     if (!user.isActive) return res.status(403).json({ error: 'This account has been deactivated.' });
     bcrypt.compare(password || '', user.password).then((isMatch) => {
       if (!isMatch) return res.status(401).json({ error: 'Invalid email or password.' });
+      // Create server-side session
+      req.session.userId = user.id;
       res.json({
         message: 'Logged in successfully',
         user: {
@@ -398,6 +413,9 @@ app.post('/api/auth/login', authLimiter, authGuard('login'), async (req, res) =>
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
+    // Create server-side session
+    req.session.userId = String(user._id);
+
     res.status(200).json({
       message: 'Logged in successfully',
       user: { id: user._id, username: user.username, email: user.email, name: user.name, role: user.role }
@@ -406,6 +424,14 @@ app.post('/api/auth/login', authLimiter, authGuard('login'), async (req, res) =>
     console.error('Login error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) return res.status(500).json({ error: 'Failed to log out.' });
+    res.clearCookie('connect.sid');
+    res.json({ message: 'Logged out successfully.' });
+  });
 });
 
 app.post('/api/auth/forgot-password', authLimiter, authGuard('forgot-password'), async (req, res) => {
@@ -628,6 +654,8 @@ app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async 
     user.isActive = false;
     user.email = user.email + '_deactivated_' + Date.now();
     await user.save({ validateBeforeSave: false });
+    // Destroy session on account deletion
+    req.session.destroy(() => {});
     res.status(200).json({ message: 'Your account has been deactivated. We are sorry to see you go.' });
   } catch (err) {
     console.error('Account deletion error:', err);

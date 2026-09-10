@@ -17,7 +17,8 @@
 
     const config = {
       ...options,
-      headers
+      headers,
+      credentials: 'same-origin'
     };
 
     if (options.body && typeof options.body === 'object') {
