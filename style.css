@@ -3796,13 +3796,13 @@ a {
   gap: 8px;
   flex: 1;
 }
-.searchbar--full {
+.blog-toolbar--full {
   max-width: 1400px;
-  margin: 0 auto 16px auto;
+  margin: 0 auto 28px auto;
   padding: 0 40px;
   box-sizing: border-box;
 }
-.searchbar--full input {
+.blog-toolbar--full .searchbar input {
   max-width: none;
   flex: 1;
 }

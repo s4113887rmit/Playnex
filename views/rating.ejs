@@ -26,13 +26,13 @@
   <div class="page-header"><h1>Game Reviews</h1></div>
 
   <div class="wrap">
-    <form class="searchbar searchbar--full" role="search">
-      <label for="search" class="visually-hidden">Search games</label>
-      <input type="text" name="search" id="search" placeholder="Search games..."
-             value="<%= search %>" autocomplete="off">
-    </form>
+    <div class="blog-toolbar rating-toolbar blog-toolbar--full">
+      <form class="searchbar" role="search">
+        <label for="search" class="visually-hidden">Search games</label>
+        <input type="text" name="search" id="search" placeholder="Search games..."
+               value="<%= search %>" autocomplete="off">
+      </form>
 
-    <div class="blog-toolbar rating-toolbar">
       <div class="blog-toolbar__right">
         <select id="sortSelect" class="sort-select" aria-label="Sort games">
           <option value="">Sort</option>
