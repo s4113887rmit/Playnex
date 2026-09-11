@@ -38,8 +38,23 @@
     if (typeof path === 'string') {
       if (path.startsWith('/api/cart') && data && data.itemCount !== undefined) {
         updateCartBadge(data.itemCount);
+        // An add (POST) is what deserves the blink; GET refreshes stay quiet.
+        if ((options.method || 'GET').toUpperCase() === 'POST' && path !== '/api/cart/promo') {
+          blinkCartIcon();
+        }
       } else if (path.includes('/api/checkout') && options.method === 'POST') {
         updateCartBadge(0);
+      }
+
+      // Keep the wishlist heart count in step with the cart count: any
+      // wishlist mutation refreshments the number from the server response.
+      const method = (options.method || 'GET').toUpperCase();
+      if (path.startsWith('/api/wishlist') && method !== 'GET') {
+        if (data && data.itemCount !== undefined) {
+          updateWishlistBadge(data.itemCount);
+        } else {
+          syncWishlistBadge();
+        }
       }
     }
 
@@ -57,14 +72,32 @@
     return false;
   }
 
+  // Restart a blink animation on an icon, forcing a reflow so a second
+  // consecutive add re-triggers it instead of being ignored.
+  function blinkIcon(selector, className) {
+    document.querySelectorAll(selector).forEach((icon) => {
+      icon.classList.remove(className);
+      void icon.offsetWidth;
+      icon.classList.add(className);
+      icon.addEventListener('animationend', () => icon.classList.remove(className), { once: true });
+    });
+  }
+
   // Blink every wishlist navigation icon after an item is added.
   function blinkWishlistIcon() {
-    document.querySelectorAll('a.icon-btn[href="wishlist.html"], a.icon-btn[href*="wishlist.html"], a.icon-btn[aria-label*="Wishlist"]').forEach((icon) => {
-      icon.classList.remove('wishlist-nav--blink');
-      void icon.offsetWidth;
-      icon.classList.add('wishlist-nav--blink');
-      icon.addEventListener('animationend', () => icon.classList.remove('wishlist-nav--blink'), { once: true });
-    });
+    blinkIcon(
+      'a.icon-btn[href="wishlist.html"], a.icon-btn[href*="wishlist.html"], a.icon-btn[aria-label*="Wishlist"]',
+      'wishlist-nav--blink'
+    );
+  }
+
+  // Blink every cart navigation icon after an item is added, mirroring the
+  // wishlist heart so both header icons react to a successful add.
+  function blinkCartIcon() {
+    blinkIcon(
+      'a.icon-btn[href="cart.html"], a.icon-btn[href*="cart.html"], a.icon-btn[aria-label*="Cart"]',
+      'cart-nav--blink'
+    );
   }
 
   // Update topbar cart icon badge count
@@ -95,6 +128,45 @@
       updateCartBadge(count);
     } catch {
       updateCartBadge(0);
+    }
+  }
+
+  // Update topbar wishlist heart badge count (mirrors the cart behaviour)
+  function updateWishlistBadge(count) {
+    const totalCount = Number(count) || 0;
+    const wishlistIcons = document.querySelectorAll('a.icon-btn[href="wishlist.html"], a.icon-btn[href*="wishlist.html"], a.icon-btn[aria-label*="Wishlist"]');
+    wishlistIcons.forEach((wishlistIcon) => {
+      let badge = wishlistIcon.querySelector('.nav-count');
+      if (totalCount > 0) {
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'nav-count nav-count--wishlist';
+          wishlistIcon.appendChild(badge);
+        }
+        const nextText = totalCount > 99 ? '99+' : String(totalCount);
+        // Bump the badge only when the number actually changes, so a plain
+        // focus/pageshow refresh does not make the heart jump for no reason.
+        if (badge.textContent !== nextText) {
+          badge.textContent = nextText;
+          badge.classList.remove('nav-count--bump');
+          void badge.offsetWidth;
+          badge.classList.add('nav-count--bump');
+        }
+        wishlistIcon.setAttribute('aria-label', `Wishlist, ${totalCount} item${totalCount === 1 ? '' : 's'}`);
+      } else {
+        if (badge) badge.remove();
+        wishlistIcon.setAttribute('aria-label', 'Wishlist');
+      }
+    });
+  }
+
+  async function syncWishlistBadge() {
+    try {
+      const data = await api('/api/wishlist');
+      const count = data.itemCount !== undefined ? data.itemCount : (data.items || []).length;
+      updateWishlistBadge(count);
+    } catch {
+      updateWishlistBadge(0);
     }
   }
 
@@ -144,8 +216,11 @@
   window.Playnex.showToast = showToast;
   window.Playnex.requireLogin = requireLogin;
   window.Playnex.updateCartBadge = updateCartBadge;
+  window.Playnex.updateWishlistBadge = updateWishlistBadge;
   window.Playnex.blinkWishlistIcon = blinkWishlistIcon;
+  window.Playnex.blinkCartIcon = blinkCartIcon;
   window.Playnex.syncCartBadge = syncCartBadge;
+  window.Playnex.syncWishlistBadge = syncWishlistBadge;
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', syncCartBadge);
@@ -154,4 +229,24 @@
   }
   window.addEventListener('pageshow', syncCartBadge);
   window.addEventListener('focus', syncCartBadge);
+
+  // Only reflect the wishlist count for a signed-in user; guests have no list.
+  function syncWishlistBadgeIfLoggedIn() {
+    const user = (window.Playnex && typeof window.Playnex.getCurrentUser === 'function')
+      ? window.Playnex.getCurrentUser()
+      : null;
+    if (!user) {
+      updateWishlistBadge(0);
+      return;
+    }
+    syncWishlistBadge();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncWishlistBadgeIfLoggedIn);
+  } else {
+    syncWishlistBadgeIfLoggedIn();
+  }
+  window.addEventListener('pageshow', syncWishlistBadgeIfLoggedIn);
+  window.addEventListener('focus', syncWishlistBadgeIfLoggedIn);
 })();

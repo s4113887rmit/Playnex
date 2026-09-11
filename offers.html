@@ -1,0 +1,153 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grand opening offer — Playnex</title>
+<meta name="description" content="Playnex grand opening: get a 50% discount voucher for every game with the code Welcome2Playnex.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="/logo.png">
+</head>
+<body>
+<a class="skip-to-content" href="#main-content">Skip to main content</a>
+
+<!-- ============ SITE HEADER: logo, primary nav, search, account/cart icons ============ -->
+<header class="topbar">
+ <div class="topbar__inner">
+    <a href="homepage.html" class="logo">
+      <img src="logo.png" alt="Playnex" class="logo__img">
+    </a>
+
+    <nav class="primary-nav">
+      <a href="homepage.html" class="primary-nav__link">Home</a>
+      <a href="shopping.html" class="primary-nav__link">Shopping</a>
+      <a href="wishlist.html" class="primary-nav__link">Wishlist</a>
+      <div class="primary-nav__dropdown">
+        <a href="forum.html" class="primary-nav__link">Community</a>
+        <div class="primary-nav__menu">
+          <a href="forum.html" class="primary-nav__sub">Forum</a>
+          <a href="/rating" class="primary-nav__sub">Reviews</a>
+          <a href="/blog" class="primary-nav__sub">Blog</a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="topbar__actions">
+      <form class="search" role="search" action="shopping.html" method="get">
+        <label for="site-search" class="visually-hidden">Search games, merch, tags</label>
+        <svg viewBox="0 0 24 24" class="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.6" y2="16.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="site-search" name="q" type="search" placeholder="Search games, merch, tags">
+        <button type="submit" class="visually-hidden">Search</button>
+      </form>
+
+      <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 14.9 3 8.9C3 5.9 5.4 3.5 8.4 3.5c1.7 0 3.3.8 4.3 2.1a5.3 5.3 0 0 1 4.3-2.1C20 3.5 21.5 5.9 21.5 8.9c0 6-9.5 11.6-9.5 11.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="cart.html" class="icon-btn" aria-label="Cart">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
+      </a>
+
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
+    </div>
+ </div>
+</header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+ <a href="homepage.html">Home</a><span>/</span>
+ <span aria-current="page">Grand opening offer</span>
+</nav>
+
+<!-- ============ MAIN CONTENT: launch voucher offer ============ -->
+<main id="main-content" class="offer-page">
+
+ <section class="offer-hero">
+    <span class="eyebrow">Grand opening</span>
+    <h1 class="offer-hero__title">Playnex is now open — enjoy 50% off every game</h1>
+    <p class="offer-hero__lead">
+      Welcome to Playnex! To celebrate our website launch, we are handing out a
+      <strong>50% discount voucher</strong> that works on <strong>every game</strong> in the store.
+      Copy the voucher below and paste it into the <em>Voucher</em> box on your cart before you check out.
+    </p>
+ </section>
+
+ <section class="offer-voucher" aria-labelledby="offer-voucher-heading">
+    <h2 id="offer-voucher-heading" class="offer-voucher__heading">Your launch voucher</h2>
+
+    <div class="voucher-card">
+      <div class="voucher-card__stub">
+        <span class="voucher-card__amount">-50%</span>
+        <span class="voucher-card__label">Every game</span>
+      </div>
+      <div class="voucher-card__body">
+        <p class="voucher-card__caption">Voucher code</p>
+        <p class="voucher-card__code" id="voucher-code" data-code="Welcome2Playnex">Welcome2Playnex</p>
+        <button type="button" class="btn btn--primary btn--large voucher-card__copy" id="copy-voucher-btn">Copy voucher</button>
+        <p class="voucher-card__status" id="voucher-copy-status" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <ol class="offer-steps">
+      <li><span class="offer-steps__num">1</span> Press <strong>Copy voucher</strong> — the code <code>Welcome2Playnex</code> is written to your clipboard.</li>
+      <li><span class="offer-steps__num">2</span> Add the games you want to your <a href="shopping.html">cart</a>.</li>
+      <li><span class="offer-steps__num">3</span> On the <a href="cart.html">cart page</a>, paste the code into the <strong>Voucher</strong> field and press <strong>Apply</strong>.</li>
+      <li><span class="offer-steps__num">4</span> Your order summary immediately drops by 50% of the eligible items.</li>
+    </ol>
+ </section>
+
+ <section class="offer-terms" aria-labelledby="offer-terms-heading">
+    <h2 id="offer-terms-heading">Offer terms</h2>
+    <ul class="offer-terms__list">
+      <li>Valid on <strong>all paid games</strong> — digital and physical — in the Playnex store.</li>
+      <li><strong>Not valid on free games.</strong> Games that are free this week already cost $0.00, so applying the voucher to a cart that contains only free games is rejected with an error.</li>
+      <li>One voucher per order; the discount is applied to the subtotal before tax.</li>
+      <li>Available during the launch week, while the promotion lasts.</li>
+    </ul>
+
+    <div class="offer-cta">
+      <a href="shopping.html" class="btn btn--primary btn--large">Browse all games</a>
+      <a href="shopping.html?cat=sale" class="btn btn--outline btn--large">See what's on sale</a>
+      <a href="shopping.html?cat=free" class="btn btn--outline btn--large">Free this week</a>
+    </div>
+ </section>
+
+</main>
+
+<!-- ============ SITE FOOTER: sitemap-style link columns ============ -->
+<footer class="site-footer">
+ <div class="site-footer__inner">
+
+    <div class="site-footer__col">
+      <a href="homepage.html" class="logo logo--footer">
+        <img src="logo.png" alt="Playnex" class="logo__img">
+      </a>
+      <p class="site-footer__tagline">Digital games and physical merch, one store, one cart.</p>
+    </div>
+
+    <div class="site-footer__col">
+      <h3>Support</h3>
+      <a href="contact.html">Contact us</a>
+      <a href="/sitemap">Sitemap</a>
+    </div>
+
+    <div class="site-footer__col">
+      <h3>Company</h3>
+      <a href="terms.html">Terms of service</a>
+      <a href="privacy.html">Privacy policy</a>
+    </div>
+
+ </div>
+
+ <div class="site-footer__bottom">
+    <p>&copy; 2026 Playnex. All rights reserved.</p>
+ </div>
+</footer>
+<script src="public/js/current-user.js"></script>
+<script src="public/js/api.js"></script>
+<script src="public/js/header.js"></script>
+<script src="public/js/offers.js"></script>
+</body>
+</html>

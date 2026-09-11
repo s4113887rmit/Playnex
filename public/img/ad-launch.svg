@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hero advert: website grand-opening launch. Confetti, a gift box and a 50% tag. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800" role="img" aria-label="Playnex grand opening celebration">
+ <defs>
+    <linearGradient id="launchBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3a1206"/>
+      <stop offset="42%" stop-color="#1b0c1e"/>
+      <stop offset="100%" stop-color="#0a0a18"/>
+    </linearGradient>
+    <radialGradient id="launchGlow" cx="50%" cy="34%" r="52%">
+      <stop offset="0%" stop-color="#ff8500" stop-opacity="0.62"/>
+      <stop offset="55%" stop-color="#ff8500" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#ff8500" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="launchBox" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffb454"/>
+      <stop offset="100%" stop-color="#e5670a"/>
+    </linearGradient>
+    <linearGradient id="launchLid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffd166"/>
+      <stop offset="100%" stop-color="#ff9d2e"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff3d6"/>
+      <stop offset="100%" stop-color="#ffd166"/>
+    </linearGradient>
+    <linearGradient id="rayFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffc46b" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#ffc46b" stop-opacity="0"/>
+    </linearGradient>
+ </defs>
+
+ <rect width="600" height="800" fill="url(#launchBg)"/>
+ <rect width="600" height="800" fill="url(#launchGlow)"/>
+
+  <!-- Spotlight rays radiating from behind the gift -->
+ <g opacity="0.5">
+    <polygon points="300,430 120,0 190,0" fill="url(#rayFade)"/>
+    <polygon points="300,430 300,0 370,0" fill="url(#rayFade)"/>
+    <polygon points="300,430 430,0 500,0" fill="url(#rayFade)"/>
+    <polygon points="300,430 20,120 66,80" fill="url(#rayFade)"/>
+    <polygon points="300,430 534,80 580,120" fill="url(#rayFade)"/>
+ </g>
+
+  <!-- Confetti -->
+ <g>
+    <rect x="74" y="118" width="16" height="7" rx="3" fill="#ffd166" transform="rotate(-24 82 121)"/>
+    <rect x="486" y="96" width="18" height="7" rx="3" fill="#3ddc97" transform="rotate(32 495 99)"/>
+    <rect x="132" y="238" width="16" height="7" rx="3" fill="#ff8500" transform="rotate(48 140 241)"/>
+    <rect x="452" y="228" width="16" height="7" rx="3" fill="#7cc4ff" transform="rotate(-38 460 231)"/>
+    <rect x="92" y="392" width="16" height="7" rx="3" fill="#ff77c8" transform="rotate(16 100 395)"/>
+    <rect x="498" y="372" width="16" height="7" rx="3" fill="#ffd166" transform="rotate(-52 506 375)"/>
+    <rect x="176" y="78" width="14" height="6" rx="3" fill="#7cc4ff" transform="rotate(64 183 81)"/>
+    <rect x="392" y="150" width="14" height="6" rx="3" fill="#ff77c8" transform="rotate(-12 399 153)"/>
+    <circle cx="58" cy="286" r="5" fill="#ffd166"/>
+    <circle cx="536" cy="248" r="5" fill="#3ddc97"/>
+    <circle cx="212" cy="152" r="4" fill="#ff8500"/>
+    <circle cx="356" cy="92" r="4" fill="#7cc4ff"/>
+    <circle cx="528" cy="452" r="5" fill="#ff77c8"/>
+    <circle cx="64" cy="500" r="4" fill="#ffd166"/>
+ </g>
+
+  <!-- -50% badge -->
+ <g transform="translate(440 300) rotate(12)">
+    <circle r="72" fill="#ff8500" opacity="0.22"/>
+    <circle r="58" fill="#12122a" stroke="#ffd166" stroke-width="3"/>
+    <text x="0" y="6" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="bold" fill="#ffd166">-50%</text>
+    <text x="0" y="28" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="11" letter-spacing="2" fill="#ffb454">VOUCHER</text>
+ </g>
+
+  <!-- Gift box -->
+ <g transform="translate(232 452)">
+    <ellipse cx="0" cy="188" rx="126" ry="20" fill="#000" opacity="0.4"/>
+    <!-- box body -->
+    <rect x="-108" y="34" width="216" height="152" rx="10" fill="url(#launchBox)"/>
+    <rect x="-108" y="34" width="216" height="152" rx="10" fill="#000" opacity="0.18"/>
+    <!-- vertical ribbon -->
+    <rect x="-16" y="34" width="32" height="152" fill="url(#ribbon)"/>
+    <!-- lid -->
+    <rect x="-124" y="-22" width="248" height="62" rx="10" fill="url(#launchLid)"/>
+    <rect x="-16" y="-22" width="32" height="62" fill="url(#ribbon)"/>
+    <!-- bow -->
+    <path d="M-16 -22 C -70 -78 -128 -54 -104 -22 C -84 2 -34 -8 -16 -22 Z" fill="#ffe6a8"/>
+    <path d="M16 -22 C 70 -78 128 -54 104 -22 C 84 2 34 -8 16 -22 Z" fill="#ffe6a8"/>
+    <path d="M-16 -22 C -46 -96 46 -96 16 -22 Z" fill="#fff3d6"/>
+    <circle cx="0" cy="-30" r="14" fill="#ffd166"/>
+ </g>
+
+  <!-- Glitter specks around the box -->
+ <g fill="#ffe6a8" opacity="0.85">
+    <path d="M148 596 l4 12 12 4 -12 4 -4 12 -4 -12 -12 -4 12 -4 z"/>
+    <path d="M456 640 l4 12 12 4 -12 4 -4 12 -4 -12 -12 -4 12 -4 z"/>
+    <path d="M104 690 l3 9 9 3 -9 3 -3 9 -3 -9 -9 -3 9 -3 z"/>
+ </g>
+</svg>

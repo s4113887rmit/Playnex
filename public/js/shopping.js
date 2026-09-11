@@ -27,14 +27,57 @@
     return `$${Number(n).toFixed(2)}`;
   }
 
-  function cardHTML(p) {
-    const priceHTML = p.oldPrice
-      ? `<span class="card__price-old">${money(p.oldPrice)}</span><span class="card__price-now">${money(p.price)}</span>`
-      : `<span class="card__price-now">${money(p.price)}</span>`;
+  // Promotion state of a product:
+  //   'free'      — price is 0, part of the "Free this week" giveaway (gold + shimmer)
+  //   'discounted'— has a higher oldPrice, i.e. currently on sale (silver + shimmer)
+  //   'none'      — full price
+  function isFreeThisWeek(p) {
+    return Number(p.price) === 0;
+  }
 
-    const badge = p.badge && p.badge !== 'Physical'
-      ? `<span class="card__badge${p.badge === 'New' ? ' card__badge--new' : ''}">${p.badge}</span>`
-      : '';
+  function isDiscounted(p) {
+    return !isFreeThisWeek(p) && Number(p.oldPrice) > Number(p.price);
+  }
+
+  function promoState(p) {
+    if (isFreeThisWeek(p)) return 'free';
+    if (isDiscounted(p)) return 'discounted';
+    return 'none';
+  }
+
+  function discountPercent(p) {
+    const oldPrice = Number(p.oldPrice);
+    const price = Number(p.price);
+    if (!oldPrice || oldPrice <= price) return 0;
+    return Math.round(((oldPrice - price) / oldPrice) * 100);
+  }
+
+  function cardHTML(p) {
+    const state = promoState(p);
+    const isFree = state === 'free';
+    const isDeal = state === 'discounted';
+    const percent = discountPercent(p);
+
+    const priceHTML = isFree
+      ? `<span class="card__price-free">Free this week</span>`
+      : p.oldPrice
+        ? `<span class="card__price-old">${money(p.oldPrice)}</span><span class="card__price-now card__price-now--deal">${money(p.price)}</span>`
+        : `<span class="card__price-now">${money(p.price)}</span>`;
+
+    // A digital title the account already owns is withdrawn from sale: the
+    // server rejects the purchase, so the card says so instead of offering it.
+    const isOwned = !!p.owned;
+
+    let badge = '';
+    if (isOwned) {
+      badge = `<span class="card__badge card__badge--owned">Owned</span>`;
+    } else if (isFree) {
+      badge = `<span class="card__badge card__badge--free">Free this week</span>`;
+    } else if (isDeal) {
+      badge = `<span class="card__badge card__badge--deal">-${percent}%</span>`;
+    } else if (p.badge && p.badge !== 'Physical') {
+      badge = `<span class="card__badge${p.badge === 'New' ? ' card__badge--new' : ''}">${p.badge}</span>`;
+    }
 
     const imgTag = p.image
       ? `<img src="${p.image}" alt="${p.title} poster" loading="lazy">`
@@ -45,9 +88,13 @@
     const isDigital = p.category === 'digital' || p.type === 'Digital';
     const showAlreadyInCart = inCart && isDigital;
 
+    // Owned wins over "in cart": the game is not purchasable at all any more.
+    const addLabel = isOwned ? 'Already owned' : showAlreadyInCart ? 'Already in cart' : 'Add to cart';
+    const addDisabled = isOwned || showAlreadyInCart;
+
     return `
       <li>
-        <article class="card" data-id="${p.id}">
+        <article class="card${isOwned ? ' card--owned' : isFree ? ' card--free' : isDeal ? ' card--deal' : ''}" data-id="${p.id}">
           <div class="card__art ${p.art || 'card__art--1'}">
             <a href="${p.href || 'shopping.html'}" aria-label="View ${p.title} detail page">
               ${imgTag}
@@ -58,8 +105,8 @@
           <div class="card__body">
             <h3 class="card__title"><a href="${p.href || 'shopping.html'}">${p.title}</a></h3>
             <p class="card__meta">${p.genre} · ${p.platform}</p>
-            <div class="card__price">${priceHTML}</div>
-            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="${p.id}" ${showAlreadyInCart ? 'disabled' : ''}>${showAlreadyInCart ? 'Already in cart' : 'Add to cart'}</button>
+            <div class="card__price${isFree ? ' card__price--free' : isDeal ? ' card__price--deal' : ''}">${priceHTML}</div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="${p.id}" ${addDisabled ? 'disabled' : ''}>${addLabel}</button>
           </div>
         </article>
       </li>`;
@@ -100,8 +147,9 @@
       // Category filter
       if (activeCat === 'digital' && p.category !== 'digital') return false;
       if (activeCat === 'merch' && p.category !== 'physical') return false;
-      if (activeCat === 'deals' && (!p.oldPrice || p.oldPrice <= p.price)) return false;
-      if (activeCat === 'free' && p.price > 0) return false;
+      // "On sale": discounted items only — free giveaways live in their own tab
+      if ((activeCat === 'sale' || activeCat === 'deals') && !isDiscounted(p)) return false;
+      if (activeCat === 'free' && !isFreeThisWeek(p)) return false;
 
       // Search query
       if (query) {
@@ -242,7 +290,10 @@
       if (categoryTabs) {
         categoryTabs.forEach(tab => {
           const href = tab.getAttribute('href');
-          const isCatMatch = (cat && href.includes(`cat=${cat}`)) || (!cat && href === 'shopping.html');
+          // Treat the old ?cat=deals link as the renamed sale tab.
+          const tabCat = href.includes('cat=deals') ? 'deals' : (href.match(/cat=([^&]+)/) || [])[1];
+          const requested = cat === 'sale' ? 'sale' : cat;
+          const isCatMatch = (requested && tabCat === requested) || (!cat && href === 'shopping.html');
           tab.classList.toggle('is-active', isCatMatch);
         });
       }
@@ -380,6 +431,13 @@
     const addBtn = e.target.closest('[data-action="add-to-cart"]');
     if (addBtn) {
       if (!requireLogin()) return;
+      // Owned digital titles render as disabled; guard anyway so a stray click
+      // cannot start a request the server would only reject.
+      const product = allProducts.find(p => p.id === addBtn.dataset.id);
+      if (product && product.owned) {
+        showToast(`You already own ${product.title}. A digital game can only be purchased once per account.`, 'info');
+        return;
+      }
       const productId = addBtn.dataset.id;
       addBtn.disabled = true;
       const originalText = addBtn.textContent;

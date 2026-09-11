@@ -2,7 +2,18 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 const Game = require('../models/Game');
-const { getCart, saveOrder, getOrder, getAllOrders } = require('../data/store');
+const { getCart, saveOrder, getOrder, getAllOrders, getOwnedDigitalIds } = require('../data/store');
+const { resolveCurrentUser } = require('../middleware/resolveUser');
+
+// Single source of truth for promo codes, shared by checkout so a discount
+// shown in the cart is never dropped when the order is created.
+const PROMO_CODES = {
+  // Grand-opening launch voucher: 50% off every paid game (never free games).
+  WELCOME2PLAYNEX: 0.50,
+  PLAYNEX10: 0.10,
+  PLAYNEX20: 0.20,
+  FREESHIP: 0.05
+};
 
 async function findItem(productId) {
   let item = await Product.findOne({ id: productId }).lean();
@@ -108,7 +119,7 @@ router.post('/', async (req, res) => {
       if (!product) continue;
       items.push({
         productId: line.productId,
-        title: product.title,
+        title: product.title || product.name,
         price: product.price,
         qty: line.qty,
         variant: line.variant || product.variant,
@@ -122,11 +133,32 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'No valid products found in cart.' });
     }
 
+    // Final guard: a digital game can only be bought once per account. This is
+    // checked again here because the cart is the last chance to stop a duplicate
+    // purchase, and the cart itself may have been filled before ownership
+    // changed (e.g. the same title bought in another tab).
+    const ownedDigitalIds = await getOwnedDigitalIds(req.userId);
+    const duplicate = items.find(i => ownedDigitalIds.includes(String(i.productId)));
+    if (duplicate) {
+      return res.status(409).json({
+        error: `You already own ${duplicate.title}. A digital game can only be purchased once per account.`
+      });
+    }
+
     const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
     const hasPhysical = items.some(i => i.category === 'physical');
     const shipping = hasPhysical ? 6.00 : 0.00;
-    const tax = Number((subtotal * 0.083).toFixed(2));
-    const total = Number((subtotal + shipping + tax).toFixed(2));
+
+    // Re-validate the promo code server-side. The client only sends the code
+    // string; the discount percentage is always looked up here so the totals
+    // on the order match what the cart and checkout summary displayed.
+    const rawPromo = String(req.body.promoCode || '').trim().toUpperCase();
+    const promoPercent = PROMO_CODES[rawPromo] || 0;
+
+    const discount = Number((subtotal * promoPercent).toFixed(2));
+    const taxableAmount = Math.max(0, subtotal - discount);
+    const tax = Number((taxableAmount * 0.083).toFixed(2));
+    const total = Number((taxableAmount + shipping + tax).toFixed(2));
 
     const rawCard = String(req.body.payment.cardNumber).replace(/\s+/g, '');
     const last4 = rawCard.slice(-4);
@@ -137,6 +169,8 @@ router.post('/', async (req, res) => {
       subtotal: Number(subtotal.toFixed(2)),
       shipping: Number(shipping.toFixed(2)),
       tax,
+      discount,
+      promoCode: promoPercent > 0 ? rawPromo : '',
       total,
       shippingInfo: {
         firstName: req.body.delivery.fullName.split(' ')[0],
@@ -159,6 +193,7 @@ router.post('/', async (req, res) => {
 
     res.status(201).json({ message: 'Order created successfully!', order });
   } catch (err) {
+    console.error('Checkout error:', err);
     res.status(500).json({ error: 'Failed to process checkout.' });
   }
 });
@@ -168,7 +203,18 @@ router.get('/order/:id', async (req, res) => {
   try {
     const order = await getOrder(req.params.id);
     if (!order) return res.status(404).json({ error: 'Order not found.' });
-    if (order.userId && order.userId !== req.userId && req.userId !== 'admin') {
+
+    // Admin access is granted by the account role resolved from the server-side
+    // session, never by matching a hardcoded user id string.
+    let isAdmin = false;
+    try {
+      const user = await resolveCurrentUser(req);
+      isAdmin = !!user && String(user.role).toLowerCase() === 'admin';
+    } catch (err) {
+      isAdmin = false;
+    }
+
+    if (order.userId && order.userId !== req.userId && !isAdmin) {
       return res.status(403).json({ error: 'Permission denied.' });
     }
     res.json({ order });

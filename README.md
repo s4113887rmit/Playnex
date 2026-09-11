@@ -7,7 +7,7 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 | Full Name | Student ID | Module |
 |-----------|-----------|--------|
 | Ngo Gia Bao | S4186655 | Game Rating, Site Map |
-| Nguyen Ngoc Quang Dang | S4113887 | shopping, cart, homepage, wishlist, checkout, confirmation |
+| Nguyen Ngoc Quang Dang | S4113887 | shopping, cart, homepage, wishlist, checkout, confirmation, offer,listing |
 | Tran Binh An | S4206755 | Discussion Forums, Administration Page |
 | Nguyen Khanh Nguyen | S4197203 | Blogs, User Account |
 
@@ -24,16 +24,20 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 ### Nguyen Ngoc Quang Dang (S4113887)
 - `homepage.html` - Landing page with hero carousel, new releases, merch shelves
 - `shopping.html` - Product catalog with filters, sorting, pagination
-- `cart.html` - Shopping cart with quantity controls and order summary
+- `offers.html` - Grand-opening offer page with the 50% launch voucher, copy-to-clipboard steps and offer terms
+- `cart.html` - Shopping cart with quantity controls, voucher field and order summary
 - `checkout.html` - Delivery and payment form
 - `confirmation.html` - Order confirmation page
-- `wishlist.html` - Saved items with purchased/favorited sections
+- `wishlist.html` - Saved items with purchased/favorited sections and a clear-all action
 - `views/listing.ejs` - Game detail page (hero, facts, related games; mostly Dang, game review section by Bao)
 - `public/js/listing.js` - Add to cart / wishlist wiring for the listing page
-- `routes/products.js`, `routes/cart.js`, `routes/wishlist.js`, `routes/checkout.js` - Store APIs
+- `routes/products.js`, `routes/cart.js`, `routes/wishlist.js`, `routes/checkout.js` - Store APIs, including the once-per-account digital rule and server-side voucher validation
+- `models/Order.js` - MongoDB order schema with embedded line items, shipping and payment details, the discount/promoCode totals and the snapshotted line-item category
 - `data/products.js` - Product seed catalogue
-- `data/store.js` - MongoDB-backed cart, wishlist and order data store with item statistics
-- `public/js/homepage.js`, `shopping.js`, `cart.js`, `wishlist.js`, `checkout.js`, `confirmation.js` - Client scripts
+- `data/store.js` - MongoDB-backed cart, wishlist and order data store with item statistics and the owned-digital lookup
+- `public/js/homepage.js`, `shopping.js`, `cart.js`, `wishlist.js`, `checkout.js`, `confirmation.js`, `offers.js` - Client scripts
+- `public/img/ad-launch.svg`, `ad-sale.svg`, `ad-free.svg` - Offer and promotion artwork
+- `A3.1-Database-Diagrams/` - Assessment 3.1 database diagram set (ERD, relationships, embedding, module scope, indexes, live schema, purchase rules)
 - `style.css` - Global stylesheet (shared)
 
 ### Tran Binh An (S4206755)

@@ -18,114 +18,47 @@
   // ==========================================
   // HERO CAROUSEL DATA & STATE
   // ==========================================
-  const heroGames = [
+  // The hero stage now runs three advertising slides instead of games:
+  //   1. Website launch — 50% launch voucher (Welcome2Playnex)
+  //   2. Games currently on sale  -> shopping.html?cat=sale
+  //   3. Games currently free     -> shopping.html?cat=free
+  const heroSlides = [
     {
-      id: 'elden-ring',
-      title: 'Elden Ring',
-      genre: 'Action RPG',
-      platform: 'PC, Console',
-      price: 59.99,
-      oldPrice: null,
-      image: 'public/img/eldenringposter.jpg',
-      href: 'listing.html?game=elden-ring',
-      desc: 'The journey on becoming the Elden Lord. Venture through ruined kingdoms and conquer legendary bosses across the Lands Between.',
-      tags: ['RPG', 'Action', 'Open World', 'Souls-like']
+      id: 'launch-voucher',
+      kind: 'Launch offer',
+      title: 'Playnex is open — 50% off every game',
+      desc: 'To celebrate our grand opening, Playnex gives you a 50% discount voucher on every game in the store. Use voucher code Welcome2Playnex — the offer cannot be applied to games that are already free.',
+      cta: 'See the launch offer',
+      href: 'offers.html',
+      code: 'Welcome2Playnex',
+      badge: '-50%',
+      tags: ['Launch deal', '50% off', 'Every game'],
+      cssClass: 'hero-card--ad hero-card--launch',
+      image: 'public/img/ad-launch.svg'
     },
     {
-      id: 'cyberpunk-2077',
-      title: 'Cyberpunk 2077',
-      genre: 'Action RPG',
-      platform: 'PC',
-      price: 20.99,
-      oldPrice: 29.99,
-      image: 'public/img/cyberpunkposter.jpg',
-      href: 'listing.html?game=cyberpunk-2077',
-      desc: 'Step into the role of V, a mercenary outlaw going after a one-of-a-kind implant that is the key to immortality in Night City.',
-      tags: ['RPG', 'Action', 'Sci-Fi', 'Open World']
+      id: 'on-sale',
+      kind: 'On sale now',
+      title: 'Games on sale this week',
+      desc: 'Big price drops across PC and console titles. Browse everything currently discounted in the store and grab the lowest prices of the season.',
+      cta: 'Shop the sale',
+      href: 'shopping.html?cat=sale',
+      badge: 'SALE',
+      tags: ['Discounted', 'Limited time', 'PC & Console'],
+      cssClass: 'hero-card--ad hero-card--sale',
+      image: 'public/img/ad-sale.svg'
     },
     {
-      id: 'ghost-of-tsushima',
-      title: 'Ghost of Tsushima',
-      genre: 'Action Adventure',
-      platform: 'PC, Console',
-      price: 34.99,
-      oldPrice: null,
-      image: 'public/img/ghostposter.jpg',
-      href: 'listing.html?game=ghost-of-tsushima',
-      desc: 'An open-world samurai adventure set during the Mongol invasion of Japan in 1274. Master the katana and forge a new path as the Ghost.',
-      tags: ['Action', 'Adventure', 'Open World', 'Samurai']
-    },
-    {
-      id: 'red-dead-redemption-2',
-      title: 'Red Dead Redemption II',
-      genre: 'Action Adventure',
-      platform: 'PC',
-      price: 49.99,
-      oldPrice: null,
-      image: 'public/img/reddeadposter.jpg',
-      href: 'listing.html?game=red-dead-redemption-2',
-      desc: 'Arthur Morgan and the Van der Linde gang are outlaws on the run in the vast and rugged heartland of America.',
-      tags: ['Action', 'Adventure', 'Western', 'Open World']
-    },
-    {
-      id: 'hades',
-      title: 'Hades',
-      genre: 'Roguelike',
-      platform: 'PC, Console',
-      price: 27.99,
-      oldPrice: null,
-      image: 'public/img/hadesposter.png',
-      href: 'listing.html?game=hades',
-      desc: 'Defy the god of the dead as you hack and slash out of the Underworld in this god-like rogue-like dungeon crawler.',
-      tags: ['Roguelike', 'Action', 'Indie', 'Mythology']
-    },
-    {
-      id: 'hollow-knight',
-      title: 'Hollow Knight',
-      genre: 'Metroidvania',
-      platform: 'PC, Console',
-      price: 29.99,
-      oldPrice: null,
-      image: 'public/img/hollowposter.jpg',
-      href: 'listing.html?game=hollow-knight',
-      desc: 'Explore a vast interconnected subterranean world of insects and heroes. Unravel ancient mysteries and conquer forgotten evils.',
-      tags: ['Metroidvania', 'Action', '2D', 'Atmospheric']
-    },
-    {
-      id: 'nier-automata',
-      title: 'NieR Automata',
-      genre: 'Action RPG',
-      platform: 'PC, Console',
-      price: 39.99,
-      oldPrice: null,
-      image: 'public/img/nierposter.jpg',
-      href: 'listing.html?game=nier-automata',
-      desc: 'Humanity has been driven from the Earth by mechanical beings from another world. Android soldiers 2B and 9S fight to reclaim it.',
-      tags: ['Action', 'RPG', 'Sci-Fi', 'Hack and Slash']
-    },
-    {
-      id: 'death-standing',
-      title: 'Death Stranding',
-      genre: 'Action',
-      platform: 'PC, Console',
-      price: 24.99,
-      oldPrice: null,
-      image: 'public/img/deathstandposter.jpg',
-      href: 'listing.html?game=death-standing',
-      desc: 'Sam Bridges must brave a world utterly transformed by the Death Stranding to reconnect the isolated cities of a fractured nation.',
-      tags: ['Action', 'Adventure', 'Sci-Fi', 'Open World']
-    },
-    {
-      id: 'witcher-3',
-      title: 'The Witcher 3: Wild Hunt',
-      genre: 'Action RPG',
-      platform: 'PC, Console',
-      price: 39.99,
-      oldPrice: null,
-      image: 'public/img/witcherposter.jpg',
-      href: 'listing.html?game=the-witcher-3',
-      desc: 'Track down the Child of Prophecy in a monster-infested world as Geralt of Rivia in this epic fantasy open-world RPG.',
-      tags: ['RPG', 'Action', 'Open World', 'Dark Fantasy']
+      id: 'free-week',
+      kind: 'Free this week',
+      title: 'Free games to claim',
+      desc: 'Free titles you can add to your library at no cost. Claim them while the giveaway lasts — voucher discounts do not apply to free games.',
+      cta: 'Claim free games',
+      href: 'shopping.html?cat=free',
+      badge: 'FREE',
+      tags: ['Free giveaway', 'No cost', 'Claim now'],
+      cssClass: 'hero-card--ad hero-card--free',
+      image: 'public/img/ad-free.svg'
     }
   ];
 
@@ -139,10 +72,19 @@
   function initHeroCarousel() {
     if (!heroStage) return;
 
-    heroStage.innerHTML = heroGames.map((game, idx) => `
-      <a href="${game.href}" class="hero-card" data-index="${idx}" data-id="${game.id}" aria-label="View ${game.title}">
+    heroStage.innerHTML = heroSlides.map((slide, idx) => `
+      <a href="${slide.href}" class="hero-card ${slide.cssClass}" data-index="${idx}" data-id="${slide.id}" aria-label="${slide.title}">
         <div class="hero-card__art">
-          <img src="${game.image}" alt="${game.title} poster" class="hero-card__img" loading="eager">
+          <img src="${slide.image}" alt="" class="hero-card__img" loading="eager">
+          <div class="hero-card__ad-overlay"></div>
+          <div class="hero-card__ad-body">
+            <span class="hero-card__ad-kind">${slide.kind}</span>
+            <span class="hero-card__ad-title">${slide.title}</span>
+            ${slide.code
+              ? `<span class="hero-card__ad-code">${slide.code}</span>`
+              : (slide.badge ? `<span class="hero-card__ad-badge">${slide.badge}</span>` : '')}
+            <span class="hero-card__ad-cta">${slide.cta} &rarr;</span>
+          </div>
         </div>
       </a>
     `).join('');
@@ -161,8 +103,8 @@
     }
 
     if (heroDotsContainer) {
-      heroDotsContainer.innerHTML = heroGames.map((game, idx) => `
-        <button type="button" class="hero__dot${idx === 0 ? ' is-active' : ''}" data-index="${idx}" role="tab" aria-label="Go to slide ${idx + 1}: ${game.title}" aria-selected="${idx === 0 ? 'true' : 'false'}"></button>
+      heroDotsContainer.innerHTML = heroSlides.map((slide, idx) => `
+        <button type="button" class="hero__dot${idx === 0 ? ' is-active' : ''}" data-index="${idx}" role="tab" aria-label="Go to slide ${idx + 1}: ${slide.title}" aria-selected="${idx === 0 ? 'true' : 'false'}"></button>
       `).join('');
 
       heroDotElements = Array.from(heroDotsContainer.querySelectorAll('.hero__dot'));
@@ -244,8 +186,8 @@
   function updateHeroCarousel(index, animate = true) {
     if (!heroCardElements.length) return;
 
-    currentHeroIndex = (index + heroGames.length) % heroGames.length;
-    const total = heroGames.length;
+    currentHeroIndex = (index + heroSlides.length) % heroSlides.length;
+    const total = heroSlides.length;
     const prevIdx = (currentHeroIndex - 1 + total) % total;
     const nextIdx = (currentHeroIndex + 1) % total;
 
@@ -281,84 +223,62 @@
       dot.setAttribute('aria-selected', isActive ? 'true' : 'false');
     });
 
-    const activeGame = heroGames[currentHeroIndex];
+    const activeSlide = heroSlides[currentHeroIndex];
     const heroContent = document.getElementById('hero-content');
 
     if (heroContent && animate) {
       heroContent.classList.add('is-changing');
       setTimeout(() => {
-        renderHeroInfo(activeGame);
+        renderHeroInfo(activeSlide);
         heroContent.classList.remove('is-changing');
         refreshCart();
         refreshWishlist();
       }, 140);
     } else if (heroContent) {
-      renderHeroInfo(activeGame);
+      renderHeroInfo(activeSlide);
       refreshCart();
       refreshWishlist();
     }
   }
 
-  function renderHeroInfo(game) {
+  // Renders the text column beside the hero carousel for the active advert.
+  // The carousel no longer features individual games, so the per-game meta,
+  // wishlist and add-to-cart controls are hidden and the primary button becomes
+  // a single call-to-action that leads to the advertised destination.
+  function renderHeroInfo(slide) {
+    const eyebrowEl = document.getElementById('hero-eyebrow');
     const titleEl = document.getElementById('hero-title');
     const descEl = document.getElementById('hero-desc');
-    const genreEl = document.getElementById('hero-genre');
-    const platformEl = document.getElementById('hero-platform');
+    const metaEl = document.getElementById('hero-meta');
     const tagsEl = document.getElementById('hero-tags');
     const buyBtn = document.getElementById('hero-buy-btn');
     const wishBtn = document.getElementById('hero-wishlist-btn');
-    let cartBtn = document.getElementById('hero-cart-btn');
+    const cartBtn = document.getElementById('hero-cart-btn');
 
-    if (titleEl) titleEl.textContent = game.title;
-    if (descEl) descEl.textContent = game.desc;
-    if (genreEl) genreEl.textContent = game.genre;
-    if (platformEl) platformEl.textContent = game.platform;
+    if (eyebrowEl) eyebrowEl.textContent = slide.kind;
+    if (titleEl) titleEl.textContent = slide.title;
+    if (descEl) descEl.textContent = slide.desc;
 
-    if (tagsEl && game.tags) {
-      tagsEl.innerHTML = game.tags.map(tag => {
-        const slug = tag.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        return `<li><a href="shopping.html?genre=${slug}" class="hero__tag" title="Filter by ${tag}">${tag}</a></li>`;
-      }).join('');
+    if (metaEl) metaEl.style.display = 'none';
+    if (cartBtn) cartBtn.style.display = 'none';
+    if (wishBtn) wishBtn.style.display = 'none';
+
+    if (tagsEl) {
+      tagsEl.innerHTML = (slide.tags || [])
+        .map(tag => `<li><span class="hero__tag">${tag}</span></li>`)
+        .join('');
     }
 
     if (buyBtn) {
-      const priceText = `Buy now — $${Number(game.price).toFixed(2)}`;
-      buyBtn.textContent = priceText;
-      buyBtn.href = game.href || `listing.html?game=${game.id}`;
-    }
-
-    if (!cartBtn) {
-      const heroActions = document.querySelector('.hero__actions');
-      if (heroActions) {
-        cartBtn = document.createElement('button');
-        cartBtn.type = 'button';
-        cartBtn.id = 'hero-cart-btn';
-        cartBtn.className = 'btn btn--outline btn--large';
-        cartBtn.setAttribute('data-action', 'add-to-cart');
-        cartBtn.textContent = 'Add to cart';
-        if (wishBtn) {
-          heroActions.insertBefore(cartBtn, wishBtn);
-        } else {
-          heroActions.appendChild(cartBtn);
-        }
-      }
-    }
-
-    if (cartBtn) {
-      cartBtn.dataset.id = game.id;
-    }
-
-    if (wishBtn) {
-      wishBtn.dataset.id = game.id;
-      const isSaved = wishlistIds.has(game.id);
-      wishBtn.classList.toggle('is-saved', isSaved);
-      wishBtn.textContent = isSaved ? 'Saved in wishlist' : 'Add to wishlist';
+      buyBtn.textContent = slide.cta;
+      buyBtn.href = slide.href;
     }
   }
 
   function startHeroTimer() {
     stopHeroTimer();
     if (heroPaused) return;
+    // Each advert slide holds for 3s before the carousel advances.
     heroTimer = setInterval(() => {
       updateHeroCarousel(currentHeroIndex + 1, true);
     }, 3000);
@@ -375,21 +295,52 @@
     if (!btn) return;
     btn.textContent = heroPaused ? 'Play' : 'Pause';
     btn.setAttribute('aria-pressed', heroPaused ? 'true' : 'false');
-    btn.setAttribute('aria-label', heroPaused ? 'Play featured games carousel' : 'Pause featured games carousel');
+    btn.setAttribute('aria-label', heroPaused ? 'Play featured offers carousel' : 'Pause featured offers carousel');
   }
 
   function money(n) {
     return `$${Number(n).toFixed(2)}`;
   }
 
-  function cardHTML(p) {
-    const priceHTML = p.oldPrice
-      ? `<span class="card__price-old">${money(p.oldPrice)}</span><span class="card__price-now">${money(p.price)}</span>`
-      : `<span class="card__price-now">${money(p.price)}</span>`;
+  // Promotion state — mirrors shopping.js so both pages highlight promos the
+  // same way: gold for free giveaways, silver for discounted (on sale) games.
+  function isFreeThisWeek(p) {
+    return Number(p.price) === 0;
+  }
 
-    const badge = p.badge && p.badge !== 'Physical'
-      ? `<span class="card__badge${p.badge === 'New' ? ' card__badge--new' : ''}">${p.badge}</span>`
-      : '';
+  function isDiscounted(p) {
+    return !isFreeThisWeek(p) && Number(p.oldPrice) > Number(p.price);
+  }
+
+  function discountPercent(p) {
+    const oldPrice = Number(p.oldPrice);
+    const price = Number(p.price);
+    if (!oldPrice || oldPrice <= price) return 0;
+    return Math.round(((oldPrice - price) / oldPrice) * 100);
+  }
+
+  function cardHTML(p) {
+    const isFree = isFreeThisWeek(p);
+    const isDeal = isDiscounted(p);
+    // Digital titles already owned by this account are no longer purchasable.
+    const isOwned = !!p.owned;
+
+    const priceHTML = isFree
+      ? `<span class="card__price-free">Free this week</span>`
+      : p.oldPrice
+        ? `<span class="card__price-old">${money(p.oldPrice)}</span><span class="card__price-now card__price-now--deal">${money(p.price)}</span>`
+        : `<span class="card__price-now">${money(p.price)}</span>`;
+
+    let badge = '';
+    if (isOwned) {
+      badge = `<span class="card__badge card__badge--owned">Owned</span>`;
+    } else if (isFree) {
+      badge = `<span class="card__badge card__badge--free">Free this week</span>`;
+    } else if (isDeal) {
+      badge = `<span class="card__badge card__badge--deal">-${discountPercent(p)}%</span>`;
+    } else if (p.badge && p.badge !== 'Physical') {
+      badge = `<span class="card__badge${p.badge === 'New' ? ' card__badge--new' : ''}">${p.badge}</span>`;
+    }
 
     const imgTag = p.image
       ? `<img src="${p.image}" alt="${p.title} poster" loading="lazy">`
@@ -399,7 +350,7 @@
 
     return `
       <li>
-        <article class="card" data-id="${p.id}">
+        <article class="card${isOwned ? ' card--owned' : isFree ? ' card--free' : isDeal ? ' card--deal' : ''}" data-id="${p.id}">
           <div class="card__art ${p.art || 'card__art--1'}">
             <a href="${p.href || 'shopping.html'}" aria-label="View ${p.title} details">
               ${imgTag}
@@ -410,8 +361,8 @@
           <div class="card__body">
             <h3 class="card__title"><a href="${p.href || 'shopping.html'}">${p.title}</a></h3>
             <p class="card__meta">${p.genre} · ${p.platform}</p>
-            <div class="card__price">${priceHTML}</div>
-            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="${p.id}">Add to cart</button>
+            <div class="card__price${isFree ? ' card__price--free' : isDeal ? ' card__price--deal' : ''}">${priceHTML}</div>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="${p.id}" ${isOwned ? 'disabled' : ''}>${isOwned ? 'Already owned' : 'Add to cart'}</button>
           </div>
         </article>
       </li>`;
@@ -519,21 +470,10 @@
           }
         }
       });
+      // The hero carousel now shows adverts rather than games, so the stage's
+      // cart button is hidden and only shelf/card buttons are synced above.
       const heroCartBtn = document.getElementById('hero-cart-btn');
-      if (heroCartBtn && heroCartBtn.dataset.id && cartIds.has(heroCartBtn.dataset.id)) {
-        const heroGame = heroGames[currentHeroIndex];
-        const product = allProducts.find(p => p.id === heroCartBtn.dataset.id);
-        const isDigital = product
-          ? (product.category === 'digital' || product.type === 'Digital')
-          : (heroGame && heroGame.id && !heroGame.id.includes('physical'));
-        if (isDigital) {
-          heroCartBtn.textContent = 'Already in cart';
-          heroCartBtn.disabled = true;
-        }
-      } else if (heroCartBtn) {
-        heroCartBtn.textContent = 'Add to cart';
-        heroCartBtn.disabled = false;
-      }
+      if (heroCartBtn) heroCartBtn.style.display = 'none';
     } catch {}
   }
 
@@ -577,6 +517,12 @@
     const addBtn = e.target.closest('[data-action="add-to-cart"]');
     if (addBtn) {
       if (!requireLogin()) return;
+      // Owned digital titles are rendered disabled; guard the click as well.
+      const ownedProduct = allProducts.find(p => p.id === addBtn.dataset.id);
+      if (ownedProduct && ownedProduct.owned) {
+        showToast(`You already own ${ownedProduct.title}. A digital game can only be purchased once per account.`, 'info');
+        return;
+      }
       const productId = addBtn.dataset.id;
       addBtn.disabled = true;
       const originalText = addBtn.textContent;

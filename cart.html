@@ -59,7 +59,7 @@
     <a href="shopping.html" class="subnav__link is-active">All</a>
     <a href="shopping.html?cat=digital" class="subnav__link">Digital games</a>
     <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
-    <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
+    <a href="shopping.html?cat=sale" class="subnav__link">On sale</a>
     <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
   </nav>
 </header>
@@ -150,10 +150,14 @@
     <a href="checkout.html" class="btn btn--primary btn--large">Proceed to checkout</a>
 
     <form class="promo-form">
-      <label for="promo-code" class="visually-hidden">Promo code</label>
-      <input id="promo-code" name="promo-code" type="text" placeholder="Promo code">
+      <label for="promo-code" class="visually-hidden">Voucher</label>
+      <input id="promo-code" name="promo-code" type="text" placeholder="Voucher" aria-label="Voucher code">
       <button type="submit" class="btn btn--ghost btn--small">Apply</button>
     </form>
+
+    <p class="promo-form__hint">
+      New here? Use the launch voucher <a href="offers.html" class="text-link">Welcome2Playnex</a> for 50% off every game.
+    </p>
   </aside>
 
 </main>
