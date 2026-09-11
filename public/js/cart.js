@@ -5,7 +5,7 @@
  *   - Live search/filter within cart items
  *   - Live sort (Title, Quantity, Price)
  *   - Quantity validation with error prevention & live totals
- *   - Promo code validation with live feedback (PLAYNEX10, PLAYNEX20)
+ *   - Voucher validation with live feedback (Welcome2Playnex, PLAYNEX10, PLAYNEX20)
  *   - Web Storage persistence for promo code and cart cache
  *   - Order Summary calculations with physical shipping logic & taxes.
  */
@@ -21,9 +21,22 @@
   const filterInput = document.getElementById('cart-filter');
   const itemCountHeader = document.querySelector('.page-header__count');
   const toolbarCountEl = document.querySelector('.cart-toolbar__count');
-  const summarySubtotal = document.querySelector('.cart-summary__row:nth-of-type(1) span:last-child');
-  const summaryShipping = document.querySelector('.cart-summary__row:nth-of-type(2) span:last-child');
-  const summaryTax = document.querySelector('.cart-summary__row:nth-of-type(3) span:last-child');
+  // The summary rows are addressed by their label rather than by position, so
+  // inserting the voucher row ahead of Total cannot shift the wrong value.
+  function summaryValue(labelText) {
+    const rows = document.querySelectorAll('.cart-summary__row');
+    for (const row of rows) {
+      const label = row.querySelector('span:first-child');
+      if (label && label.textContent.trim().toLowerCase() === labelText) {
+        return row.querySelector('span:last-child');
+      }
+    }
+    return null;
+  }
+
+  const summarySubtotal = summaryValue('subtotal');
+  const summaryShipping = summaryValue('shipping');
+  const summaryTax = summaryValue('tax');
   const summaryTotal = document.querySelector('.cart-summary__row--total span:last-child');
   const checkoutBtn = document.querySelector('.cart-summary .btn--primary');
   const promoForm = document.querySelector('.promo-form');
@@ -108,6 +121,31 @@
     return filtered;
   }
 
+  // The cart summary has no voucher row until one is applied: it is created on
+  // demand just above Total and removed again when no discount is in effect, so
+  // an un-discounted cart shows exactly the four rows it always did.
+  function updateVoucherRow(discountVal) {
+    const summary = document.querySelector('.cart-summary');
+    if (!summary) return;
+
+    let row = summary.querySelector('.cart-summary__row--discount');
+
+    if (discountVal > 0) {
+      if (!row) {
+        row = document.createElement('div');
+        row.className = 'cart-summary__row cart-summary__row--discount';
+        row.innerHTML = '<span>Voucher</span><span class="cart-summary__voucher-amount"></span>';
+        const totalRow = summary.querySelector('.cart-summary__row--total');
+        if (totalRow) summary.insertBefore(row, totalRow);
+        else summary.appendChild(row);
+      }
+      const amount = row.querySelector('.cart-summary__voucher-amount');
+      if (amount) amount.textContent = `-${money(discountVal)}`;
+    } else if (row) {
+      row.remove();
+    }
+  }
+
   function updateSummary(items) {
     const subtotal = items.reduce((sum, i) => {
       const isDigital = i.product.category === 'digital' || !i.product.category;
@@ -136,6 +174,7 @@
     if (summaryShipping) summaryShipping.textContent = money(shipping);
     if (summaryTax) summaryTax.textContent = money(tax);
     if (summaryTotal) summaryTotal.textContent = money(total);
+    updateVoucherRow(discountVal);
 
     if (checkoutBtn) {
       if (items.length === 0) {
@@ -256,14 +295,14 @@
     });
   }
 
-  // Promo code form validation & application
+  // Voucher form validation & application
   if (promoForm) {
     promoForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const code = promoInput ? promoInput.value.trim() : '';
 
       if (!code) {
-        showToast('Please enter a promo code.', 'error');
+        showToast('Please enter a voucher code.', 'error');
         if (promoInput) promoInput.classList.add('is-invalid');
         return;
       }

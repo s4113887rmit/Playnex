@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 const Game = require('../models/Game');
-const { getWishlist, getCart, getStats } = require('../data/store');
+const { getWishlist, getCart, getStats, getOwnedDigitalIds } = require('../data/store');
 
 async function findItem(productId) {
   let item = await Product.findOne({ id: productId }).lean();
@@ -145,9 +145,24 @@ router.post('/:productId/move-to-cart', async (req, res) => {
     const product = await findItem(productId);
     if (!product) return res.status(404).json({ error: 'Product not found.' });
 
+    // Same rule as POST /api/cart: an owned digital game cannot be re-acquired,
+    // including through the wishlist's "move to cart" shortcut.
+    const isDigital = product.category === 'digital' || product.type === 'Digital' || !product.category;
+    if (isDigital) {
+      const ownedIds = await getOwnedDigitalIds(req.userId);
+      if (ownedIds.includes(String(productId))) {
+        return res.status(409).json({
+          error: `You already own ${product.title}. A digital game can only be purchased once per account.`
+        });
+      }
+    }
+
     const cart = await getCart(req.userId);
     const existing = cart.items.find(l => l.productId === productId);
     if (existing) {
+      if (isDigital) {
+        return res.status(409).json({ error: 'This digital item is already in your cart.' });
+      }
       existing.qty += 1;
     } else {
       cart.items.push({ productId, qty: 1, variant: product.variant || '' });
@@ -214,6 +229,45 @@ router.delete('/:productId', async (req, res) => {
     res.json({ message: 'Item removed from wishlist.' });
   } catch (err) {
     res.status(500).json({ error: 'Failed to remove item.' });
+  }
+});
+
+// DELETE /api/wishlist (remove all active items, moved to the bin)
+router.delete('/', async (req, res) => {
+  try {
+    const wishlist = await getWishlist(req.userId);
+    const items = wishlist.items || [];
+    if (items.length === 0) {
+      return res.status(400).json({ error: 'Your wishlist is already empty.' });
+    }
+
+    // Soft-delete every saved item so the whole action stays reversible
+    // from the History/Bin tab, exactly like removing items one by one.
+    if (!wishlist.removedItems) wishlist.removedItems = [];
+    const now = new Date();
+    items.forEach((entry) => {
+      const productId = typeof entry === 'string' ? entry : entry.productId;
+      const alreadyRemoved = wishlist.removedItems.some(e => e.productId === productId);
+      if (alreadyRemoved) return;
+      wishlist.removedItems.unshift({
+        productId,
+        addedAt: (entry && entry.addedAt) || now,
+        removedAt: now
+      });
+    });
+
+    const removedCount = items.length;
+    wishlist.items = [];
+    await wishlist.save();
+
+    res.json({
+      message: `${removedCount} item${removedCount === 1 ? '' : 's'} removed from your wishlist.`,
+      items: [],
+      itemCount: 0,
+      removedCount
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to clear wishlist.' });
   }
 });
 

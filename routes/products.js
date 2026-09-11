@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
-const { getStatsBatch } = require('../data/store');
+const { getStatsBatch, getOwnedDigitalIds } = require('../data/store');
 
 const PROJECTION = '-_id -__v -createdAt -updatedAt';
 
@@ -18,11 +18,14 @@ router.get('/', async (req, res) => {
       query.$or = [{ title: re }, { genre: re }, { platform: re }];
     }
 
-    // Category filter ('digital' | 'physical' | 'deals' | 'free')
+    // Category filter ('digital' | 'physical' | 'sale' | 'free')
+    // 'deals' is kept as an alias so existing links keep working.
     if (category && category !== 'all') {
       if (category === 'digital' || category === 'physical') {
         query.category = category;
-      } else if (category === 'deals') {
+      } else if (category === 'sale' || category === 'deals') {
+        // On sale: discounted, but never the free giveaways.
+        query.price = { $gt: 0 };
         query.$expr = { $gt: ['$oldPrice', '$price'] };
       } else if (category === 'free') {
         query.price = 0;
@@ -75,7 +78,17 @@ router.get('/', async (req, res) => {
 
     // Attach cross-collection statistics
     const stats = await getStatsBatch(list.map((p) => p.id));
-    const enriched = list.map((p) => ({ ...p, stats: stats[p.id] || { wishlistCount: 0, cartCount: 0, purchasedCount: 0 } }));
+
+    // Mark the digital titles this account already owns so the storefront can
+    // show them as unavailable instead of offering an impossible purchase.
+    // Physical goods are never flagged: they can be re-ordered freely.
+    const ownedIds = new Set(await getOwnedDigitalIds(req.userId));
+
+    const enriched = list.map((p) => ({
+      ...p,
+      owned: ownedIds.has(String(p.id)),
+      stats: stats[p.id] || { wishlistCount: 0, cartCount: 0, purchasedCount: 0 }
+    }));
 
     res.json(enriched);
   } catch (err) {
@@ -92,7 +105,12 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: `Product with id "${req.params.id}" not found.` });
     }
     const stats = await getStatsBatch([product.id]);
-    res.json({ ...product, stats: stats[product.id] || { wishlistCount: 0, cartCount: 0, purchasedCount: 0 } });
+    const ownedIds = await getOwnedDigitalIds(req.userId);
+    res.json({
+      ...product,
+      owned: ownedIds.includes(String(product.id)),
+      stats: stats[product.id] || { wishlistCount: 0, cartCount: 0, purchasedCount: 0 }
+    });
   } catch (err) {
     console.error('Failed to load product:', err);
     res.status(500).json({ error: 'Failed to load product.' });

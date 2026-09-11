@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/Product');
 const Game = require('../models/Game');
-const { getCart } = require('../data/store');
+const { getCart, getOwnedDigitalIds } = require('../data/store');
 
 async function findItem(productId) {
   let item = await Product.findOne({ id: productId }).lean();
@@ -86,6 +86,19 @@ router.post('/', async (req, res) => {
     }
 
     const isDigital = product.category === 'digital' || product.type === 'Digital' || !product.category;
+
+    // A digital game key is granted once per account, so a title the buyer
+    // already owns is withdrawn from sale for that account. Physical goods are
+    // exempt on purpose: discs and merch can be re-ordered any number of times.
+    if (isDigital) {
+      const ownedIds = await getOwnedDigitalIds(req.userId);
+      if (ownedIds.includes(String(productId))) {
+        return res.status(409).json({
+          error: `You already own ${product.title}. A digital game can only be purchased once per account.`
+        });
+      }
+    }
+
     const cart = await getCart(req.userId);
     const existing = cart.items.find(l => l.productId === productId);
 
@@ -199,15 +212,16 @@ router.post('/promo', async (req, res) => {
   try {
     const { code } = req.body;
     if (!code || typeof code !== 'string') {
-      return res.status(400).json({ error: 'Please enter a promo code.' });
+      return res.status(400).json({ error: 'Please enter a voucher code.' });
     }
 
     const cleanCode = code.trim().toUpperCase();
     let discount = 0;
-    if (cleanCode === 'PLAYNEX10') discount = 0.10;
+    if (cleanCode === 'WELCOME2PLAYNEX') discount = 0.50;
+    else if (cleanCode === 'PLAYNEX10') discount = 0.10;
     else if (cleanCode === 'PLAYNEX20') discount = 0.20;
     else if (cleanCode === 'FREESHIP') discount = 0.05;
-    else return res.status(400).json({ error: 'Invalid or expired promo code.' });
+    else return res.status(400).json({ error: 'Invalid or expired voucher.' });
 
     const cart = await getCart(req.userId);
     const items = [];
@@ -215,17 +229,34 @@ router.post('/promo', async (req, res) => {
       const detail = await withProductDetails(line);
       if (detail) items.push(detail);
     }
+
+    // The launch voucher is valid on every game except the free ones: a free
+    // game already costs $0.00, so a 50% discount would be meaningless and the
+    // promotion explicitly excludes giveaways. Reject it with a clear error.
+    if (cleanCode === 'WELCOME2PLAYNEX') {
+      const paidItems = items.filter(i => Number(i.product.price) > 0);
+      if (items.length === 0) {
+        return res.status(400).json({ error: 'Your cart is empty. Add a paid game before applying the voucher.' });
+      }
+      if (paidItems.length === 0) {
+        return res.status(400).json({ error: 'The launch voucher cannot be applied to free games — every game in your cart is already free this week.' });
+      }
+    }
+
     const totals = calculateTotals(items, discount);
 
     res.json({
-      message: `Promo code ${cleanCode} applied (${(discount * 100)}% discount)!`,
+      // Deliberately generic so every current and future voucher reports the
+      // same confirmation; the code and percentage travel as separate fields
+      // for any UI that wants to display them.
+      message: 'Voucher applied',
       promoCode: cleanCode,
       discountPercent: discount * 100,
       items,
       ...totals
     });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to apply promo.' });
+    res.status(500).json({ error: 'Failed to apply voucher.' });
   }
 });
 
