@@ -301,8 +301,15 @@
 
   document.getElementById('logout-btn').addEventListener('click', function (e) {
     e.preventDefault();
-    localStorage.removeItem('playnex_user');
-    window.location.href = 'Login.html';
+    fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
+      .then(function () {
+        localStorage.removeItem('playnex_user');
+        window.location.href = 'Login.html';
+      })
+      .catch(function () {
+        localStorage.removeItem('playnex_user');
+        window.location.href = 'Login.html';
+      });
   });
 
   if (nameInput) {
@@ -392,4 +399,68 @@
   }
 
   loadProfile();
+  loadPurchases();
+
+  function loadPurchases() {
+    var stored = localStorage.getItem('playnex_user');
+    if (!stored) return;
+    var userData = JSON.parse(stored);
+    var userId = userData.id;
+
+    fetch('/api/checkout/orders', {
+      headers: { 'x-user-id': userId }
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        var list = document.getElementById('purchases-list');
+        var emptyMsg = document.getElementById('purchases-empty');
+        var orders = data.orders || [];
+
+        if (orders.length === 0) {
+          if (emptyMsg) emptyMsg.style.display = 'block';
+          return;
+        }
+
+        if (emptyMsg) emptyMsg.style.display = 'none';
+
+        var html = '';
+        orders.forEach(function (order) {
+          var date = order.createdAt ? new Date(order.createdAt).toLocaleDateString() : 'Unknown date';
+          html += '<div class="purchase-card">';
+          html += '<div class="purchase-card__header">';
+          html += '<span class="purchase-card__id">' + (order._id || order.id || 'N/A') + '</span>';
+          html += '<span class="purchase-card__date">' + date + '</span>';
+          html += '<span class="purchase-card__status purchase-card__status--' + (order.status || 'completed') + '">' + (order.status || 'completed') + '</span>';
+          html += '</div>';
+          html += '<div class="purchase-card__items">';
+          if (order.items) {
+            order.items.forEach(function (item) {
+              html += '<div class="purchase-item">';
+              if (item.image) html += '<img src="' + item.image + '" alt="' + (item.title || '') + '" class="purchase-item__img">';
+              html += '<div class="purchase-item__info">';
+              html += '<span class="purchase-item__title">' + (item.title || 'Unknown item') + '</span>';
+              html += '<span class="purchase-item__qty">Qty: ' + (item.qty || 1) + '</span>';
+              html += '<span class="purchase-item__price">$' + (item.price || 0).toFixed(2) + '</span>';
+              html += '</div>';
+              html += '</div>';
+            });
+          }
+          html += '</div>';
+          html += '<div class="purchase-card__footer">';
+          html += '<div class="purchase-card__breakdown">';
+          html += '<span>Subtotal: $' + (order.subtotal || 0).toFixed(2) + '</span>';
+          html += '<span>Shipping: $' + (order.shipping || 0).toFixed(2) + '</span>';
+          html += '<span>Tax: $' + (order.tax || 0).toFixed(2) + '</span>';
+          html += '</div>';
+          html += '<span class="purchase-card__total">Total: $' + (order.total || 0).toFixed(2) + '</span>';
+          html += '</div>';
+          html += '</div>';
+        });
+
+        list.innerHTML = html;
+      })
+      .catch(function () {
+        console.error('Could not load purchase history');
+      });
+  }
 })();

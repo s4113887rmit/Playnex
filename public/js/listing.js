@@ -37,6 +37,22 @@
       .catch(function () { });
   }
 
+  function checkCart() {
+    if (!slug || !cartBtn || typeof window.Playnex.api !== 'function') return;
+    window.Playnex.api('/api/cart')
+      .then(function (data) {
+        var found = (data.items || []).some(function (item) { return item.productId === slug; });
+        if (found) {
+          var isDigital = cartBtn.dataset.type === 'Digital';
+          if (isDigital) {
+            cartBtn.textContent = 'Already in cart';
+            cartBtn.disabled = true;
+          }
+        }
+      })
+      .catch(function () { });
+  }
+
   function isLoggedIn() {
     return typeof window.Playnex.getCurrentUser === 'function' && !!window.Playnex.getCurrentUser();
   }
@@ -44,7 +60,8 @@
   function requireLogin(event) {
     if (!isLoggedIn()) {
       if (event) event.preventDefault();
-      window.Playnex.showToast('Please log in to continue. <a href="Login.html" class="playnex-toast__link">Log In -&gt;</a>', 'info');
+      var returnTo = encodeURIComponent(window.location.pathname + window.location.search);
+      window.location.href = 'Login.html?return=' + returnTo;
       return false;
     }
     return true;
@@ -71,13 +88,20 @@
           if (path === '/api/wishlist' && window.Playnex.blinkWishlistIcon) {
             window.Playnex.blinkWishlistIcon();
           }
+          if (path === '/api/cart') {
+            btn.textContent = 'Already in cart';
+            btn.disabled = true;
+            if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
+          }
         })
         .catch(function (err) {
           window.Playnex.showToast(err.message || 'Something went wrong.', 'error');
         })
         .finally(function () {
-          btn.disabled = false;
-          btn.textContent = original;
+          if (path !== '/api/cart') {
+            btn.disabled = false;
+            btn.textContent = original;
+          }
         });
     });
   }
@@ -127,10 +151,13 @@
   }
 
   checkWishlist();
+  checkCart();
   window.addEventListener('pageshow', checkWishlist);
+  window.addEventListener('pageshow', checkCart);
   window.addEventListener('focus', checkWishlist);
+  window.addEventListener('focus', checkCart);
   document.addEventListener('visibilitychange', function () {
-    if (!document.hidden) checkWishlist();
+    if (!document.hidden) { checkWishlist(); checkCart(); }
   });
 
   if (buyNowBtn) {
@@ -151,6 +178,7 @@
         body: { productId: slug, qty: 1 }
       })
         .then(function () {
+          if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
           window.location.href = 'checkout.html';
         })
         .catch(function (err) {

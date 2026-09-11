@@ -9,6 +9,19 @@
     }
   }
 
+  // Reveal only the controls that match the current session state. Elements are
+  // hidden in the markup so a logged-out visitor never sees a Log out button or
+  // a profile icon, even before this script runs.
+  function applySessionUI(user) {
+    var signedIn = !!(user && (user.id || user.username || user.email));
+    document.querySelectorAll('[data-auth-in]').forEach(function (el) {
+      el.hidden = !signedIn;
+    });
+    document.querySelectorAll('[data-auth-out]').forEach(function (el) {
+      el.hidden = signedIn;
+    });
+  }
+
   function updateHeader() {
     var page = window.location.pathname.split('/').pop() || 'homepage.html';
     if (page === 'Login.html') return;
@@ -20,12 +33,17 @@
     } catch (e) {}
 
     if (page === 'Profile.html') {
+      applySessionUI(user);
       applyAdminUI(user);
       return;
     }
 
     var wrapper = document.querySelector('.topbar__actions');
     if (!wrapper) return;
+
+    // Keep any markup-driven auth controls in sync with the session state.
+    applySessionUI(user);
+
     if (wrapper.getAttribute('data-auth-synced') === 'true') {
       wrapper.style.visibility = 'visible';
       return;
@@ -63,8 +81,15 @@
     logoutBtn.textContent = 'Log out';
     logoutBtn.addEventListener('click', function (e) {
       e.preventDefault();
-      localStorage.removeItem('playnex_user');
-      window.location.href = 'Login.html';
+      fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' })
+        .then(function () {
+          localStorage.removeItem('playnex_user');
+          window.location.href = 'Login.html';
+        })
+        .catch(function () {
+          localStorage.removeItem('playnex_user');
+          window.location.href = 'Login.html';
+        });
     });
 
     wrapper.insertBefore(logoutBtn, wrapper.firstElementChild);

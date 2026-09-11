@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Administrator Dashboard — Playnex</title>
 <meta name="description" content="Manage Playnex users and moderation flags.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -92,7 +93,8 @@
 <main id="main-content" class="admin-layout">
 
   <div class="admin-toolbar">
-    <input type="text" placeholder="Search users by username or email...">
+    <label class="visually-hidden" for="admin-search">Search users by username</label>
+    <input type="text" id="admin-search" placeholder="Search users by username..." autocomplete="off">
   </div>
 
   <!-- Normal Accounts Section -->

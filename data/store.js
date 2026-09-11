@@ -1,61 +1,110 @@
 /**
- * store.js — In-memory datastore for Assessment 2.
- * Keyed by userId so every user has their own isolated Cart, Wishlist, and Order history.
+ * store.js - MongoDB-backed datastore for Assessment 3.
+ * Uses Cart, Wishlist and Order models for persistent storage, and
+ * computes real cross-collection statistics for wishlist items.
  */
 
-const carts = {};      // { [userId]: [{ productId, qty, variant }] }
-const wishlists = {};  // { [userId]: [{ productId, addedAt, purchased }] }
-const orders = {};     // { [orderId]: order }
+const mongoose = require('mongoose');
+const Cart = require('../models/Cart');
+const Wishlist = require('../models/Wishlist');
+const Order = require('../models/Order');
 
-// Global wishlist & cart counters for statistics
-const productStats = {}; // { [productId]: { wishlistCount: number, cartCount: number, purchasedCount: number } }
-
-let nextOrderNumber = 48213;
-
-function getStats(productId) {
-  if (!productStats[productId]) {
-    productStats[productId] = { wishlistCount: 0, cartCount: 0, purchasedCount: 0 };
+async function getCart(userId) {
+  let cart = await Cart.findOne({ userId });
+  if (!cart) {
+    cart = await Cart.create({ userId, items: [] });
   }
-  return productStats[productId];
+  return cart;
 }
 
-function getCart(userId) {
-  if (!carts[userId]) {
-    // Initial demo default cart for realistic testing if newly created
-    carts[userId] = [];
+async function getWishlist(userId) {
+  let wishlist = await Wishlist.findOne({ userId });
+  if (!wishlist) {
+    wishlist = await Wishlist.create({ userId, items: [] });
   }
-  return carts[userId];
+  return wishlist;
 }
 
-function getWishlist(userId) {
-  if (!wishlists[userId]) {
-    wishlists[userId] = [];
-  }
-  return wishlists[userId];
+async function saveOrder(order) {
+  const record = await Order.create({
+    userId: order.userId,
+    items: order.items,
+    subtotal: order.subtotal,
+    shipping: order.shipping,
+    tax: order.tax || 0,
+    total: order.total,
+    shippingInfo: order.shippingInfo,
+    paymentInfo: order.paymentInfo,
+    status: 'completed'
+  });
+  return { id: record._id, ...order, createdAt: record.createdAt };
 }
 
-function saveOrder(order) {
-  const id = `PLX-${nextOrderNumber++}`;
-  const record = { id, ...order, createdAt: new Date().toISOString() };
-  orders[id] = record;
-  
-  // Update purchase statistics
-  if (Array.isArray(order.items)) {
-    order.items.forEach(item => {
-      const stats = getStats(item.productId || (item.product && item.product.id));
-      stats.purchasedCount += (item.qty || 1);
-    });
-  }
-  
-  return record;
+async function getOrder(id) {
+  return await Order.findById(id).lean();
 }
 
-function getOrder(id) {
-  return orders[id] || null;
+async function getAllOrders(userId) {
+  return await Order.find({ userId }).sort({ createdAt: -1 }).lean();
 }
 
-function getAllOrders(userId) {
-  return Object.values(orders).filter(o => o.userId === userId);
+const EMPTY_STATS = { wishlistCount: 0, cartCount: 0, purchasedCount: 0 };
+
+function toMap(rows) {
+  const map = {};
+  rows.forEach((row) => {
+    map[row._id] = row.count;
+  });
+  return map;
+}
+
+/**
+ * Compute wishlist, cart and purchase statistics for a set of product ids.
+ * Runs three aggregations in total rather than one query per product.
+ */
+async function getStatsBatch(productIds) {
+  const ids = (productIds || []).map(String);
+  if (!ids.length || mongoose.connection.readyState !== 1) return {};
+
+  const [wishRow, cartRows, orderRows] = await Promise.all([
+    Wishlist.aggregate([
+      { $unwind: '$items' },
+      { $match: { 'items.productId': { $in: ids } } },
+      { $group: { _id: '$items.productId', count: { $sum: 1 } } }
+    ]),
+    Cart.aggregate([
+      { $unwind: '$items' },
+      { $match: { 'items.productId': { $in: ids } } },
+      { $group: { _id: '$items.productId', count: { $sum: '$items.qty' } } }
+    ]),
+    Order.aggregate([
+      { $unwind: '$items' },
+      { $match: { 'items.productId': { $in: ids } } },
+      { $group: { _id: '$items.productId', count: { $sum: '$items.qty' } } }
+    ])
+  ]);
+
+  const wishMap = toMap(wishRow);
+  const cartMap = toMap(cartRows);
+  const orderMap = toMap(orderRows);
+
+  const stats = {};
+  ids.forEach((id) => {
+    stats[id] = {
+      wishlistCount: wishMap[id] || 0,
+      cartCount: cartMap[id] || 0,
+      purchasedCount: orderMap[id] || 0
+    };
+  });
+  return stats;
+}
+
+/**
+ * Statistics for a single item, used by the wishlist and cart routes.
+ */
+async function getStats(productId) {
+  const stats = await getStatsBatch([productId]);
+  return stats[String(productId)] || { ...EMPTY_STATS };
 }
 
 module.exports = {
@@ -64,5 +113,6 @@ module.exports = {
   saveOrder,
   getOrder,
   getAllOrders,
-  getStats
+  getStats,
+  getStatsBatch
 };

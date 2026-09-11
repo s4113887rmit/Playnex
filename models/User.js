@@ -50,6 +50,14 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  lockedAt: {
+    type: Date,
+    default: null
+  },
+  lockReason: {
+    type: String,
+    default: null
+  },
   isActive: {
     type: Boolean,
     default: true

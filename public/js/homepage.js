@@ -131,6 +131,7 @@
 
   let currentHeroIndex = 0;
   let heroTimer = null;
+  let heroPaused = false;
   const heroStage = document.getElementById('hero-stage');
   let heroCardElements = [];
   let heroDotElements = [];
@@ -200,9 +201,43 @@
       });
     }
 
+    // Respect the user's motion preference: do not auto-advance when reduced
+    // motion is requested, and resume automatically if the preference changes.
+    const motionQuery = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    if (motionQuery && motionQuery.matches) {
+      heroPaused = true;
+    }
+
+    const pauseBtn = document.getElementById('hero-pause-btn');
+    setPauseButtonState(pauseBtn);
+
+    if (pauseBtn) {
+      pauseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        heroPaused = !heroPaused;
+        setPauseButtonState(pauseBtn);
+        if (heroPaused) stopHeroTimer();
+        else startHeroTimer();
+      });
+    }
+
+    if (motionQuery) {
+      const onMotionChange = (event) => {
+        heroPaused = event.matches;
+        setPauseButtonState(pauseBtn);
+        if (heroPaused) stopHeroTimer();
+        else startHeroTimer();
+      };
+      if (motionQuery.addEventListener) motionQuery.addEventListener('change', onMotionChange);
+      else if (motionQuery.addListener) motionQuery.addListener(onMotionChange);
+    }
+
     if (heroVisual) {
+      // Pause while the carousel is hovered or holds keyboard focus.
       heroVisual.addEventListener('mouseenter', stopHeroTimer);
-      heroVisual.addEventListener('mouseleave', startHeroTimer);
+      heroVisual.addEventListener('mouseleave', () => { if (!heroPaused) startHeroTimer(); });
+      heroVisual.addEventListener('focusin', stopHeroTimer);
+      heroVisual.addEventListener('focusout', () => { if (!heroPaused) startHeroTimer(); });
     }
   }
 
@@ -254,9 +289,13 @@
       setTimeout(() => {
         renderHeroInfo(activeGame);
         heroContent.classList.remove('is-changing');
+        refreshCart();
+        refreshWishlist();
       }, 140);
     } else if (heroContent) {
       renderHeroInfo(activeGame);
+      refreshCart();
+      refreshWishlist();
     }
   }
 
@@ -319,6 +358,7 @@
 
   function startHeroTimer() {
     stopHeroTimer();
+    if (heroPaused) return;
     heroTimer = setInterval(() => {
       updateHeroCarousel(currentHeroIndex + 1, true);
     }, 3000);
@@ -329,6 +369,13 @@
       clearInterval(heroTimer);
       heroTimer = null;
     }
+  }
+
+  function setPauseButtonState(btn) {
+    if (!btn) return;
+    btn.textContent = heroPaused ? 'Play' : 'Pause';
+    btn.setAttribute('aria-pressed', heroPaused ? 'true' : 'false');
+    btn.setAttribute('aria-label', heroPaused ? 'Play featured games carousel' : 'Pause featured games carousel');
   }
 
   function money(n) {
@@ -434,6 +481,8 @@
       });
       wishlistIds = new Set((wishlistData.items || []).map(item => item.id));
       render();
+      refreshCart();
+      refreshWishlist();
     } catch (err) {
       console.error('Failed to load products:', err);
     }
@@ -455,8 +504,43 @@
     } catch {}
   }
 
+  async function refreshCart() {
+    try {
+      const cartData = await api('/api/cart').catch(() => ({ items: [] }));
+      const cartIds = new Set((cartData.items || []).map(item => item.productId));
+      document.querySelectorAll('[data-action="add-to-cart"]').forEach(btn => {
+        const id = btn.dataset.id;
+        if (id && cartIds.has(id)) {
+          const product = allProducts.find(p => p.id === id);
+          const isDigital = product && (product.category === 'digital' || product.type === 'Digital');
+          if (isDigital) {
+            btn.textContent = 'Already in cart';
+            btn.disabled = true;
+          }
+        }
+      });
+      const heroCartBtn = document.getElementById('hero-cart-btn');
+      if (heroCartBtn && heroCartBtn.dataset.id && cartIds.has(heroCartBtn.dataset.id)) {
+        const heroGame = heroGames[currentHeroIndex];
+        const product = allProducts.find(p => p.id === heroCartBtn.dataset.id);
+        const isDigital = product
+          ? (product.category === 'digital' || product.type === 'Digital')
+          : (heroGame && heroGame.id && !heroGame.id.includes('physical'));
+        if (isDigital) {
+          heroCartBtn.textContent = 'Already in cart';
+          heroCartBtn.disabled = true;
+        }
+      } else if (heroCartBtn) {
+        heroCartBtn.textContent = 'Add to cart';
+        heroCartBtn.disabled = false;
+      }
+    } catch {}
+  }
+
   window.addEventListener('pageshow', refreshWishlist);
   window.addEventListener('focus', refreshWishlist);
+  window.addEventListener('pageshow', refreshCart);
+  window.addEventListener('focus', refreshCart);
 
   // Live search input
   if (searchInput) {
@@ -503,6 +587,8 @@
         });
         addBtn.textContent = 'Added ✓';
         showToast('Added item to your cart!', 'success');
+        if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
+        refreshCart();
         setTimeout(() => {
           addBtn.textContent = originalText;
           addBtn.disabled = false;
@@ -571,6 +657,7 @@
           body: { productId: 'death-standing', qty: 1 }
         });
         showToast('Claimed Death Stranding for your cart!', 'success');
+        if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
         setTimeout(() => {
           window.location.href = 'cart.html';
         }, 600);

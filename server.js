@@ -1,42 +1,69 @@
+require('dotenv').config();
+try { require('dns').setServers(['8.8.8.8', '8.8.4.4']); } catch (e) {}
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
+const session = require('express-session');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
-const BLOG_DATA_PATH = path.join(__dirname, 'data', 'blogs.json');
-const DATA_PATH = path.join(__dirname, 'data', 'games.json');
-
-(function loadEnv() {
-  var envPath = path.join(__dirname, '.env');
-  if (!fs.existsSync(envPath)) return;
-  var lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
-  for (var i = 0; i < lines.length; i++) {
-    var line = lines[i].trim();
-    if (!line || line[0] === '#') continue;
-    var eq = line.indexOf('=');
-    if (eq === -1) continue;
-    var key = line.substring(0, eq).trim();
-    var value = line.substring(eq + 1).trim();
-    if (value[0] === '"' && value[value.length - 1] === '"') value = value.slice(1, -1);
-    if (value[0] === "'" && value[value.length - 1] === "'") value = value.slice(1, -1);
-    if (!process.env[key]) process.env[key] = value;
-  }
-})();
-
-const dns = require('dns');
-dns.setServers(['8.8.8.8', '1.1.1.1']);
+const Game = require('./models/Game');
 
 const app = express();
 
 app.set("view engine", "ejs");
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.set("trust proxy", 1);
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Baseline security headers. These run before the static handlers, because a
+// served file ends the request and later middleware would never execute.
+app.use(function (req, res, next) {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
+// Static assets are served from public/ and from the project root so that the
+// HTML pages, stylesheet and images resolve. Server-side code and configuration
+// must never be downloadable, so those paths are refused before the root
+// static handler runs.
+const BLOCKED_STATIC_DIRS = /^\/(models|routes|middleware|data|node_modules|\.git|\.vscode)(\/|$)/i;
+const BLOCKED_ROOT_FILE = /^\/[^/]+\.(js|json|ya?ml|md|lock|log)$/i;
+
+app.use(function (req, res, next) {
+  if (BLOCKED_STATIC_DIRS.test(req.path) || BLOCKED_ROOT_FILE.test(req.path)) {
+    return res.status(404).send('Not found');
+  }
+  next();
+});
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.static(path.join(__dirname)));
+
+// Session middleware. The secret should be supplied through SESSION_SECRET; a
+// random fallback is used so that an unset value is never predictable.
+const sessionSecret = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+if (!process.env.SESSION_SECRET) {
+  console.warn('SESSION_SECRET is not set. A random secret was generated, so logins will not survive a restart.');
+}
+
+app.use(session({
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',
+    // 'auto' marks the cookie Secure only when the request actually arrived over
+    // HTTPS. In production TLS terminates at the proxy and trust proxy makes
+    // req.secure true, while local HTTP development still works.
+    secure: 'auto',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
 
 // Current User middleware
 const currentUser = require('./middleware/currentUser');
@@ -56,6 +83,14 @@ app.use('/api/checkout', checkoutRouter);
 // Blog module (EJS pages at /blog + JSON API at /api/blogs)
 const blogsRouter = require('./routes/blogs');
 app.use('/', blogsRouter);
+
+// Discussion Forum module (MongoDB-backed threads and replies)
+const threadsRouter = require('./routes/threads');
+app.use('/', threadsRouter);
+
+// Administration module (MongoDB-backed user management)
+const adminRouter = require('./routes/admin');
+app.use('/', adminRouter);
 
 app.get('/', function (req, res) {
   res.redirect('/homepage.html');
@@ -119,6 +154,14 @@ function signupValidator(body) {
   return errors;
 }
 
+// Resolve a memory-store user from the session. Used only when MongoDB is
+// unreachable, and still never trusts a client-supplied identifier.
+function memorySessionUser(req) {
+  const sessionId = req.session && req.session.userId;
+  if (!sessionId) return null;
+  return memoryUsers.findMemoryUser((u) => u.id === String(sessionId)) || null;
+}
+
 function handleMemoryAuth(req, res, route) {
   const { email, password, confirmPassword, username, name, description, profilePicture } = req.body || {};
   const lowerEmail = String(email || '').toLowerCase();
@@ -156,6 +199,8 @@ function handleMemoryAuth(req, res, route) {
     if (!user.isActive) return res.status(403).json({ error: 'This account has been deactivated.' });
     bcrypt.compare(password || '', user.password).then((isMatch) => {
       if (!isMatch) return res.status(401).json({ error: 'Invalid email or password.' });
+      // Create server-side session
+      req.session.userId = user.id;
       res.json({
         message: 'Logged in successfully',
         user: {
@@ -171,14 +216,14 @@ function handleMemoryAuth(req, res, route) {
   }
 
   if (route === 'profile-get') {
-    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
+    const user = memorySessionUser(req);
+    if (!user) return res.status(401).json({ error: 'You must be logged in to view your profile.' });
     return res.json(memoryUsers.publicUser(user));
   }
 
   if (route === 'profile-put') {
-    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
-    if (!user) return res.status(404).json({ error: 'User not found.' });
+    const user = memorySessionUser(req);
+    if (!user) return res.status(401).json({ error: 'You must be logged in to update your profile.' });
     const trimmedName = typeof name === 'string' ? name.trim() : '';
     const trimmedDesc = typeof description === 'string' ? description.trim() : '';
     if (name !== undefined && (!trimmedName || trimmedName.length > 100)) {
@@ -195,8 +240,8 @@ function handleMemoryAuth(req, res, route) {
   }
 
   if (route === 'change-password') {
-    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
-    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    const user = memorySessionUser(req);
+    if (!user) return res.status(401).json({ error: 'You must be logged in to change your password.' });
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
     if (!currentPassword || !newPassword || !confirmNewPassword) {
       return res.status(400).json({ error: 'All fields are required.' });
@@ -214,8 +259,8 @@ function handleMemoryAuth(req, res, route) {
   }
 
   if (route === 'change-email') {
-    const user = memoryUsers.findMemoryUser((u) => u.email === String(req.body.currentEmail || '').toLowerCase());
-    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    const user = memorySessionUser(req);
+    if (!user) return res.status(401).json({ error: 'You must be logged in to change your email.' });
     const { newEmail, password: pwd } = req.body;
     if (!newEmail || !pwd) return res.status(400).json({ error: 'All fields are required.' });
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(newEmail))) {
@@ -233,12 +278,13 @@ function handleMemoryAuth(req, res, route) {
   }
 
   if (route === 'delete-account') {
-    const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
-    if (!user) return res.status(404).json({ error: 'Account not found.' });
+    const user = memorySessionUser(req);
+    if (!user) return res.status(401).json({ error: 'You must be logged in to deactivate your account.' });
     bcrypt.compare(password || '', user.password).then((isMatch) => {
       if (!isMatch) return res.status(401).json({ error: 'Password is incorrect.' });
       user.isActive = false;
       user.email = user.email + '_deactivated_' + Date.now();
+      req.session.destroy(() => {});
       res.json({ message: 'Your account has been deactivated. We are sorry to see you go.' });
     });
     return;
@@ -252,7 +298,7 @@ function handleMemoryAuth(req, res, route) {
     if (user) {
       user.passwordResetToken = crypto.randomBytes(32).toString('hex');
       user.passwordResetExpires = Date.now() + 60 * 60 * 1000;
-      console.log('Password reset token for ' + lowerEmail + ': ' + user.passwordResetToken);
+      // Token generated for password reset
     }
     return res.json({ message: 'If that email is registered, a reset link has been sent.' });
   }
@@ -284,27 +330,8 @@ function authGuard(route) {
   };
 }
 
-// Resolve the logged-in user for modules that need ownership (blog, reviews)
-async function resolveCurrentUser(req) {
-  const userId = (req.body && req.body.userId) || req.userId || req.header('x-user-id') || '';
-  if (!userId || userId === 'guest-user') return null;
-
-  const mem = memoryUsers.findMemoryUser((u) => u.id === userId);
-  if (mem) {
-    if (mem.isLocked || !mem.isActive) return null;
-    return mem;
-  }
-
-  if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(userId)) {
-    try {
-      const user = await User.findById(userId);
-      if (user && !user.isLocked && user.isActive) return user;
-    } catch (err) {
-      return null;
-    }
-  }
-  return null;
-}
+// Resolve the logged-in user for modules that need ownership (reviews)
+const { resolveCurrentUser } = require('./middleware/resolveUser');
 
 async function seedDemoAccounts() {
   const demoAccounts = [
@@ -415,6 +442,9 @@ app.post('/api/auth/login', authLimiter, authGuard('login'), async (req, res) =>
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
+    // Create server-side session
+    req.session.userId = String(user._id);
+
     res.status(200).json({
       message: 'Logged in successfully',
       user: { id: user._id, username: user.username, email: user.email, name: user.name, role: user.role }
@@ -423,6 +453,14 @@ app.post('/api/auth/login', authLimiter, authGuard('login'), async (req, res) =>
     console.error('Login error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
   }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  req.session.destroy((err) => {
+    if (err) return res.status(500).json({ error: 'Failed to log out.' });
+    res.clearCookie('connect.sid');
+    res.json({ message: 'Logged out successfully.' });
+  });
 });
 
 app.post('/api/auth/forgot-password', authLimiter, authGuard('forgot-password'), async (req, res) => {
@@ -442,7 +480,7 @@ app.post('/api/auth/forgot-password', authLimiter, authGuard('forgot-password'),
     user.passwordResetExpires = Date.now() + 60 * 60 * 1000;
     await user.save({ validateBeforeSave: false });
 
-    console.log('Password reset token for ' + email + ': ' + resetToken);
+    // Token generated for password reset
 
     res.status(200).json({ message: 'If that email is registered, a reset link has been sent.' });
   } catch (err) {
@@ -490,25 +528,35 @@ app.post('/api/auth/reset-password', authLimiter, authGuard('reset-password'), a
   }
 });
 
+// The logged-in user is taken from the server-side session. Client-supplied
+// identifiers such as a body email are never used to select the account.
+async function findSessionUser(req, withPassword) {
+  const sessionId = req.session && req.session.userId;
+  if (!sessionId || !mongoose.isValidObjectId(sessionId)) return null;
+  const query = User.findById(sessionId);
+  if (withPassword) query.select('+password');
+  return query;
+}
+
+function profilePayload(user) {
+  return {
+    id: user._id,
+    username: user.username,
+    name: user.name,
+    email: user.email,
+    description: user.description,
+    profilePicture: user.profilePicture,
+    role: user.role
+  };
+}
+
 app.post('/api/auth/profile', authLimiter, authGuard('profile-get'), async (req, res) => {
   try {
-    var { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-    var user = await User.findOne({ email: email.toLowerCase() });
+    var user = await findSessionUser(req);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(401).json({ error: 'You must be logged in to view your profile.' });
     }
-    res.status(200).json({
-      id: user._id,
-      username: user.username,
-      name: user.name,
-      email: user.email,
-      description: user.description,
-      profilePicture: user.profilePicture,
-      role: user.role
-    });
+    res.status(200).json(profilePayload(user));
   } catch (err) {
     console.error('Profile fetch error:', err);
     res.status(500).json({ error: 'Something went wrong. Please try again.' });
@@ -517,13 +565,10 @@ app.post('/api/auth/profile', authLimiter, authGuard('profile-get'), async (req,
 
 app.put('/api/auth/profile', authLimiter, authGuard('profile-put'), async (req, res) => {
   try {
-    var { email, name, description, profilePicture } = req.body;
-    if (!email) {
-      return res.status(400).json({ error: 'Email is required' });
-    }
-    var user = await User.findOne({ email: email.toLowerCase() });
+    var { name, description, profilePicture } = req.body;
+    var user = await findSessionUser(req);
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(401).json({ error: 'You must be logged in to update your profile.' });
     }
     if (name !== undefined) {
       var trimmedName = String(name).trim();
@@ -546,15 +591,7 @@ app.put('/api/auth/profile', authLimiter, authGuard('profile-put'), async (req, 
     await user.save({ validateBeforeSave: false });
     res.status(200).json({
       message: 'Profile updated successfully.',
-      user: {
-        id: user._id,
-        username: user.username,
-        name: user.name,
-        email: user.email,
-        description: user.description,
-        profilePicture: user.profilePicture,
-        role: user.role
-      }
+      user: profilePayload(user)
     });
   } catch (err) {
     if (err.name === 'ValidationError') {
@@ -568,24 +605,24 @@ app.put('/api/auth/profile', authLimiter, authGuard('profile-put'), async (req, 
 
 app.put('/api/auth/email', authLimiter, authGuard('change-email'), async (req, res) => {
   try {
-    var { currentEmail, newEmail, password } = req.body;
-    if (!currentEmail || !newEmail || !password) {
+    var { newEmail, password } = req.body;
+    if (!newEmail || !password) {
       return res.status(400).json({ error: 'All fields are required' });
     }
-    var user = await User.findOne({ email: currentEmail.toLowerCase() }).select('+password');
+    var user = await findSessionUser(req, true);
     if (!user) {
-      return res.status(404).json({ error: 'Account not found' });
+      return res.status(401).json({ error: 'You must be logged in to change your email.' });
     }
     var isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return res.status(401).json({ error: 'Password is incorrect' });
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+      return res.status(400).json({ error: 'Please provide a valid email address' });
+    }
     var existing = await User.findOne({ email: newEmail.toLowerCase() });
     if (existing) {
       return res.status(409).json({ error: 'That email address is already in use' });
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
-      return res.status(400).json({ error: 'Please provide a valid email address' });
     }
     user.email = newEmail;
     await user.save({ validateBeforeSave: false });
@@ -601,8 +638,8 @@ app.put('/api/auth/email', authLimiter, authGuard('change-email'), async (req, r
 
 app.put('/api/auth/change-password', authLimiter, authGuard('change-password'), async (req, res) => {
   try {
-    var { email, currentPassword, newPassword, confirmNewPassword } = req.body;
-    if (!email || !currentPassword || !newPassword || !confirmNewPassword) {
+    var { currentPassword, newPassword, confirmNewPassword } = req.body;
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
       return res.status(400).json({ error: 'All fields are required' });
     }
     if (newPassword !== confirmNewPassword) {
@@ -611,9 +648,9 @@ app.put('/api/auth/change-password', authLimiter, authGuard('change-password'), 
     if (newPassword.length < 8) {
       return res.status(400).json({ error: 'New password must be at least 8 characters' });
     }
-    var user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    var user = await findSessionUser(req, true);
     if (!user) {
-      return res.status(404).json({ error: 'Account not found' });
+      return res.status(401).json({ error: 'You must be logged in to change your password.' });
     }
     var isMatch = await user.comparePassword(currentPassword);
     if (!isMatch) {
@@ -630,13 +667,13 @@ app.put('/api/auth/change-password', authLimiter, authGuard('change-password'), 
 
 app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async (req, res) => {
   try {
-    var { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+    var { password } = req.body;
+    if (!password) {
+      return res.status(400).json({ error: 'Password is required' });
     }
-    var user = await User.findOne({ email: email.toLowerCase() }).select('+password');
+    var user = await findSessionUser(req, true);
     if (!user) {
-      return res.status(404).json({ error: 'Account not found' });
+      return res.status(401).json({ error: 'You must be logged in to deactivate your account.' });
     }
     var isMatch = await user.comparePassword(password);
     if (!isMatch) {
@@ -645,6 +682,8 @@ app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async 
     user.isActive = false;
     user.email = user.email + '_deactivated_' + Date.now();
     await user.save({ validateBeforeSave: false });
+    // Destroy session on account deletion
+    req.session.destroy(() => {});
     res.status(200).json({ message: 'Your account has been deactivated. We are sorry to see you go.' });
   } catch (err) {
     console.error('Account deletion error:', err);
@@ -652,443 +691,12 @@ app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async 
   }
 });
 
-// --- FORUM MODULE: IN-MEMORY DATA ---
-function timeAgo(ts) {
-  if (!ts || isNaN(ts)) return "Just now";
-  const diff = Date.now() - ts;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return "Just now";
-  if (mins < 60) return mins + " min ago";
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return hours + " hour" + (hours > 1 ? "s" : "") + " ago";
-  const days = Math.floor(hours / 24);
-  return days + " day" + (days > 1 ? "s" : "") + " ago";
-}
-
-let forumThreads = [
-  {
-    id: 1,
-    title: "[Elden Ring] Fixing co-op connection failures",
-    content: "Me and a friend keep failing to summon each other for co-op in Elden Ring. We're both on the same NAT type, passwords match, but the connection keeps timing out. Any tips on fixing this?",
-    author: "darknexus",
-    authorId: null,
-    tag: "support",
-    tagClass: "tag--support",
-    replies: 2,
-    views: 1200,
-    lastPostAuthor: "script_master",
-    createdAt: Date.now() - 3 * 60 * 60 * 1000,
-    lastPostAt: Date.now() - 2 * 60 * 60 * 1000,
-    deleted: false,
-    posts: [
-      {
-        id: "p1",
-        author: "script_master",
-        authorId: null,
-        content: "Checking scoreboard logic every tick for every connected player over a VPN will drain your TPS. Schedule the check on an event trigger instead of looping it, and verify your VPN routing is not adding packet loss.",
-        createdAt: Date.now() - 2 * 60 * 60 * 1000,
-        deleted: false
-      },
-      {
-        id: "p2",
-        author: "netguru",
-        authorId: null,
-        content: "Also profile with /tick health to confirm the source. Radmin LAN mode usually adds only 2-5ms; a datapack loop is the likely culprit.",
-        createdAt: Date.now() - 90 * 60 * 1000,
-        deleted: false
-      }
-    ]
-  },
-  {
-    id: 2,
-    title: "[The Witcher 3: Wild Hunt] Game of the Year Edition Review",
-    content: "Just received the Embercrown Saga Collector's Edition throne figure. Sharing photos and thoughts on build quality, paint application, and packaging.",
-    author: "cyber_fan",
-    authorId: null,
-    tag: "review",
-    tagClass: "tag--review",
-    replies: 1,
-    views: 3400,
-    lastPostAuthor: "merch_guy",
-    createdAt: Date.now() - 6 * 60 * 60 * 1000,
-    lastPostAt: Date.now() - 5 * 60 * 60 * 1000,
-    deleted: false,
-    posts: [
-      {
-        id: "p3",
-        author: "merch_guy",
-        authorId: null,
-        content: "Paint application is clean on mine too. The throne base is heavier than expected, which is great for display stability.",
-        createdAt: Date.now() - 5 * 60 * 60 * 1000,
-        deleted: false
-      }
-    ]
-  }
-];
-
-function publicThread(t) {
-  return {
-    id: t.id,
-    title: t.title,
-    content: t.content,
-    author: t.author,
-    authorId: t.authorId,
-    tag: t.tag,
-    tagClass: t.tagClass,
-    replies: t.replies,
-    views: t.views,
-    lastPostAuthor: t.lastPostAuthor,
-    lastPostTime: timeAgo(t.lastPostAt),
-    createdAt: t.createdAt,
-    lastPostAt: t.lastPostAt
-  };
-}
-
-// GET: Retrieve all forum threads
-app.get('/api/threads', (req, res) => {
-  const visible = forumThreads.filter((t) => !t.deleted).map(publicThread);
-  res.json(visible);
-});
-
-// POST: Create a new forum thread
-app.post('/api/threads', async (req, res) => {
-  const { title, game, category, content } = req.body;
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to create a thread." });
-  }
-
-  // Server-Side Validation
-  if (!title || title.trim() === '') {
-    return res.status(400).json({ error: "Thread title is strictly required." });
-  }
-  if (!category || category.trim() === '') {
-    return res.status(400).json({ error: "A category selection is required." });
-  }
-  if (!content || content.trim() === '') {
-    return res.status(400).json({ error: "Post content cannot be empty." });
-  }
-
-  // Determine the tag class based on the category for styling
-  let tagClass = "tag--general";
-  if (category === "support") tagClass = "tag--support";
-  if (category === "review") tagClass = "tag--review";
-
-  const authorName = user.name || user.username;
-
-  // Create the new thread object
-  const newThread = {
-    id: forumThreads.length + 1,
-    title: title,
-    content: content,
-    author: authorName,
-    authorId: String(user.id),
-    tag: category,
-    tagClass: tagClass,
-    replies: 0,
-    views: 0,
-    lastPostAuthor: authorName,
-    lastPostTime: "Just now",
-    createdAt: Date.now(),
-    lastPostAt: Date.now()
-  };
-
-  // Save it to our temporary "database"
-  forumThreads.unshift(newThread); // unshift adds it to the top of the array
-
-  // Send a success response back to the client
-  res.status(201).json({ message: "Thread created successfully!", thread: newThread });
-});
-
-// ==========================================
-// ADMIN MODULE: IN-MEMORY DATA & ROUTES
-// ==========================================
-
-let adminUsers = [
-  {
-    id: 1,
-    username: "John_A",
-    status: "normal",
-    joined: "Jan 12, 2026",
-    avatarSeed: "Ngyuen",
-    flags: "0 active flags"
-  },
-  {
-    id: 2,
-    username: "jane_B",
-    status: "normal",
-    joined: "Mar 05, 2026",
-    avatarSeed: "Dang",
-    flags: "1 resolved warning"
-  },
-  {
-    id: 3,
-    username: "spammer_99",
-    status: "locked",
-    lockedDate: "Jul 21, 2026",
-    avatarSeed: "Spam",
-    reason: "Forum Abuse"
-  }
-];
-
-// GET: Retrieve all users for the dashboard
-app.get('/api/users', async (req, res) => {
-  const user = await resolveCurrentUser(req);
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: "Administrator access required." });
-  }
-  res.json(adminUsers);
-});
-
-// GET: Retrieve a single user by ID
-app.get('/api/users/:id', async (req, res) => {
-  const user = await resolveCurrentUser(req);
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: "Administrator access required." });
-  }
-  const userId = parseInt(req.params.id);
-  const targetUser = adminUsers.find(u => u.id === userId);
-  if (!targetUser) {
-    return res.status(404).json({ error: "User not found." });
-  }
-  res.json(targetUser);
-});
-
-// POST: Toggle user lock status
-app.post('/api/users/:id/toggle-lock', async (req, res) => {
-  const user = await resolveCurrentUser(req);
-  if (!user || user.role !== 'admin') {
-    return res.status(403).json({ error: "Administrator access required." });
-  }
-  // Grab the ID from the URL and convert it to an integer
-  const userId = parseInt(req.params.id);
-
-  // Find the specific user in our in-memory array
-  const targetUser = adminUsers.find(u => u.id === userId);
-
-  // Server-side validation: Make sure the user actually exists
-  if (!targetUser) {
-    return res.status(404).json({ error: "User not found." });
-  }
-
-  // Toggle the status
-  if (targetUser.status === 'normal') {
-    targetUser.status = 'locked';
-    targetUser.lockedDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
-    targetUser.reason = req.body.reason || "Manual Admin Lock";
-  } else {
-    targetUser.status = 'normal';
-    // Clean up locked properties
-    delete targetUser.lockedDate;
-    delete targetUser.reason;
-  }
-
-  res.json({ message: `User status successfully updated to ${targetUser.status}`, user: targetUser });
-});
-// GET: Retrieve a single thread by ID
-app.get('/api/threads/:id', (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  res.json({
-    ...publicThread(thread),
-    posts: (thread.posts || [])
-      .filter((p) => !p.deleted)
-      .map((p) => ({
-        id: p.id,
-        author: p.author,
-        authorId: p.authorId,
-        content: p.content,
-        createdAt: p.createdAt,
-        timeAgo: timeAgo(p.createdAt)
-      }))
-  });
-});
-
-// POST: Reply to a thread
-app.post('/api/threads/:id/replies', async (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to reply." });
-  }
-
-  const content = (req.body.content || "").trim();
-  if (!content) {
-    return res.status(400).json({ error: "Reply content cannot be empty." });
-  }
-  if (content.length > 2000) {
-    return res.status(400).json({ error: "Reply content must be at most 2000 characters." });
-  }
-
-  const reply = {
-    id: "p_" + Date.now(),
-    author: user.name || user.username,
-    authorId: String(user.id),
-    content,
-    createdAt: Date.now(),
-    deleted: false
-  };
-
-  thread.posts = thread.posts || [];
-  thread.posts.push(reply);
-  thread.replies = thread.posts.filter((p) => !p.deleted).length;
-  thread.lastPostAuthor = reply.author;
-  thread.lastPostAt = reply.createdAt;
-
-  res.status(201).json({ message: "Reply posted successfully.", reply: { ...reply, timeAgo: "Just now" } });
-});
-
-// PUT: Edit a thread (owner or admin)
-app.put('/api/threads/:id', async (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to edit a thread." });
-  }
-
-  const isOwner = thread.authorId && String(thread.authorId) === String(user.id);
-  const isAdmin = user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).json({ error: "You can only edit your own threads." });
-  }
-
-  const title = (req.body.title || "").trim();
-  const content = (req.body.content || "").trim();
-  if (!title) return res.status(400).json({ error: "Thread title is strictly required." });
-  if (!content) return res.status(400).json({ error: "Post content cannot be empty." });
-  if (title.length > 150) return res.status(400).json({ error: "Thread title must be at most 150 characters." });
-  if (content.length > 5000) return res.status(400).json({ error: "Post content must be at most 5000 characters." });
-
-  thread.title = title;
-  thread.content = content;
-  thread.lastPostAt = Date.now();
-
-  res.json({ message: "Thread updated successfully.", thread: publicThread(thread) });
-});
-
-// PUT: Edit a reply (owner or admin)
-app.put('/api/threads/:id/replies/:replyId', async (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  const reply = (thread.posts || []).find((p) => p.id === req.params.replyId && !p.deleted);
-  if (!reply) {
-    return res.status(404).json({ error: "Reply not found." });
-  }
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to edit a reply." });
-  }
-
-  const isOwner = reply.authorId && String(reply.authorId) === String(user.id);
-  const isAdmin = user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).json({ error: "You can only edit your own replies." });
-  }
-
-  const content = (req.body.content || "").trim();
-  if (!content) return res.status(400).json({ error: "Reply content cannot be empty." });
-  if (content.length > 2000) return res.status(400).json({ error: "Reply content must be at most 2000 characters." });
-
-  reply.content = content;
-
-  res.json({ message: "Reply updated successfully.", reply: { ...reply, timeAgo: timeAgo(reply.createdAt) } });
-});
-
-// DELETE: Soft-delete a thread (retained for auditing)
-app.delete('/api/threads/:id', async (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to delete a thread." });
-  }
-
-  const isOwner = thread.authorId && String(thread.authorId) === String(user.id);
-  const isAdmin = user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).json({ error: "You can only delete your own threads." });
-  }
-
-  thread.deleted = true;
-  res.json({ message: "Thread successfully deleted." });
-});
-
-// DELETE: Soft-delete a reply (retained for auditing)
-app.delete('/api/threads/:id/replies/:replyId', async (req, res) => {
-  const threadId = parseInt(req.params.id);
-  const thread = forumThreads.find(t => t.id === threadId);
-  if (!thread || thread.deleted) {
-    return res.status(404).json({ error: "Thread not found." });
-  }
-
-  const reply = (thread.posts || []).find((p) => p.id === req.params.replyId && !p.deleted);
-  if (!reply) {
-    return res.status(404).json({ error: "Reply not found." });
-  }
-
-  const user = await resolveCurrentUser(req);
-  if (!user) {
-    return res.status(401).json({ error: "You must be logged in to delete a reply." });
-  }
-
-  const isOwner = reply.authorId && String(reply.authorId) === String(user.id);
-  const isAdmin = user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).json({ error: "You can only delete your own replies." });
-  }
-
-  reply.deleted = true;
-  thread.replies = thread.posts.filter((p) => !p.deleted).length;
-  thread.lastPostAt = Date.now();
-
-  res.json({ message: "Reply successfully deleted." });
-});
-
-function readGames() {
-  const games = JSON.parse(fs.readFileSync(DATA_PATH, "utf-8"));
-  let changed = false;
-  games.forEach((g) => {
-    g.reviews.forEach((r) => {
-      if (!r.id) {
-        r.id = "r_" + Date.now() + Math.random().toString(36).slice(2, 8);
-        changed = true;
-      }
-    });
-  });
-  if (changed) writeGames(games);
-  return games;
-}
-
-function writeGames(games) {
-  fs.writeFileSync(DATA_PATH, JSON.stringify(games, null, 2));
-}
-
-// Calculate avarage rating//
+// ============================================================
+// FORUM & ADMIN MODULES
+// Both modules are now MongoDB-backed and live in their own routers:
+//   routes/threads.js  -> /api/threads (+ /api/threads/:id/replies)
+//   routes/admin.js    -> /api/users  (+ lock / unlock)
+// ============================================================
 function getAvgRating(game) {
   const count = game.reviews.length;
   const totalScore = game.reviews.reduce((sum, r) => sum + r.stars, 0);
@@ -1096,7 +704,6 @@ function getAvgRating(game) {
   return { avg, count };
 }
 
-// Calculate the percentage distribution of star ratings from actual user reviews
 function getDistribution(game) {
   const dist = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
   game.reviews.forEach((r) => (dist[r.stars] += 1));
@@ -1107,155 +714,156 @@ function getDistribution(game) {
   }
   return percent;
 }
+
 function validateReviewInput(title, content, rating) {
   const errors = [];
   const t = (title || "").trim();
   const c = (content || "").trim();
-  const r = parseInt(rating);
-
+  const rawRating = parseFloat(rating);
+  if (Number.isNaN(rawRating) || rawRating < 1 || rawRating > 5) {
+    errors.push("The rating must be between 1 and 5.");
+  } else if (!Number.isInteger(rawRating)) {
+    errors.push("The rating must be a whole number (1-5).");
+  }
   if (!t) errors.push("Cant leave blank");
-  if (t.length > 80) errors.push("Title maximum 80   characters");
+  if (t.length > 80) errors.push("Title maximum 80 characters");
   if (c.length < 10) errors.push("The content must be at least 10 characters long.");
   if (c.length > 2000) errors.push("The content must be no more than 2,000 characters long.");
-  if (!Number.isInteger(r) || r < 1 || r > 5) errors.push("The rating must be between 1 and 5.");
-
   return errors;
 }
 
 // RATING
-app.get("/rating", (req, res) => {
-  let games = readGames();
-  games = games.map((g) => ({ ...g, ...getAvgRating(g) }));
-
-  const filterStar = req.query.stars ? parseInt(req.query.stars) : null;
-  const q = (req.query.search || "").toLowerCase();
-
-  let filtered = games;
-  if (filterStar) {
-    filtered = filtered.filter((g) => Math.round(g.avg) === filterStar);
+app.get("/rating", async (req, res) => {
+  try {
+    let games = await Game.find().lean();
+    games = games.map((g) => ({ ...g, id: g.id || g._id, ...getAvgRating(g) }));
+    const filterStar = req.query.stars ? parseInt(req.query.stars) : null;
+    const q = (req.query.search || "").toLowerCase();
+    let filtered = games;
+    if (filterStar) filtered = filtered.filter((g) => Math.round(g.avg) === filterStar);
+    if (q) filtered = filtered.filter((g) => g.name.toLowerCase().includes(q));
+    res.render("rating", { games: filtered, filterStar, search: req.query.search || "" });
+  } catch (err) {
+    res.render("rating", { games: [], filterStar: null, search: "" });
   }
-  if (q) {
-    filtered = filtered.filter((g) => g.name.toLowerCase().includes(q));
+});
+
+app.get("/api/games", async (req, res) => {
+  try {
+    let games = await Game.find().lean();
+    games = games.map((g) => ({ id: g.id, name: g.name, image: g.image, ...getAvgRating(g) }));
+    const q = (req.query.search || "").toLowerCase();
+    if (q) games = games.filter((g) => g.name.toLowerCase().includes(q));
+    res.json(games.map(({ id, name, image, avg }) => ({ id, name, image, avg })));
+  } catch (err) {
+    res.json([]);
   }
-
-  res.render("rating", { games: filtered, filterStar, search: req.query.search || "" });
 });
 
-app.get("/api/games", (req, res) => {
-  let games = readGames().map((g) => ({ ...g, ...getAvgRating(g) }));
-  const q = (req.query.search || "").toLowerCase();
-  if (q) games = games.filter((g) => g.name.toLowerCase().includes(q));
-  res.json(games.map(({ id, name, image, avg }) => ({ id, name, image, avg })));
+app.get("/game/:id", async (req, res) => {
+  try {
+    const game = await Game.findOne({ id: parseInt(req.params.id) }).lean();
+    if (!game) return res.status(404).send("Game not found");
+    const { avg, count } = getAvgRating(game);
+    const distribution = getDistribution(game);
+    res.render("ratinggame", { game, avg, count, distribution });
+  } catch (err) {
+    res.status(404).send("Game not found");
+  }
 });
-
-// RATINGGAME
-app.get("/game/:id", (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
-
-  const { avg, count } = getAvgRating(game);
-  const distribution = getDistribution(game);
-
-  res.render("ratinggame", { game, avg, count, distribution });
-});
-
-// Write game review
 
 app.get("/game/:id/review", async (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
-
-  let review = null;
-  if (req.query.edit) {
-    review = game.reviews.find((r) => r.id === req.query.edit) || null;
-    if (!review) return res.status(404).send("Review not found");
-    const user = await resolveCurrentUser(req);
-    if (user && review.authorId && String(review.authorId) !== String(user.id) && user.role !== 'admin') {
-      return res.status(403).send("You can only edit your own reviews");
+  try {
+    const game = await Game.findOne({ id: parseInt(req.params.id) }).lean();
+    if (!game) return res.status(404).send("Game not found");
+    let review = null;
+    if (req.query.edit) {
+      review = game.reviews.find((r) => String(r._id) === String(req.query.edit)) || null;
+      if (!review) return res.status(404).send("Review not found");
+      const user = await resolveCurrentUser(req);
+      if (user && review.authorId && String(review.authorId) !== String(user.id) && user.role !== 'admin') {
+        return res.status(403).send("You can only edit your own reviews");
+      }
     }
+    res.render("writegamereview", { game, review, errors: [] });
+  } catch (err) {
+    res.status(404).send("Game not found");
   }
-
-  res.render("writegamereview", { game, review, errors: [] });
 });
-
 
 app.post("/game/:id/review", async (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
-
-  const user = await resolveCurrentUser(req);
-  if (!user) return res.redirect("/Login.html");
-
-  const { title, content, rating, image, reviewId } = req.body;
-  const errors = validateReviewInput(title, content, rating);
-
-  if (errors.length) {
-    const review = reviewId ? game.reviews.find((r) => r.id === reviewId) : null;
-    return res.status(400).render("writegamereview", { game, review, errors });
+  try {
+    const game = await Game.findOne({ id: parseInt(req.params.id) });
+    if (!game) return res.status(404).send("Game not found");
+    const user = await resolveCurrentUser(req);
+    if (!user) return res.redirect("/Login.html");
+    const { title, content, rating, image, reviewId } = req.body;
+    const errors = validateReviewInput(title, content, rating);
+    if (errors.length) {
+      const reviewObj = reviewId ? game.reviews.find((r) => String(r._id) === String(reviewId)) : null;
+      return res.status(400).render("writegamereview", { game: game.toObject(), review: reviewObj, errors });
+    }
+    let imagePath = (image || "").trim();
+    if (imagePath.startsWith("data:image")) {
+      const saved = saveBase64Image(imagePath);
+      if (saved) imagePath = saved;
+    }
+    if (reviewId) {
+      const review = game.reviews.find((r) => String(r._id) === String(reviewId));
+      if (!review) return res.status(404).send("Review not found");
+      const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
+      const isAdmin = user && user.role === 'admin';
+      if (!isOwner && !isAdmin) return res.status(403).send("You can only edit your own reviews");
+      review.title = title.trim();
+      review.content = content.trim();
+      review.stars = parseInt(rating);
+      review.image = (image || "").trim();
+      review.editedAt = new Date();
+    } else {
+      // Block duplicate reviews from same user on same game
+      const existingReview = game.reviews.find((r) => r.authorId && String(r.authorId) === String(user.id));
+      if (existingReview && user.role !== 'admin') {
+        const errors = ["You have already reviewed this game. You can edit your existing review instead."];
+        return res.status(400).render("writegamereview", { game: game.toObject(), review: null, errors });
+      }
+      game.reviews.push({
+        id: "r_" + Date.now(),
+        author: user.name || user.username,
+        authorId: String(user.id),
+        date: new Date().toISOString(),
+        stars: parseInt(rating),
+        title: title.trim(),
+        content: content.trim(),
+        image: (image || "").trim(),
+      });
+    }
+    await game.save();
+    res.redirect("/listing.html?game=" + slugifyGame(game.name));
+  } catch (err) {
+    res.status(500).send("Failed to save review");
   }
+});
 
-  if (reviewId) {
-    // update already existing review
-    const review = game.reviews.find((r) => r.id === reviewId);
+app.post("/game/:id/review/:reviewId/delete", async (req, res) => {
+  try {
+    const game = await Game.findOne({ id: parseInt(req.params.id) });
+    if (!game) return res.status(404).send("Game not found");
+    const review = game.reviews.find((r) => String(r._id) === String(req.params.reviewId));
     if (!review) return res.status(404).send("Review not found");
+    const user = await resolveCurrentUser(req);
     const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
     const isAdmin = user && user.role === 'admin';
-    if (!isOwner && !isAdmin) {
-      return res.status(403).send("You can only edit your own reviews");
-    }
-    review.title = title.trim();
-    review.content = content.trim();
-    review.stars = parseInt(rating);
-    review.image = (image || "").trim();
-    review.date = new Date().toLocaleDateString("vi-VN") + " (edited)";
-  } else {
-    // create new review
-    game.reviews.push({
-      id: "r_" + Date.now(),
-      author: user.name || user.username,
-      authorId: String(user.id),
-      date: new Date().toLocaleDateString("vi-VN"),
-      stars: parseInt(rating),
-      title: title.trim(),
-      content: content.trim(),
-      image: (image || "").trim(),
-    });
+    if (!isOwner && !isAdmin) return res.status(403).send("You can only delete your own reviews");
+    game.reviews.pull(review._id);
+    await game.save();
+    res.redirect("/listing.html?game=" + slugifyGame(game.name));
+  } catch (err) {
+    res.status(500).send("Failed to delete review");
   }
-
-  writeGames(games);
-  res.redirect("/game/" + game.id);
 });
 
-// delete review
-app.post("/game/:id/review/:reviewId/delete", async (req, res) => {
-  const games = readGames();
-  const game = games.find((g) => g.id === parseInt(req.params.id));
-  if (!game) return res.status(404).send("Game not found");
-
-  const review = game.reviews.find((r) => r.id === req.params.reviewId);
-  if (!review) return res.status(404).send("Review not found");
-
-  const user = await resolveCurrentUser(req);
-  const isOwner = review.authorId && user && String(review.authorId) === String(user.id);
-  const isAdmin = user && user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).send("You can only delete your own reviews");
-  }
-
-  game.reviews = game.reviews.filter((r) => r.id !== req.params.reviewId);
-  writeGames(games);
-  res.redirect("/game/" + game.id);
-});
-// Game listing (detail page)
-// Linked from the store pages as listing.html?game=<slug> and /listing/:id
 function slugifyGame(name) {
-  return String(name)
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+  return String(name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
 const GAME_SLUG_ALIASES = {
@@ -1263,46 +871,42 @@ const GAME_SLUG_ALIASES = {
   "death-standing": 8,
   "death-stranding": 8,
   "cyberpunk": 2,
-  "witcher-3": 9
+  "witcher-3": 9,
+  "the-witcher-3": 9
 };
 
-function findGameBySlug(games, slug) {
-  const normalized = String(slug || "").toLowerCase().trim();
-  if (!normalized) return null;
-  const byName = games.find((g) => slugifyGame(g.name) === normalized);
-  if (byName) return byName;
-  const aliasId = GAME_SLUG_ALIASES[normalized];
-  if (aliasId) return games.find((g) => g.id === aliasId);
-  return null;
-}
-
-function renderListing(req, res) {
-  const games = readGames();
-  let game = null;
-  let slug = "";
-
-  if (req.params.id) {
-    game = games.find((g) => g.id === parseInt(req.params.id));
-  } else if (req.query.game) {
-    game = findGameBySlug(games, req.query.game);
-    slug = String(req.query.game);
-  } else if (req.query.id) {
-    game = games.find((g) => g.id === parseInt(req.query.id));
+async function renderListing(req, res) {
+  try {
+    let game = null;
+    let slug = "";
+    if (req.params.id) {
+      game = await Game.findOne({ id: parseInt(req.params.id) }).lean();
+    } else if (req.query.game) {
+      const normalized = String(req.query.game).toLowerCase().trim();
+      game = await Game.findOne({ $expr: { $eq: [{ $toLower: "$name" }, normalized.replace(/-/g, " ")] } }).lean();
+      if (!game) {
+        const aliasId = GAME_SLUG_ALIASES[normalized];
+        if (aliasId) game = await Game.findOne({ id: aliasId }).lean();
+      }
+      slug = String(req.query.game);
+    } else if (req.query.id) {
+      game = await Game.findOne({ id: parseInt(req.query.id) }).lean();
+    }
+    if (!game) return res.status(404).send("Game not found");
+    slug = slug || slugifyGame(game.name);
+    const { avg, count } = getAvgRating(game);
+    const distribution = getDistribution(game);
+    const allGames = await Game.find().lean();
+    const fcGameIds = new Set([10, 11, 12, 13]);
+    const related = fcGameIds.has(game.id)
+      ? allGames.filter((g) => fcGameIds.has(g.id) && g.id !== game.id).slice(0, 3)
+      : allGames.filter((g) => g.id !== game.id).slice(0, 4);
+    const newReleaseFreeIds = new Set([4, 13]);
+    const isNewReleaseFree = newReleaseFreeIds.has(game.id);
+    res.render("listing", { game, avg, count, distribution, related, slug, isNewReleaseFree });
+  } catch (err) {
+    res.status(500).send("Failed to load listing");
   }
-
-  if (!game) return res.status(404).send("Game not found");
-
-  slug = slug || slugifyGame(game.name);
-  const { avg, count } = getAvgRating(game);
-  const distribution = getDistribution(game);
-  const fcGameIds = new Set([10, 11, 12, 13]);
-  const related = fcGameIds.has(game.id)
-    ? games.filter((g) => fcGameIds.has(g.id) && g.id !== game.id).slice(0, 3)
-    : games.filter((g) => g.id !== game.id).slice(0, 4);
-  // Newly released titles that are temporarily free as part of the launch promotion.
-  const newReleaseFreeIds = new Set([4, 13]); // Red Dead Redemption II, EA Sports FC 26
-  const isNewReleaseFree = newReleaseFreeIds.has(game.id);
-  res.render("listing", { game, avg, count, distribution, related, slug, isNewReleaseFree });
 }
 
 app.get("/listing.html", renderListing);
@@ -1313,17 +917,19 @@ app.listen(PORT, () => {
   console.log('Playnex server running on http://localhost:' + PORT);
 });
 
-// Sitemap
-app.get('/sitemap', (req, res) => {
+// Sitemap — generated automatically from the database
+app.get('/sitemap', async (req, res) => {
   try {
-    const games = JSON.parse(fs.readFileSync(DATA_PATH, 'utf-8'));
-    const blogPosts = JSON.parse(fs.readFileSync(BLOG_DATA_PATH, 'utf-8'));
-    const threads = forumThreads;
+    const Blog = require('./models/Blog');
+    const Thread = require('./models/Thread');
+    const games = await Game.find().select('id name').lean();
+    const blogPosts = await Blog.find().select('_id title').lean();
+    const threads = await Thread.find({ deleted: false }).select('_id title').lean();
 
     res.render('sitemap', {
       games: games.map(g => ({ id: g.id, name: g.name })),
-      blogPosts: blogPosts.map(p => ({ id: p.id, title: p.title })),
-      threads: threads.map(t => ({ id: t.id, title: t.title }))
+      blogPosts: blogPosts.map(p => ({ id: p._id, title: p.title })),
+      threads: threads.map(t => ({ id: t._id, title: t.title }))
     });
   } catch (err) {
     console.error('Error rendering sitemap:', err);

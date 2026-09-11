@@ -52,7 +52,7 @@
           <p id="listing-description" class="listing-hero__description"><%= game.description %></p>
 
           <div class="listing-hero__actions">
-            <button id="listing-add-cart" type="button" class="btn btn--primary btn--large" data-game-slug="<%= slug %>">Add to cart</button>
+            <button id="listing-add-cart" type="button" class="btn btn--primary btn--large" data-game-slug="<%= slug %>" data-type="<%= game.type %>">Add to cart</button>
             <button id="listing-add-wishlist" type="button" class="btn btn--outline btn--large" data-game-slug="<%= slug %>">Add to wishlist</button>
             <a id="listing-buy-now" href="checkout.html" class="btn btn--ghost btn--large">Buy now</a>
           </div>
@@ -135,9 +135,9 @@
             <div class="comment-content">
               <div class="comment-meta">
                 <span class="author"><%= r.author %></span>
-                <span class="date"><%= r.date %></span>
-                <a href="/game/<%= game.id %>/review?edit=<%= r.id %>" class="comment-action review-owner-action" data-author-id="<%= r.authorId || '' %>">Edit</a>
-                <form method="POST" action="/game/<%= game.id %>/review/<%= r.id %>/delete"
+                <span class="date"><%= r.date ? new Date(r.date).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '' %><%= r.editedAt ? ' (edited)' : '' %></span>
+                <a href="/game/<%= game.id %>/review?edit=<%= r._id %>" class="comment-action review-owner-action" data-author-id="<%= r.authorId || '' %>">Edit</a>
+                <form method="POST" action="/game/<%= game.id %>/review/<%= r._id %>/delete"
                       class="delete-review-form review-owner-action" data-author-id="<%= r.authorId || '' %>" style="display:inline">
                   <input type="hidden" name="userId" class="review-delete-user-id" value="">
                   <button type="submit" class="comment-action comment-action--danger">Delete</button>

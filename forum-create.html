@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Create a new discussion thread on Playnex.">
 <title>Create Thread — Playnex</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -61,6 +62,22 @@
         </div>
       </div>
     </nav>
+    <div class="topbar__actions">
+      <form class="search" role="search" action="shopping.html" method="get">
+        <label for="site-search" class="visually-hidden">Search games, merch, tags</label>
+        <svg viewBox="0 0 24 24" class="search__icon" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.6" y2="16.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="site-search" name="q" type="search" placeholder="Search games, merch, tags">
+        <button type="submit" class="visually-hidden">Search</button>
+      </form>
+      <a href="wishlist.html" class="icon-btn" aria-label="Wishlist">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.5S3 14.9 3 8.9C3 5.9 5.4 3.5 8.4 3.5c1.7 0 3.3.8 4.3 2.1a5.3 5.3 0 0 1 4.3-2.1C20 3.5 21.5 5.9 21.5 8.9c0 6-9.5 11.6-9.5 11.6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="cart.html" class="icon-btn" aria-label="Cart">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
+      </a>
+      <a href="Login.html" class="btn btn--ghost btn--small">Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small">Sign up</a>
+    </div>
   </div>
 <nav class="subnav">
   <a href="forum.html" class="subnav__link is-active">Forum</a>
@@ -68,6 +85,12 @@
   <a href="/blog" class="subnav__link">Blog</a>
 </nav>
 </header>
+
+<nav class="breadcrumb" aria-label="Breadcrumb">
+  <a href="homepage.html">Home</a><span>/</span>
+  <a href="forum.html">Community</a><span>/</span>
+  <span aria-current="page">Create Thread</span>
+</nav>
 
 <main id="main-content" class="create-layout">
   <div class="create-header">
@@ -90,6 +113,10 @@
           <option value="ghost-of-tsushima">Ghost of Tsushima</option>
           <option value="death-standing">Death Stranding</option>
           <option value="witcher-3">The Witcher 3</option>
+          <option value="red-dead-redemption-2">Red Dead Redemption II</option>
+          <option value="hades">Hades</option>
+          <option value="hollow-knight">Hollow Knight</option>
+          <option value="nier-automata">NieR Automata</option>
           <option value="other">Other / General</option>
         </select>
       </div>
@@ -111,11 +138,16 @@
     </div>
 
     <div class="form-group">
-      <label>Upload Images / Attachments</label>
-      <div class="drag-drop-box">
-        <svg viewBox="0 0 24 24" width="32" height="32" stroke="currentColor" stroke-width="2" fill="none" class="drag-drop-icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-        <p>Image drag and drop box (or click to browse)</p>
+      <label for="thread-image">Illustration image (optional)</label>
+      <div class="file-upload">
+        <input id="thread-image" type="file" accept="image/jpeg,image/png,image/gif,image/webp">
+        <label for="thread-image" class="file-upload__label">
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="file-upload__icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>Choose an image</span>
+        </label>
+        <span class="file-upload__name" id="thread-image-name">No file chosen</span>
       </div>
+      <img id="thread-image-preview" alt="Thread image preview" style="display:none;">
     </div>
 
     <div class="form-actions">

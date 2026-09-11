@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <p>${escapeHtml(post.timeAgo || '')}</p>
         </div>
         <div class="thread-post-content">
-          <div class="thread-post-body">${escapeHtml(post.content)}</div>
+          <div class="thread-post-body">${escapeHtml(post.content)}${post.image ? `<img class="thread-post-image" src="${escapeHtml(post.image)}" alt="Image attached by ${escapeHtml(post.author)}">` : ''}</div>
           <div class="thread-post-actions">${manageHtml}</div>
         </div>
       </article>`;
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         <h1>${escapeHtml(thread.title)}</h1>
         <p class="thread-meta">Posted by ${escapeHtml(thread.author)} · ${escapeHtml(thread.lastPostTime)} · ${replyCount} ${replyCount === 1 ? 'reply' : 'replies'}</p>
       </div>
-      ${postTemplate({ id: 'main', author: thread.author, authorId: thread.authorId, content: thread.content, timeAgo: thread.lastPostTime }, true)}
+      ${postTemplate({ id: 'main', author: thread.author, authorId: thread.authorId, content: thread.content, image: thread.image, timeAgo: thread.lastPostTime }, true)}
     `;
 
     (thread.posts || []).forEach((p) => {
@@ -130,16 +130,31 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.textContent = 'Posting...';
 
       try {
+        // Read the optional attachment as a data URL so it travels with the
+        // reply and is stored on the reply document.
+        const imageFile = document.getElementById('reply-image')?.files[0];
+        let image = null;
+        if (imageFile) {
+          image = await new Promise((resolve) => {
+            const fr = new FileReader();
+            fr.onload = () => resolve(fr.result);
+            fr.onerror = () => resolve(null);
+            fr.readAsDataURL(imageFile);
+          });
+        }
+
         const res = await fetch(`/api/threads/${threadId}/replies`, {
           method: 'POST',
           headers: getHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify({ content })
+          body: JSON.stringify({ content, image })
         });
         const data = await res.json().catch(() => ({}));
         if (res.ok) {
           try { sessionStorage.removeItem(draftKey); } catch (e) {}
           replyContent.value = '';
           replyCharCount.textContent = '0';
+          const imageInput = document.getElementById('reply-image');
+          if (imageInput) imageInput.value = '';
           replyMsg.textContent = data.message;
           replyMsg.className = 'auth-server-msg is-success';
           await loadThread();

@@ -2,12 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profile settings — Playnex</title>
 <meta name="description" content="Edit your Playnex profile settings.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="icon" href="logo.png"><link rel="stylesheet" href="style.css">
+<link rel="icon" href="/logo.png"><link rel="stylesheet" href="style.css">
 </head>
 <body>
 <a class="skip-to-content" href="#main-content">Skip to main content</a>
@@ -33,23 +34,17 @@
       </div>
     </nav>
     <div class="topbar__actions">
-      <a href="Profile.html" class="icon-btn profile-icon" aria-label="Profile">
+      <a href="Profile.html" class="icon-btn profile-icon" aria-label="Profile" data-auth-in hidden>
         <span class="profile-icon__letter" id="profile-avatar-letter"></span>
       </a>
       <a href="cart.html" class="icon-btn" aria-label="Cart">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.4 12.2a2 2 0 0 0 2 1.6h7.6a2 2 0 0 0 2-1.6L21 8H6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="10" cy="21" r="1.3" fill="currentColor"/><circle cx="18" cy="21" r="1.3" fill="currentColor"/></svg>
       </a>
-      <a href="Login.html" class="btn btn--ghost btn--small" id="logout-btn">Log out</a>
+      <a href="Login.html" class="btn btn--ghost btn--small" id="logout-btn" data-auth-in hidden>Log out</a>
+      <a href="Login.html" class="btn btn--ghost btn--small" data-auth-out hidden>Log in</a>
+      <a href="Login.html" class="btn btn--primary btn--small" data-auth-out hidden>Sign up</a>
     </div>
   </div>
-
-  <nav class="subnav">
-    <a href="shopping.html" class="subnav__link">All</a>
-    <a href="shopping.html?cat=digital" class="subnav__link">Digital games</a>
-    <a href="shopping.html?cat=merch" class="subnav__link">Physical merch</a>
-    <a href="shopping.html?cat=deals" class="subnav__link">Deals</a>
-    <a href="shopping.html?cat=free" class="subnav__link">Free this week</a>
-  </nav>
 </header>
 
 
@@ -271,6 +266,18 @@
               <span class="mission-card__reward">+75 XP</span>
             </div>
           </div>
+
+        </section>
+
+        <hr class="profile-divider">
+
+        <!-- ALREADY PURCHASED -->
+        <section class="profile-section" id="purchases-section">
+          <h2>Already Purchased</h2>
+          <p class="profile-section__hint">Your order history from the store</p>
+          <div id="purchases-list" class="purchases-list">
+            <p class="purchases-empty" id="purchases-empty">No purchases yet.</p>
+          </div>
         </section>
 
       </div>
@@ -278,7 +285,6 @@
 
   </div>
 </main>
-
 
 <footer class="site-footer">
   <div class="site-footer__inner">

@@ -17,17 +17,22 @@
 <%- include('partials/header', { activeNav: 'community', activeSubnav: 'blog' }) %>
 
 <main id="main-content">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="/homepage.html">Home</a><span>/</span>
+    <a href="/forum.html">Community</a><span>/</span>
+    <span aria-current="page">Blog</span>
+  </nav>
+
   <div class="page-header">
     <h1>Blog</h1>
     <a href="/blog/new" class="btn btn--primary btn--small" id="write-post-btn" hidden>Write a post</a>
   </div>
 
   <div class="wrap">
-    <div class="blog-toolbar">
+    <div class="blog-toolbar blog-toolbar--full">
       <form class="searchbar" id="search-form" role="search">
         <label for="search" class="visually-hidden">Search blog posts</label>
         <input type="text" name="search" id="search" placeholder="Search title, summary, tag or author..." autocomplete="off">
-        <button type="submit" class="btn btn--primary btn--small">Search</button>
       </form>
 
       <div class="blog-toolbar__right">

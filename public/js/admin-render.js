@@ -11,6 +11,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  // Escape values before interpolating them into HTML. Account usernames are
+  // user supplied, so rendering them raw would allow script injection.
+  const escapeHtml = (value) => {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
   // Function to fetch and render users
   const loadUsers = async () => {
     try {
@@ -27,34 +38,36 @@ document.addEventListener('DOMContentLoaded', () => {
       lockedList.innerHTML = '';
 
       users.forEach(user => {
+        const seed = encodeURIComponent(user.avatarSeed || user.username || 'user');
+        const username = escapeHtml(user.username);
         if (user.status === 'normal') {
           normalList.innerHTML += `
             <div class="admin-row">
               <div class="account-profile">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}" alt="Avatar">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" alt="Avatar">
                 <div class="account-info">
-                  <h4>${user.username}</h4>
-                  <p>Joined: ${user.joined} · ${user.flags}</p>
+                  <h4>${username}</h4>
+                  <p>Joined: ${escapeHtml(user.joined)} · ${escapeHtml(user.flags)}</p>
                 </div>
               </div>
               <div class="admin-actions">
-                <a class="btn btn--outline btn--small" href="admin-detail.html?id=${user.id}">View details</a>
-                <button class="btn btn--danger btn--small toggle-lock-btn" data-id="${user.id}">Lock account</button>
+                <a class="btn btn--outline btn--small" href="admin-detail.html?id=${encodeURIComponent(user.id)}">View details</a>
+                <button class="btn btn--danger btn--small toggle-lock-btn" data-id="${escapeHtml(user.id)}">Lock account</button>
               </div>
             </div>`;
         } else {
           lockedList.innerHTML += `
             <div class="admin-row">
               <div class="account-profile">
-                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatarSeed}" alt="Avatar" style="opacity:0.5;">
+                <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${seed}" alt="Avatar" style="opacity:0.5;">
                 <div class="account-info">
-                  <h4>${user.username}</h4>
-                  <p>Locked: ${user.lockedDate} · Reason: ${user.reason}</p>
+                  <h4>${username}</h4>
+                  <p>Locked: ${escapeHtml(user.lockedDate)} · Reason: ${escapeHtml(user.reason)}</p>
                 </div>
               </div>
               <div class="admin-actions">
-                <a class="btn btn--outline btn--small" href="admin-detail.html?id=${user.id}">View details</a>
-                <button class="btn btn--success btn--small toggle-lock-btn" data-id="${user.id}">Unlock account</button>
+                <a class="btn btn--outline btn--small" href="admin-detail.html?id=${encodeURIComponent(user.id)}">View details</a>
+                <button class="btn btn--success btn--small toggle-lock-btn" data-id="${escapeHtml(user.id)}">Unlock account</button>
               </div>
             </div>`;
         }

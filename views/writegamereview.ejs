@@ -39,7 +39,7 @@
     <form class="new-thread-form" method="POST" action="/game/<%= game.id %>/review" id="reviewForm" novalidate>
       <input type="hidden" name="userId" id="review-user-id" value="">
       <% if (review) { %>
-        <input type="hidden" name="reviewId" value="<%= review.id %>">
+        <input type="hidden" name="reviewId" value="<%= review._id %>">
       <% } %>
 
       <div class="field">
@@ -65,11 +65,18 @@
         <span class="field-error" id="contentError"></span>
       </div>
 
-      <div class="field">
-        <label for="reviewImage">Illustration image (URL, optional)</label>
-        <input type="url" id="reviewImage" name="image"
-               value="<%= review ? review.image : '' %>" placeholder="https://...">
-        <img id="imagePreview" src="" alt="" style="display:none;">
+            <div class="field">
+        <label for="reviewImageFile">Illustration image (optional)</label>
+        <div class="file-upload">
+          <input id="reviewImageFile" type="file" accept="image/jpeg,image/png,image/gif,image/webp">
+          <label for="reviewImageFile" class="file-upload__label">
+            <svg viewBox="0 0 24 24" aria-hidden="true" class="file-upload__icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>Choose an image</span>
+          </label>
+          <span class="file-upload__name" id="reviewImageFileName">No file chosen</span>
+        </div>
+        <input type="hidden" id="reviewImage" name="image" value="<%= review ? review.image : '' %>">
+        <img id="imagePreview" src="<%= review && review.image ? review.image : '' %>" alt="" style="<%= review && review.image ? '' : 'display:none;' %>">
       </div>
 
       <button type="submit" class="btn btn--primary"><%= review ? 'Update' : 'Submit' %></button>
@@ -84,7 +91,9 @@
   const form = document.getElementById('reviewForm');
   const titleInput = document.getElementById('title');
   const contentInput = document.getElementById('content');
-  const imageInput = document.getElementById('reviewImage');
+  const imageInput = document.getElementById('reviewImage'); 
+  const imageFileInput = document.getElementById('reviewImageFile');
+  const imageFileName = document.getElementById('reviewImageFileName');
   const imagePreview = document.getElementById('imagePreview');
   const DRAFT_KEY = 'reviewDraft_<%= game.id %>_<%= review ? review.id : "new" %>';
 
@@ -125,15 +134,22 @@
   titleInput.addEventListener('input', () => { validateTitle(); saveDraft(); });
   contentInput.addEventListener('input', () => { validateContent(); saveDraft(); });
 
-  imageInput.addEventListener('input', () => {
-    if (imageInput.value) {
-      imagePreview.src = imageInput.value;
-      imagePreview.style.display = 'block';
-      imagePreview.onerror = () => { imagePreview.style.display = 'none'; };
-    } else {
-      imagePreview.style.display = 'none';
+    imageFileInput.addEventListener('change', () => {
+    const file = imageFileInput.files[0];
+    if (!file) {
+      imageFileName.textContent = 'No file chosen';
+      return;
     }
-    saveDraft();
+    imageFileName.textContent = file.name;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      imageInput.value = reader.result; // data:image/...;base64,....
+      imagePreview.src = reader.result;
+      imagePreview.style.display = 'block';
+      saveDraft();
+    };
+    reader.readAsDataURL(file);
   });
 
   form.addEventListener('submit', (e) => {

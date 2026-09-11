@@ -18,7 +18,7 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 - `views/ratinggame.ejs` - Game review details with rating breakdown and user reviews
 - `views/writegamereview.ejs` - Submit a star rating and written review for a game
 - `views/sitemap.ejs` - Automatically generated sitemap
-- `data/games.json` - Game and review data
+- `data/games.json` - Game and review seed data
 - `views/partials/header.ejs`, `views/partials/footer.ejs` - Shared EJS header and footer partials
 
 ### Nguyen Ngoc Quang Dang (S4113887)
@@ -31,7 +31,8 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 - `views/listing.ejs` - Game detail page (hero, facts, related games; mostly Dang, game review section by Bao)
 - `public/js/listing.js` - Add to cart / wishlist wiring for the listing page
 - `routes/products.js`, `routes/cart.js`, `routes/wishlist.js`, `routes/checkout.js` - Store APIs
-- `data/products.js`, `data/store.js` - Store catalogue and in-memory store data
+- `data/products.js` - Product seed catalogue
+- `data/store.js` - MongoDB-backed cart, wishlist and order data store with item statistics
 - `public/js/homepage.js`, `shopping.js`, `cart.js`, `wishlist.js`, `checkout.js`, `confirmation.js` - Client scripts
 - `style.css` - Global stylesheet (shared)
 
@@ -41,9 +42,13 @@ Playnex is a digital games and physical merchandise storefront. Browse games, ad
 - `forum-create.html` - Form to create or edit a discussion post
 - `admin.html` - Administrator dashboard for managing locked/normal accounts
 - `admin-detail.html` - Detailed user moderation view with flags and purchase history
-- `public/js/forum-render.js`, `forum-filter.js`, `forum-detail.js`, `forum-create.js` - Forum client scripts
+- `public/js/forum-render.js`, `forum-detail.js`, `forum-create.js` - Forum client scripts
 - `public/js/admin-render.js`, `admin-search.js`, `admin-detail.js` - Admin client scripts
-- `server.js` (Forum & Admin segments) - In-memory data arrays and REST API endpoints
+- `routes/threads.js` - Forum API (threads, replies, ownership checks) backed by MongoDB
+- `routes/admin.js` - Administration API (list accounts, lock and unlock accounts)
+- `models/Thread.js` - MongoDB thread schema with embedded reply documents
+- `models/Category.js` - MongoDB forum category schema
+- `seed-forum.js` - Seeds forum categories and demo threads without touching other collections
 
 ### Nguyen Khanh Nguyen (S4197203) - Blog + User Account
 Blog module:
@@ -51,15 +56,17 @@ Blog module:
 - `views/detailblog.ejs` - Full post view with comments and owner edit/delete
 - `views/writeblog.ejs` - Create / edit post form with live validation and draft autosave
 - `routes/blogs.js` - Blog routes (pages + JSON API) with server-side validation and ownership checks
-- `data/blogs.json` - Blog post data
+- `models/Blog.js` - MongoDB blog schema with embedded comment documents
+- `data/blogs.json` - Blog seed data
 
 Shared User Account module (with team):
 - `Login.html` + `public/js/auth.js` - Login, sign up, forgot password, and reset password forms (live validation)
 - `Profile.html` + `public/js/profile.js` - Edit profile, change email/password, delete account
 - `server.js` - Auth API endpoints with server-side validation and in-memory fallback
 - `models/User.js` - MongoDB user schema
-- `models/memoryUsers.js` - In-memory user store for the A2 prototype
+- `models/memoryUsers.js` - In-memory user store used as a fallback if MongoDB is unreachable
 - `middleware/currentUser.js` - Identifies the current user for API requests
+- `middleware/resolveUser.js` - Resolves the logged-in session user for ownership checks
 - `public/js/current-user.js`, `public/js/header.js` - Logged-in state and admin-only UI across pages
 
 ### Shared / Assets
@@ -68,19 +75,43 @@ Shared User Account module (with team):
 - `public/img/` - Product and article images
 - `server.js` - Express server, shared modules, and module routes
 
+## Live Website
+https://playnex-m13w.onrender.com
+
+## GitHub Repository
+https://github.com/s4113887rmit/Playnex
+
 ## How to Run and Test
 
 1. Install dependencies (only once):
    ```
    npm install
    ```
-2. Start the server:
+2. Create a `.env` file with your MongoDB Atlas connection string:
+   ```
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/playnex?retryWrites=true&w=majority
+   PORT=3000
+   ```
+3. Seed the database (first time only). This clears and rebuilds blogs, games and products:
+   ```
+   node seed.js
+   ```
+4. Add or refresh the forum categories and demo threads on an existing database.
+   This does not modify any other collection and is safe to run repeatedly:
+   ```
+   node seed-forum.js
+   ```
+5. Start the server:
    ```
    npm start
    ```
-3. Open http://localhost:3000
+6. Open http://localhost:3000
 
-The A2 prototype does not require MongoDB. If no MongoDB connection string is set (or the database is unreachable), the app automatically falls back to in-memory users.
+### MongoDB Connection
+- **Database**: MongoDB Atlas (cloud-hosted)
+- **Cluster**: playnex.mzcuobd.mongodb.net
+- **Database name**: playnex
+- **Collections**: blogs, games, products, carts, wishlists, orders, users, threads, categories
 
 ### Demo accounts
 
@@ -111,12 +142,16 @@ The A2 prototype does not require MongoDB. If no MongoDB connection string is se
 - Browse `shopping.html` with filters, sorting, and search; open a game detail page from any card
 - Add items to the cart and wishlist, update quantities, move wishlist items to the cart
 - Complete the checkout form (invalid data is rejected with field errors) and view the confirmation page
+- Wishlist items show live statistics (how many wishlists contain the item, cart adds and purchases)
 
 ### Testing the Forum and Admin modules
-- **Admin Dashboard:** Log in with the Admin demo account and navigate to `admin.html`. Click "Lock account" or "Unlock account" to dynamically update user statuses via the backend API.
-- **Forum Threads:** Navigate to `forum.html` to view the dynamic thread list fetched from the server.
-- **Single Thread:** Click on any thread title to view its specific data, loaded dynamically on `forum-detail.html`.
-- **Create & Delete:** Create a new thread with the "Create Thread" form, and use the delete buttons to trigger the server's DELETE routes.
+- **Forum Threads:** open `forum.html` to view the thread list, which is loaded from the `threads` collection in MongoDB
+- **Search, filter and sort:** use the search box, the category filter and the sort dropdown (latest, oldest, most viewed, most replies, and so on)
+- **Single Thread:** click any thread title to load it on `forum-detail.html` with its replies; the view counter is stored in the database
+- **Create, Edit, Delete:** logged-in users create threads, reply, and edit or delete their own threads and replies. Deleted content is hidden from the site but retained in the database for auditing
+- **Admin Dashboard:** log in with the Admin demo account and open `admin.html`. The list shows the real registered accounts from the `users` collection
+- **Lock and Unlock:** locking an account sets `isLocked` on that user in MongoDB. A locked user can no longer log in and is refused by the API. Administrator accounts cannot be locked
+- JSON API: `GET /api/threads`, `GET /api/threads/:id`, `POST /api/threads`, `PUT /api/threads/:id`, `DELETE /api/threads/:id`, `POST /api/threads/:id/replies`, and `GET /api/users`, `GET /api/users/:id`, `POST /api/users/:id/toggle-lock`
 
 ## Technical Stack
 
@@ -124,8 +159,10 @@ The A2 prototype does not require MongoDB. If no MongoDB connection string is se
 |-------|-----------|
 | Front-end | HTML, CSS, JavaScript (no external frameworks) |
 | Back-end | NodeJS, Express, EJS |
-| Data | In-memory / JSON files (A2), MongoDB Atlas + Mongoose (A3) |
+| Database | MongoDB Atlas (cloud-hosted) |
+| Data | MongoDB Atlas with Mongoose for all application data; JSON files are used only by the seed scripts |
 
 ## Assignment Notes
 - No external frameworks (React, jQuery, Bootstrap, etc.) are used per course requirement
 - All submitted code is original work
+- Database seeded with sample data via `node seed.js`, and forum data via `node seed-forum.js`

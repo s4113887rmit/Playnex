@@ -11,6 +11,7 @@
   let filteredProducts = [];
   let appliedFilters = { platforms: [], genres: [], prices: [], availability: [] };
   let currentPage = 1;
+  let cartIds = new Set();
   const itemsPerPage = 9;
 
   const grid = document.querySelector('.shop-grid');
@@ -40,6 +41,9 @@
       : `<div class="card__placeholder-art">${p.title.charAt(0)}</div>`;
 
     const isSaved = wishlistIds.has(p.id);
+    const inCart = cartIds.has(p.id);
+    const isDigital = p.category === 'digital' || p.type === 'Digital';
+    const showAlreadyInCart = inCart && isDigital;
 
     return `
       <li>
@@ -55,7 +59,7 @@
             <h3 class="card__title"><a href="${p.href || 'shopping.html'}">${p.title}</a></h3>
             <p class="card__meta">${p.genre} · ${p.platform}</p>
             <div class="card__price">${priceHTML}</div>
-            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="${p.id}">Add to cart</button>
+            <button type="button" class="btn btn--ghost btn--small card__add" data-action="add-to-cart" data-id="${p.id}" ${showAlreadyInCart ? 'disabled' : ''}>${showAlreadyInCart ? 'Already in cart' : 'Add to cart'}</button>
           </div>
         </article>
       </li>`;
@@ -203,10 +207,12 @@
 
   async function loadCatalogue() {
     try {
-      const [productsData, wishlistData] = await Promise.all([
+      const [productsData, wishlistData, cartData] = await Promise.all([
         api('/api/products'),
-        api('/api/wishlist').catch(() => ({ items: [] }))
+        api('/api/wishlist').catch(() => ({ items: [] })),
+        api('/api/cart').catch(() => ({ items: [] }))
       ]);
+      cartIds = new Set((cartData.items || []).map(item => item.productId));
       // Keep page one games and the four FC physical games for page two.
       allProducts = (productsData || []).filter(p => {
         if (p.category === 'digital') {
@@ -300,8 +306,28 @@
     } catch {}
   }
 
+  async function refreshCart() {
+    try {
+      const cartData = await api('/api/cart').catch(() => ({ items: [] }));
+      cartIds = new Set((cartData.items || []).map(item => item.productId));
+      document.querySelectorAll('[data-action="add-to-cart"]').forEach(btn => {
+        const id = btn.dataset.id;
+        if (id && cartIds.has(id)) {
+          const product = allProducts.find(p => p.id === id);
+          const isDigital = product && (product.category === 'digital' || product.type === 'Digital');
+          if (isDigital) {
+            btn.textContent = 'Already in cart';
+            btn.disabled = true;
+          }
+        }
+      });
+    } catch {}
+  }
+
   window.addEventListener('pageshow', refreshWishlist);
   window.addEventListener('focus', refreshWishlist);
+  window.addEventListener('pageshow', refreshCart);
+  window.addEventListener('focus', refreshCart);
 
   // Filter Form listeners
   if (filterForm) {
@@ -362,14 +388,13 @@
           method: 'POST',
           body: { productId, qty: 1 }
         });
-        addBtn.textContent = 'Added ✓';
+        addBtn.textContent = 'Already in cart';
+        addBtn.disabled = true;
         showToast('Added item to your cart!', 'success');
-        setTimeout(() => {
-          addBtn.textContent = originalText;
-          addBtn.disabled = false;
-        }, 1200);
+        if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
       } catch (err) {
         showToast(err.message, 'error');
+        addBtn.textContent = originalText;
         addBtn.disabled = false;
       }
       return;

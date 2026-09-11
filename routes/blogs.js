@@ -1,26 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const fs = require('fs');
-const path = require('path');
 const router = express.Router();
-
-const BLOGS_PATH = path.join(__dirname, '..', 'data', 'blogs.json');
+const Blog = require('../models/Blog');
 const User = require('../models/User');
 const memoryUsers = require('../models/memoryUsers');
-
-function readBlogs() {
-  let raw = fs.readFileSync(BLOGS_PATH, 'utf-8');
-  if (raw.charCodeAt(0) === 0xfeff) raw = raw.slice(1);
-  return JSON.parse(raw);
-}
-
-function writeBlogs(blogs) {
-  fs.writeFileSync(BLOGS_PATH, JSON.stringify(blogs, null, 2));
-}
-
-function newId(prefix) {
-  return prefix + '-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8);
-}
 
 function formatDate(iso) {
   const d = new Date(iso);
@@ -83,17 +66,19 @@ function validateBlogInput(body) {
 }
 
 async function resolveUser(req) {
-  const userId = (req.body && req.body.userId) || req.userId || req.header('x-user-id') || '';
+  // Identity comes from the server-side session only. A body userId or
+  // x-user-id header is client controlled and must not be trusted here.
+  const sessionId = req.session && req.session.userId;
+  if (!sessionId) return null;
+  const userId = String(sessionId).trim();
   if (!userId || userId === 'guest-user') return null;
 
-  // 1) In-memory store (A2 prototype, no MongoDB required)
   const mem = memoryUsers.findMemoryUser((u) => u.id === userId);
   if (mem) {
     if (mem.isLocked || !mem.isActive) return null;
     return { _id: mem.id, name: mem.name, username: mem.username, email: mem.email, role: mem.role };
   }
 
-  // 2) MongoDB (optional; used if the database is available)
   if (mongoose.connection.readyState === 1 && mongoose.isValidObjectId(userId)) {
     try {
       const user = await User.findById(userId);
@@ -105,9 +90,9 @@ async function resolveUser(req) {
   return null;
 }
 
-function listPayload(blogs) {
-  return blogs.map((blog) => ({
-    id: blog.id,
+function listPayload(blog) {
+  return {
+    id: blog._id,
     title: blog.title,
     summary: blog.summary,
     content: blog.content,
@@ -118,61 +103,64 @@ function listPayload(blogs) {
     date: blog.date,
     views: blog.views,
     commentCount: (blog.comments || []).length
-  }));
+  };
 }
 
 // ============================================================
 // Blog pages (EJS views)
 // ============================================================
 
-// GET /blog - list view. Posts are rendered server-side; search, sort and
-// tag filtering all run client-side (see blog.ejs) without back-end calls.
-router.get('/blog', (req, res) => {
-  const blogs = readBlogs();
-  const allTags = [];
-  blogs.forEach((b) => {
-    (b.tags || []).forEach((t) => {
-      if (allTags.indexOf(t) === -1) allTags.push(t);
+router.get('/blog', async (req, res) => {
+  try {
+    const blogs = await Blog.find().sort({ date: -1 }).lean();
+    const allTags = [];
+    blogs.forEach((b) => {
+      (b.tags || []).forEach((t) => {
+        if (allTags.indexOf(t) === -1) allTags.push(t);
+      });
     });
-  });
-  res.render('blog', { posts: listPayload(blogs), allTags: allTags.sort() });
+    res.render('blog', { posts: blogs.map(listPayload), allTags: allTags.sort() });
+  } catch (err) {
+    res.render('blog', { posts: [], allTags: [] });
+  }
 });
 
-// GET /blog/new - write a new post
 router.get('/blog/new', (req, res) => {
   res.render('writeblog', { post: null, errors: [], values: {}, isEdit: false });
 });
 
-// GET /blog/:id - detailed view with comments
-router.get('/blog/:id', (req, res) => {
-  const blogs = readBlogs();
-  const post = blogs.find((b) => b.id === req.params.id);
-  if (!post) return res.status(404).send('Post not found');
-  post.views = (post.views || 0) + 1;
-  writeBlogs(blogs);
-
-  res.render('detailblog', {
-    post: post,
-    date: formatDate(post.date),
-    blocks: parseBlocks(post.content),
-    commentErrors: []
-  });
+router.get('/blog/:id', async (req, res) => {
+  try {
+    const post = await Blog.findById(req.params.id).lean();
+    if (!post) return res.status(404).send('Post not found');
+    await Blog.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } });
+    post.views = (post.views || 0) + 1;
+    res.render('detailblog', {
+      post: { ...post, id: post._id },
+      date: formatDate(post.date),
+      blocks: parseBlocks(post.content),
+      commentErrors: []
+    });
+  } catch (err) {
+    res.status(404).send('Post not found');
+  }
 });
 
-// GET /blog/:id/edit - edit form (ownership enforced again on POST)
-router.get('/blog/:id/edit', (req, res) => {
-  const blogs = readBlogs();
-  const post = blogs.find((b) => b.id === req.params.id);
-  if (!post) return res.status(404).send('Post not found');
-  res.render('writeblog', {
-    post: post,
-    errors: [],
-    values: { title: post.title, summary: post.summary, tags: (post.tags || []).join(', '), image: post.image || '', content: post.content },
-    isEdit: true
-  });
+router.get('/blog/:id/edit', async (req, res) => {
+  try {
+    const post = await Blog.findById(req.params.id).lean();
+    if (!post) return res.status(404).send('Post not found');
+    res.render('writeblog', {
+      post: { ...post, id: post._id },
+      errors: [],
+      values: { title: post.title, summary: post.summary, tags: (post.tags || []).join(', '), image: post.image || '', content: post.content },
+      isEdit: true
+    });
+  } catch (err) {
+    res.status(404).send('Post not found');
+  }
 });
 
-// POST /blog/create
 router.post('/blog/create', async (req, res) => {
   const user = await resolveUser(req);
   if (!user) {
@@ -189,164 +177,174 @@ router.post('/blog/create', async (req, res) => {
     return res.status(400).render('writeblog', { post: null, errors, values: req.body, isEdit: false });
   }
 
-  const blogs = readBlogs();
-  const post = {
-    id: newId('post'),
-    title: values.title,
-    summary: values.summary,
-    content: values.content,
-    tags: values.tags,
-    image: values.image || null,
-    authorName: user.name || user.username,
-    authorId: String(user._id),
-    date: new Date().toISOString(),
-    views: 0,
-    comments: []
-  };
-  blogs.unshift(post);
-  writeBlogs(blogs);
-  res.redirect('/blog/' + post.id);
+  try {
+    const post = await Blog.create({
+      title: values.title,
+      summary: values.summary,
+      content: values.content,
+      tags: values.tags,
+      image: values.image || null,
+      authorName: user.name || user.username,
+      authorId: String(user._id),
+      date: new Date().toISOString(),
+      views: 0,
+      comments: []
+    });
+    res.redirect('/blog/' + post._id);
+  } catch (err) {
+    res.status(500).render('writeblog', { post: null, errors: ['Failed to create post.'], values: req.body, isEdit: false });
+  }
 });
 
-// POST /blog/:id/update
 router.post('/blog/:id/update', async (req, res) => {
   const user = await resolveUser(req);
-  const blogs = readBlogs();
-  const post = blogs.find((b) => b.id === req.params.id);
-  if (!post) return res.status(404).send('Post not found');
+  try {
+    const post = await Blog.findById(req.params.id);
+    if (!post) return res.status(404).send('Post not found');
 
-  if (!user) {
-    return res.status(401).render('writeblog', {
-      post,
-      errors: ['You must be logged in to edit this post.'],
-      values: req.body,
-      isEdit: true
-    });
-  }
-  if (post.authorId !== String(user._id)) {
-    return res.status(403).send('You can only edit your own posts');
-  }
+    if (!user) {
+      return res.status(401).render('writeblog', {
+        post: { ...post.toObject(), id: post._id },
+        errors: ['You must be logged in to edit this post.'],
+        values: req.body,
+        isEdit: true
+      });
+    }
+    if (post.authorId !== String(user._id)) {
+      return res.status(403).send('You can only edit your own posts');
+    }
 
-  const { errors, values } = validateBlogInput(req.body);
-  if (errors.length) {
-    return res.status(400).render('writeblog', { post, errors, values: req.body, isEdit: true });
-  }
+    const { errors, values } = validateBlogInput(req.body);
+    if (errors.length) {
+      return res.status(400).render('writeblog', { post: { ...post.toObject(), id: post._id }, errors, values: req.body, isEdit: true });
+    }
 
-  post.title = values.title;
-  post.summary = values.summary;
-  post.content = values.content;
-  post.tags = values.tags;
-  post.image = values.image || null;
-  writeBlogs(blogs);
-  res.redirect('/blog/' + post.id);
+    post.title = values.title;
+    post.summary = values.summary;
+    post.content = values.content;
+    post.tags = values.tags;
+    post.image = values.image || null;
+    await post.save();
+    res.redirect('/blog/' + post._id);
+  } catch (err) {
+    res.status(500).send('Failed to update post');
+  }
 });
 
-// POST /blog/:id/delete
 router.post('/blog/:id/delete', async (req, res) => {
   const user = await resolveUser(req);
-  const blogs = readBlogs();
-  const post = blogs.find((b) => b.id === req.params.id);
-  if (!post) return res.status(404).send('Post not found');
-
-  if (!user) return res.redirect('/Login.html');
-  if (post.authorId !== String(user._id)) {
-    return res.status(403).send('You can only delete your own posts');
+  try {
+    const post = await Blog.findById(req.params.id);
+    if (!post) return res.status(404).send('Post not found');
+    if (!user) return res.redirect('/Login.html');
+    if (post.authorId !== String(user._id)) {
+      return res.status(403).send('You can only delete your own posts');
+    }
+    await Blog.findByIdAndDelete(req.params.id);
+    res.redirect('/blog');
+  } catch (err) {
+    res.status(500).send('Failed to delete post');
   }
-
-  writeBlogs(blogs.filter((b) => b.id !== post.id));
-  res.redirect('/blog');
 });
 
-// POST /blog/:id/comment
 router.post('/blog/:id/comment', async (req, res) => {
   const user = await resolveUser(req);
-  const blogs = readBlogs();
-  const post = blogs.find((b) => b.id === req.params.id);
-  if (!post) return res.status(404).send('Post not found');
+  try {
+    const post = await Blog.findById(req.params.id);
+    if (!post) return res.status(404).send('Post not found');
 
-  const content = (req.body.content || '').trim();
-  const commentErrors = [];
-  if (!user) commentErrors.push('You must be logged in to comment.');
-  if (!content) commentErrors.push('Comment cannot be blank.');
-  else if (content.length > 1000) commentErrors.push('Comment must be at most 1,000 characters.');
+    const content = (req.body.content || '').trim();
+    const commentErrors = [];
+    if (!user) commentErrors.push('You must be logged in to comment.');
+    if (!content) commentErrors.push('Comment cannot be blank.');
+    else if (content.length > 1000) commentErrors.push('Comment must be at most 1,000 characters.');
 
-  if (commentErrors.length) {
-    return res.status(400).render('detailblog', {
-      post,
-      date: formatDate(post.date),
-      blocks: parseBlocks(post.content),
-      commentErrors
+    if (commentErrors.length) {
+      return res.status(400).render('detailblog', {
+        post: { ...post.toObject(), id: post._id },
+        date: formatDate(post.date),
+        blocks: parseBlocks(post.content),
+        commentErrors
+      });
+    }
+
+    post.comments.push({
+      authorName: user.name || user.username,
+      authorId: String(user._id),
+      content,
+      date: new Date().toISOString()
     });
+    await post.save();
+    res.redirect('/blog/' + post._id);
+  } catch (err) {
+    res.status(500).send('Failed to add comment');
   }
-
-  post.comments = post.comments || [];
-  post.comments.push({
-    id: newId('comment'),
-    authorName: user.name || user.username,
-    authorId: String(user._id),
-    content,
-    date: new Date().toISOString()
-  });
-  writeBlogs(blogs);
-  res.redirect('/blog/' + post.id);
 });
 
-// POST /blog/:id/comment/:commentId/delete - comment owner or admin
 router.post('/blog/:id/comment/:commentId/delete', async (req, res) => {
   const user = await resolveUser(req);
-  const blogs = readBlogs();
-  const post = blogs.find((b) => b.id === req.params.id);
-  if (!post) return res.status(404).send('Post not found');
+  try {
+    const post = await Blog.findById(req.params.id);
+    if (!post) return res.status(404).send('Post not found');
 
-  const comment = (post.comments || []).find((c) => c.id === req.params.commentId);
-  if (!comment) return res.status(404).send('Comment not found');
-  if (!user) return res.redirect('/Login.html');
+    const comment = post.comments.id(req.params.commentId);
+    if (!comment) return res.status(404).send('Comment not found');
+    if (!user) return res.redirect('/Login.html');
 
-  const isOwner = comment.authorId === String(user._id);
-  const isAdmin = user.role === 'admin';
-  if (!isOwner && !isAdmin) {
-    return res.status(403).send('You can only delete your own comments');
+    const isOwner = comment.authorId === String(user._id);
+    const isAdmin = user.role === 'admin';
+    if (!isOwner && !isAdmin) {
+      return res.status(403).send('You can only delete your own comments');
+    }
+
+    post.comments.pull(req.params.commentId);
+    await post.save();
+    res.redirect('/blog/' + post._id);
+  } catch (err) {
+    res.status(500).send('Failed to delete comment');
   }
-
-  post.comments = post.comments.filter((c) => c.id !== req.params.commentId);
-  writeBlogs(blogs);
-  res.redirect('/blog/' + post.id);
 });
 
 // ============================================================
-// Blog JSON API (used for dynamic retrieval / integration)
+// Blog JSON API
 // ============================================================
 
-// GET /api/blogs - list previews
-router.get('/api/blogs', (req, res) => {
-  let blogs = readBlogs();
-  const q = (req.query.q || '').toLowerCase();
-  const tag = (req.query.tag || '').toLowerCase();
-  if (q) {
-    blogs = blogs.filter((b) =>
-      [b.title, b.summary, b.content, b.authorName, ...(b.tags || [])]
-        .join(' ')
-        .toLowerCase()
-        .includes(q)
-    );
+router.get('/api/blogs', async (req, res) => {
+  try {
+    let query = {};
+    const q = (req.query.q || '').trim();
+    const tag = (req.query.tag || '').trim();
+    if (q) {
+      const safe = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.$or = [
+        { title: { $regex: safe, $options: 'i' } },
+        { summary: { $regex: safe, $options: 'i' } },
+        { content: { $regex: safe, $options: 'i' } },
+        { authorName: { $regex: safe, $options: 'i' } },
+        { tags: { $regex: safe, $options: 'i' } }
+      ];
+    }
+    if (tag) {
+      query.tags = { $in: [new RegExp('^' + tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$', 'i')] };
+    }
+    const blogs = await Blog.find(query).sort({ date: -1 }).lean();
+    res.json(blogs.map(listPayload));
+  } catch (err) {
+    res.json([]);
   }
-  if (tag) {
-    blogs = blogs.filter((b) => (b.tags || []).some((t) => t.toLowerCase() === tag));
-  }
-  res.json(listPayload(blogs));
 });
 
-// GET /api/blogs/:id - full post (increments views)
-router.get('/api/blogs/:id', (req, res) => {
-  const blogs = readBlogs();
-  const post = blogs.find((b) => b.id === req.params.id);
-  if (!post) return res.status(404).json({ error: 'Blog post not found.' });
-  post.views = (post.views || 0) + 1;
-  writeBlogs(blogs);
-  res.json(post);
+router.get('/api/blogs/:id', async (req, res) => {
+  try {
+    const post = await Blog.findById(req.params.id).lean();
+    if (!post) return res.status(404).json({ error: 'Blog post not found.' });
+    await Blog.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } });
+    res.json({ ...post, id: post._id });
+  } catch (err) {
+    res.status(404).json({ error: 'Blog post not found.' });
+  }
 });
 
-// POST /api/blogs - create (logged-in users only)
 router.post('/api/blogs', async (req, res) => {
   const user = await resolveUser(req);
   if (!user) return res.status(401).json({ error: 'You must be logged in to write a post.' });
@@ -354,63 +352,66 @@ router.post('/api/blogs', async (req, res) => {
   const { errors, values } = validateBlogInput(req.body);
   if (errors.length) return res.status(400).json({ error: errors.join(' ') });
 
-  const blogs = readBlogs();
-  const post = {
-    id: newId('post'),
-    title: values.title,
-    summary: values.summary,
-    content: values.content,
-    tags: values.tags,
-    image: values.image || null,
-    authorName: user.name || user.username,
-    authorId: String(user._id),
-    date: new Date().toISOString(),
-    views: 0,
-    comments: []
-  };
-  blogs.unshift(post);
-  writeBlogs(blogs);
-  res.status(201).json({ message: 'Post published successfully.', post });
+  try {
+    const post = await Blog.create({
+      title: values.title,
+      summary: values.summary,
+      content: values.content,
+      tags: values.tags,
+      image: values.image || null,
+      authorName: user.name || user.username,
+      authorId: String(user._id),
+      date: new Date().toISOString(),
+      views: 0,
+      comments: []
+    });
+    res.status(201).json({ message: 'Post published successfully.', post: { ...post.toObject(), id: post._id } });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create post.' });
+  }
 });
 
-// PUT /api/blogs/:id - update own post
 router.put('/api/blogs/:id', async (req, res) => {
   const user = await resolveUser(req);
   if (!user) return res.status(401).json({ error: 'You must be logged in to edit a post.' });
 
-  const blogs = readBlogs();
-  const post = blogs.find((b) => b.id === req.params.id);
-  if (!post) return res.status(404).json({ error: 'Blog post not found.' });
-  if (post.authorId !== String(user._id)) {
-    return res.status(403).json({ error: 'You can only edit your own posts.' });
+  try {
+    const post = await Blog.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: 'Blog post not found.' });
+    if (post.authorId !== String(user._id)) {
+      return res.status(403).json({ error: 'You can only edit your own posts.' });
+    }
+
+    const { errors, values } = validateBlogInput(req.body);
+    if (errors.length) return res.status(400).json({ error: errors.join(' ') });
+
+    post.title = values.title;
+    post.summary = values.summary;
+    post.content = values.content;
+    post.tags = values.tags;
+    post.image = values.image || null;
+    await post.save();
+    res.json({ message: 'Post updated successfully.', post: { ...post.toObject(), id: post._id } });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update post.' });
   }
-
-  const { errors, values } = validateBlogInput(req.body);
-  if (errors.length) return res.status(400).json({ error: errors.join(' ') });
-
-  post.title = values.title;
-  post.summary = values.summary;
-  post.content = values.content;
-  post.tags = values.tags;
-  post.image = values.image || null;
-  writeBlogs(blogs);
-  res.json({ message: 'Post updated successfully.', post });
 });
 
-// DELETE /api/blogs/:id - delete own post
 router.delete('/api/blogs/:id', async (req, res) => {
   const user = await resolveUser(req);
   if (!user) return res.status(401).json({ error: 'You must be logged in to delete a post.' });
 
-  const blogs = readBlogs();
-  const post = blogs.find((b) => b.id === req.params.id);
-  if (!post) return res.status(404).json({ error: 'Blog post not found.' });
-  if (post.authorId !== String(user._id)) {
-    return res.status(403).json({ error: 'You can only delete your own posts.' });
+  try {
+    const post = await Blog.findById(req.params.id);
+    if (!post) return res.status(404).json({ error: 'Blog post not found.' });
+    if (post.authorId !== String(user._id)) {
+      return res.status(403).json({ error: 'You can only delete your own posts.' });
+    }
+    await Blog.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Post deleted successfully.' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete post.' });
   }
-
-  writeBlogs(blogs.filter((b) => b.id !== post.id));
-  res.json({ message: 'Post deleted successfully.' });
 });
 
 module.exports = router;

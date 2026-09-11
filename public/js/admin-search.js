@@ -1,21 +1,26 @@
 document.addEventListener('DOMContentLoaded', () => {
   const searchInput = document.querySelector('.admin-toolbar input');
-  const userRows = document.querySelectorAll('.admin-row');
+  if (!searchInput) return;
 
-  searchInput.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase();
+  // The account rows are rendered by admin-render.js after this script runs, so
+  // query them on each keystroke instead of caching them at load. Users who can
+  // edit their own profile, such as a changed username, need no special casing
+  // because the text is read from the live DOM.
+  const filterRows = () => {
+    const term = searchInput.value.trim().toLowerCase();
+    const rows = document.querySelectorAll('.admin-row');
 
-    userRows.forEach(row => {
-      // Look at the username and the details paragraph for matches
-      const username = row.querySelector('.account-info h3').textContent.toLowerCase();
-      const details = row.querySelector('.account-info p').textContent.toLowerCase();
-
-      // Toggle visibility based on whether the search term is found
-      if (username.includes(searchTerm) || details.includes(searchTerm)) {
-        row.style.display = 'flex';
-      } else {
-        row.style.display = 'none';
-      }
+    rows.forEach((row) => {
+      const info = row.querySelector('.account-info');
+      const text = info ? info.textContent.toLowerCase() : '';
+      row.style.display = !term || text.includes(term) ? 'flex' : 'none';
     });
+  };
+
+  searchInput.addEventListener('input', filterRows);
+  // Re-apply the current filter whenever the dashboard re-renders its lists.
+  const lists = document.querySelectorAll('.admin-list');
+  lists.forEach((list) => {
+    new MutationObserver(filterRows).observe(list, { childList: true });
   });
 });

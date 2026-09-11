@@ -230,6 +230,7 @@
           body: { qty }
         });
         render(data.items);
+        if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
       } catch (err) {
         showToast(err.message, 'error');
         loadCart();
@@ -248,6 +249,7 @@
         });
         render(data.items);
         showToast('Item removed from cart.', 'info');
+        if (window.Playnex.syncCartBadge) window.Playnex.syncCartBadge();
       } catch (err) {
         showToast(err.message, 'error');
       }

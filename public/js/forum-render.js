@@ -53,22 +53,28 @@ document.addEventListener('DOMContentLoaded', async () => {
       return matchesSearch && matchesType;
     });
 
+    const ts = (value) => {
+      if (typeof value === 'number') return value;
+      const parsed = Date.parse(value);
+      return isNaN(parsed) ? 0 : parsed;
+    };
+
     visible = visible.slice().sort((a, b) => {
       switch (sortBy) {
         case 'latest':
-          return (b.lastPostAt || 0) - (a.lastPostAt || 0);
+          return ts(b.lastPostAt) - ts(a.lastPostAt);
         case 'oldest-activity':
-          return (a.lastPostAt || 0) - (b.lastPostAt || 0);
+          return ts(a.lastPostAt) - ts(b.lastPostAt);
         case 'newest-thread':
-          return (b.createdAt || 0) - (a.createdAt || 0);
+          return ts(b.createdAt) - ts(a.createdAt);
         case 'oldest-thread':
-          return (a.createdAt || 0) - (b.createdAt || 0);
+          return ts(a.createdAt) - ts(b.createdAt);
         case 'views':
           return (b.views || 0) - (a.views || 0);
         case 'replies':
           return (b.replies || 0) - (a.replies || 0);
         default:
-          return (b.lastPostAt || 0) - (a.lastPostAt || 0);
+          return ts(b.lastPostAt) - ts(a.lastPostAt);
       }
     });
 
