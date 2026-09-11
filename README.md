@@ -140,7 +140,8 @@ https://github.com/s4113887rmit/Playnex
 - Click `Write a post` (visible when logged in) or open `/blog/new`
 - The write form validates live, counts characters, and autosaves a draft in localStorage (restored after refresh)
 - Logged-in users can edit and delete only their own posts; the admin can delete any comment
-- JSON API: `GET /api/blogs`, `GET /api/blogs/:id`, `POST /api/blogs`, `PUT /api/blogs/:id`, `DELETE /api/blogs/:id`, `POST /api/blogs/:id/comments`
+- JSON API: `GET /api/blogs`, `GET /api/blogs/:id`, `POST /api/blogs`, `PUT /api/blogs/:id`, `DELETE /api/blogs/:id`
+- Comments are posted from the detail page form: `POST /blog/:id/comment`, and removed with `POST /blog/:id/comment/:commentId/delete`
 
 ### Testing the Game Rating module
 - Open `/rating` to browse games with client-side search and sorting

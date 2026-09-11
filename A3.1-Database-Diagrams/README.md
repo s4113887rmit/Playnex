@@ -4,8 +4,8 @@
 **Project:** Playnex · **Repository:** github.com/s4113887rmit/Playnex
 **Student:** Nguyen Ngoc Quang Dang · S4113887
 
-This folder is self-contained and sits beside the other folders in `WebDesign`.
-It holds one image file per diagram, in a single format (PNG), plus this index.
+This folder sits at the root of the Playnex repository, alongside the application
+source. It holds one image file per diagram, in a single format (PNG), plus this index.
 
 ---
 
