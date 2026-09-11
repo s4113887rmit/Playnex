@@ -99,6 +99,21 @@
     el.className = 'auth-server-msg is-' + type;
   }
 
+  // Read a response without assuming it is JSON. Express answers some errors with
+  // an HTML page, and calling res.json() on that throws, which the handlers below
+  // would otherwise report as a misleading network error.
+  function readResponse(res) {
+    return res.text().then(function (text) {
+      var data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        data = { error: 'The server returned an unexpected response. Please try again.' };
+      }
+      return { status: res.status, data: data };
+    });
+  }
+
   function validateSignup() {
     clearErrors();
     var valid = true;
@@ -369,7 +384,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-      .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
+      .then(readResponse)
       .then(function (result) {
         if (result.status === 201) {
           showServerMsg('signup', result.data.message, 'success');
@@ -417,7 +432,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-      .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
+      .then(readResponse)
       .then(function (result) {
         if (result.status === 200) {
           localStorage.removeItem('playnex_user');
@@ -463,7 +478,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-      .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
+      .then(readResponse)
       .then(function (result) {
         showServerMsg('forgot', result.data.message, 'success');
         sessionStorage.removeItem('playnex_draft_forgot');
@@ -497,7 +512,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-      .then(function (res) { return res.json().then(function (data) { return { status: res.status, data: data }; }); })
+      .then(readResponse)
       .then(function (result) {
         if (result.status === 200) {
           showServerMsg('reset', result.data.message, 'success');

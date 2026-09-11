@@ -183,7 +183,7 @@ function handleMemoryAuth(req, res, route) {
   if (route === 'signup') {
     const errors = signupValidator(req.body);
     if (errors.length) return res.status(400).json({ error: errors.join(' ') });
-    if (memoryUsers.findMemoryUser((u) => u.email === lowerEmail || u.username === username)) {
+    if (memoryUsers.findMemoryUser((u) => u.email === lowerEmail || String(u.username).toLowerCase() === String(username).toLowerCase())) {
       return res.status(409).json({ error: 'Username or email already registered.' });
     }
     bcrypt.hash(password, 12).then((hash) => {
@@ -296,8 +296,10 @@ function handleMemoryAuth(req, res, route) {
     if (!user) return res.status(401).json({ error: 'You must be logged in to deactivate your account.' });
     bcrypt.compare(password || '', user.password).then((isMatch) => {
       if (!isMatch) return res.status(401).json({ error: 'Password is incorrect.' });
+      // Keep the email address. Rewriting it would free the address for someone
+      // else to register and would stop the login route recognising the account
+      // as deactivated.
       user.isActive = false;
-      user.email = user.email + '_deactivated_' + Date.now();
       req.session.destroy(() => {});
       res.json({ message: 'Your account has been deactivated. We are sorry to see you go.' });
     });
@@ -393,9 +395,19 @@ app.post('/api/auth/signup', authLimiter, authGuard('signup'), async (req, res) 
       return res.status(400).json({ error: 'Description must be at most 500 characters' });
     }
 
-    var existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    // Usernames must be unique regardless of letter case, otherwise a second
+    // account can be created as "Admin" while "admin" already exists and the
+    // two are impossible to tell apart on screen.
+    var emailNormalised = String(email).toLowerCase();
+    var usernamePattern = String(username).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    var existingUser = await User.findOne({
+      $or: [
+        { email: emailNormalised },
+        { username: { $regex: '^' + usernamePattern + '$', $options: 'i' } }
+      ]
+    });
     if (existingUser) {
-      var field = existingUser.email === email.toLowerCase() ? 'Email' : 'Username';
+      var field = String(existingUser.email).toLowerCase() === emailNormalised ? 'Email' : 'Username';
       return res.status(409).json({ error: field + ' is already registered' });
     }
 
@@ -693,8 +705,10 @@ app.delete('/api/auth/account', authLimiter, authGuard('delete-account'), async 
     if (!isMatch) {
       return res.status(401).json({ error: 'Password is incorrect' });
     }
+    // Keep the email address so the address cannot be claimed by another
+    // account and so the login route reports the account as deactivated rather
+    // than as unknown.
     user.isActive = false;
-    user.email = user.email + '_deactivated_' + Date.now();
     await user.save({ validateBeforeSave: false });
     // Destroy session on account deletion
     req.session.destroy(() => {});
