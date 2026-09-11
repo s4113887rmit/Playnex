@@ -369,6 +369,12 @@
   });
 
   function sendSignup(pictureBase64) {
+    // Query the button here rather than relying on the submit handler's local
+    // variable, which is not in scope in this function. Without this reference
+    // the finally block below threw a ReferenceError and left the button
+    // permanently disabled after a rejected signup, such as a duplicate email.
+    var btn = signupForm.querySelector('button[type="submit"]');
+
     var payload = {
       username: document.getElementById('signup-username').value.trim(),
       email: document.getElementById('signup-email').value.trim(),

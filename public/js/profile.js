@@ -42,6 +42,21 @@
     });
   });
 
+  // Read a response without assuming it is JSON. The server answers some errors
+  // with an HTML page, and calling res.json() on that throws, which the callers
+  // below would report as a bare "Network error." that misleads the user.
+  function readResponse(res) {
+    return res.text().then(function (text) {
+      var data = {};
+      try {
+        data = text ? JSON.parse(text) : {};
+      } catch (e) {
+        data = { error: 'The server returned an unexpected response. Please try again.' };
+      }
+      return { status: res.status, data: data };
+    });
+  }
+
   function clearAllMessages() {
     var msgs = document.querySelectorAll('.auth-server-msg');
     msgs.forEach(function (m) { m.textContent = ''; m.className = 'auth-server-msg'; });
@@ -83,7 +98,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: currentEmail })
     })
-      .then(function (res) { return res.json().then(function (d) { return { status: res.status, data: d }; }); })
+      .then(readResponse)
       .then(function (result) {
         if (result.status === 200) {
           showServerMsg('profile-edit-msg', '', 'success');
@@ -158,6 +173,11 @@
   });
 
   function sendProfileUpdate(pictureBase64) {
+    // Query the button here. The submit handler's local variable is not in scope
+    // in this function, so the finally block below previously threw a
+    // ReferenceError and left the button stuck on "Saving..." after every save.
+    var btn = document.querySelector('#form-edit-profile button[type="submit"]');
+
     var payload = {
       email: currentEmail,
       name: nameInput.value.trim(),
@@ -170,7 +190,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-      .then(function (res) { return res.json().then(function (d) { return { status: res.status, data: d }; }); })
+      .then(readResponse)
       .then(function (result) {
         if (result.status === 200) {
           showServerMsg('profile-edit-msg', result.data.message, 'success');
@@ -216,7 +236,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ currentEmail: currentEmail, newEmail: newEmail, password: password })
     })
-      .then(function (res) { return res.json().then(function (d) { return { status: res.status, data: d }; }); })
+      .then(readResponse)
       .then(function (result) {
         if (result.status === 200) {
           showServerMsg('email-msg', result.data.message, 'success');
@@ -252,7 +272,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: currentEmail, currentPassword: currentPassword, newPassword: newPassword, confirmNewPassword: confirmNew })
     })
-      .then(function (res) { return res.json().then(function (d) { return { status: res.status, data: d }; }); })
+      .then(readResponse)
       .then(function (result) {
         if (result.status === 200) {
           showServerMsg('password-msg', result.data.message, 'success');
@@ -285,7 +305,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: currentEmail, password: password })
     })
-      .then(function (res) { return res.json().then(function (d) { return { status: res.status, data: d }; }); })
+      .then(readResponse)
       .then(function (result) {
         if (result.status === 200) {
           showServerMsg('delete-msg', result.data.message, 'success');

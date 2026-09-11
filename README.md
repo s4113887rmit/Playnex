@@ -91,13 +91,18 @@ https://github.com/s4113887rmit/Playnex
    ```
    MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/playnex?retryWrites=true&w=majority
    PORT=3000
+   SESSION_SECRET=any-long-random-string
    ```
-3. Seed the database (first time only). This clears and rebuilds blogs, games and products:
+   `SESSION_SECRET` is optional. Without it the server generates a random one at
+   startup and logs a warning, which also means logins do not survive a restart.
+3. Seed the database (first time only). This clears and rebuilds blogs, games,
+   products, forum categories and forum threads:
    ```
    node seed.js
    ```
-4. Add or refresh the forum categories and demo threads on an existing database.
-   This does not modify any other collection and is safe to run repeatedly:
+4. Refresh just the forum categories and demo threads on a database that already
+   has content. This does not modify any other collection and is safe to run
+   repeatedly, which makes it the right command to use on the live database:
    ```
    node seed-forum.js
    ```
