@@ -136,7 +136,13 @@ router.get('/blog/:id', async (req, res) => {
     await Blog.findByIdAndUpdate(req.params.id, { $inc: { views: 1 } });
     post.views = (post.views || 0) + 1;
     res.render('detailblog', {
-      post: { ...post, id: post._id },
+      // lean() documents only carry _id, so map id onto the post and each
+      // comment for the template to build the comment delete URL.
+      post: {
+        ...post,
+        id: post._id,
+        comments: (post.comments || []).map((c) => ({ ...c, id: c._id }))
+      },
       date: formatDate(post.date),
       blocks: parseBlocks(post.content),
       commentErrors: []
@@ -261,7 +267,11 @@ router.post('/blog/:id/comment', async (req, res) => {
 
     if (commentErrors.length) {
       return res.status(400).render('detailblog', {
-        post: { ...post.toObject(), id: post._id },
+        post: {
+          ...post.toObject(),
+          id: post._id,
+          comments: (post.comments || []).map((c) => ({ ...c.toObject(), id: c._id }))
+        },
         date: formatDate(post.date),
         blocks: parseBlocks(post.content),
         commentErrors

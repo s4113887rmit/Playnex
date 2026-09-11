@@ -312,9 +312,11 @@ function handleMemoryAuth(req, res, route) {
     }
     const user = memoryUsers.findMemoryUser((u) => u.email === lowerEmail);
     if (user) {
-      user.passwordResetToken = crypto.randomBytes(32).toString('hex');
+      const token = crypto.randomBytes(32).toString('hex');
+      user.passwordResetToken = token;
       user.passwordResetExpires = Date.now() + 60 * 60 * 1000;
-      // Token generated for password reset
+      // See the MongoDB path: the code is logged because no mail service exists.
+      console.log('Password reset code for ' + user.email + ': ' + token);
     }
     return res.json({ message: 'If that email is registered, a reset link has been sent.' });
   }
@@ -506,7 +508,10 @@ app.post('/api/auth/forgot-password', authLimiter, authGuard('forgot-password'),
     user.passwordResetExpires = Date.now() + 60 * 60 * 1000;
     await user.save({ validateBeforeSave: false });
 
-    // Token generated for password reset
+    // No mail service is configured for this project, so the reset code is
+    // written to the server console. Without this the raw code exists nowhere,
+    // which would leave the forgotten password flow impossible to complete.
+    console.log('Password reset code for ' + user.email + ': ' + resetToken);
 
     res.status(200).json({ message: 'If that email is registered, a reset link has been sent.' });
   } catch (err) {
