@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Hero advert: free games this week. An opened gift with a FREE ribbon. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" width="600" height="800" role="img" aria-label="Playnex free games giveaway">
+ <defs>
+    <linearGradient id="freeBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#06301f"/>
+      <stop offset="45%" stop-color="#0b1c22"/>
+      <stop offset="100%" stop-color="#07070f"/>
+    </linearGradient>
+    <radialGradient id="freeGlow" cx="50%" cy="38%" r="55%">
+      <stop offset="0%" stop-color="#3ddc97" stop-opacity="0.50"/>
+      <stop offset="55%" stop-color="#3ddc97" stop-opacity="0.14"/>
+      <stop offset="100%" stop-color="#3ddc97" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="freeLid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6ff0bd"/>
+      <stop offset="100%" stop-color="#22b479"/>
+    </linearGradient>
+    <linearGradient id="freeBox" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2fbf87"/>
+      <stop offset="100%" stop-color="#0e6d4b"/>
+    </linearGradient>
+    <linearGradient id="freeRibbon" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#a9f5d3"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c9ffe6" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#c9ffe6" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="freeSoft" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity="0.5"/>
+    </filter>
+ </defs>
+
+ <rect width="600" height="800" fill="url(#freeBg)"/>
+ <rect width="600" height="800" fill="url(#freeGlow)"/>
+
+  <!-- Light beam bursting out of the open box -->
+ <g opacity="0.6">
+    <polygon points="300,330 196,0 404,0" fill="url(#beam)"/>
+    <polygon points="300,330 60,150 150,60" fill="url(#beam)"/>
+    <polygon points="300,330 450,60 540,150" fill="url(#beam)"/>
+ </g>
+
+  <!-- Floating game glyphs being given away (controller, disc, cart) -->
+ <g opacity="0.9">
+    <!-- gamepad -->
+    <g transform="translate(126 250) rotate(-16)">
+      <rect x="-52" y="-30" width="104" height="60" rx="26" fill="none" stroke="#a9f5d3" stroke-width="4"/>
+      <line x1="-26" y1="-8" x2="-26" y2="8" stroke="#a9f5d3" stroke-width="4" stroke-linecap="round"/>
+      <line x1="-34" y1="0" x2="-18" y2="0" stroke="#a9f5d3" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="26" cy="-7" r="5" fill="#a9f5d3"/>
+      <circle cx="40" cy="7" r="5" fill="#a9f5d3"/>
+    </g>
+    <!-- disc -->
+    <g transform="translate(478 196) rotate(14)">
+      <circle r="42" fill="none" stroke="#6ff0bd" stroke-width="4"/>
+      <circle r="13" fill="none" stroke="#6ff0bd" stroke-width="4"/>
+    </g>
+    <!-- shopping cart -->
+    <g transform="translate(492 470) rotate(-8)" stroke="#3ddc97" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M-32 -26 h14 l12 44 h40 l12 -30 h-58"/>
+      <circle cx="0" cy="30" r="5"/>
+      <circle cx="30" cy="30" r="5"/>
+    </g>
+ </g>
+
+  <!-- FREE price-tag banner -->
+ <g transform="translate(300 176) rotate(-4)" filter="url(#freeSoft)">
+    <rect x="-118" y="-40" width="236" height="80" rx="16" fill="#04281a" stroke="#3ddc97" stroke-width="3"/>
+    <text x="0" y="12" text-anchor="middle" font-family="Helvetica, Arial, sans-serif"
+          font-size="42" font-weight="bold" letter-spacing="4" fill="#6ff0bd">FREE</text>
+    <text x="0" y="40" text-anchor="middle" font-family="Helvetica, Arial, sans-serif"
+          font-size="12" letter-spacing="3" fill="#3ddc97">THIS WEEK</text>
+ </g>
+
+  <!-- Opened gift box -->
+ <g transform="translate(300 500)" filter="url(#freeSoft)">
+    <ellipse cx="0" cy="176" rx="134" ry="20" fill="#000" opacity="0.4"/>
+    <!-- offset lid, lifted and tilted -->
+    <g transform="translate(-6 -128) rotate(-12)">
+      <rect x="-132" y="-30" width="264" height="60" rx="12" fill="url(#freeLid)"/>
+      <rect x="-16" y="-30" width="32" height="60" fill="url(#freeRibbon)"/>
+    </g>
+    <!-- box body -->
+    <path d="M-112 6 L112 6 L102 172 A12 12 0 0 1 90 182 L-90 182 A12 12 0 0 1 -102 172 Z" fill="url(#freeBox)"/>
+    <path d="M-112 6 L112 6 L102 172 A12 12 0 0 1 90 182 L-90 182 A12 12 0 0 1 -102 172 Z" fill="#000" opacity="0.16"/>
+    <rect x="-16" y="6" width="32" height="176" fill="url(#freeRibbon)"/>
+    <!-- rim highlight -->
+    <rect x="-112" y="6" width="224" height="10" rx="5" fill="#8df7c9" opacity="0.55"/>
+ </g>
+
+  <!-- Sparkles -->
+ <g fill="#c9ffe6">
+    <path d="M148 604 l4 13 13 4 -13 4 -4 13 -4 -13 -13 -4 13 -4 z"/>
+    <path d="M462 576 l4 12 12 4 -12 4 -4 12 -4 -12 -12 -4 12 -4 z"/>
+    <path d="M92 690 l3 10 10 3 -10 3 -3 10 -3 -10 -10 -3 10 -3 z"/>
+    <path d="M520 690 l3 10 10 3 -10 3 -3 10 -3 -10 -10 -3 10 -3 z"/>
+ </g>
+</svg>

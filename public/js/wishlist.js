@@ -5,7 +5,7 @@
  *   - Dynamic saved-item count in the page header
  *   - Dynamic filter counts
  *   - History/Bin: soft-deleted items can be restored or permanently deleted
- *   - Add to cart, remove from wishlist (moves to bin)
+ *   - Add to cart, remove from wishlist (moves to bin), or remove all at once
  *   - Dynamic "Recommended for you" shelf
  *   - Total wishlist value displayed subtly below the grid
  *   - Seamless server & local synchronization scoped to current user.
@@ -23,6 +23,7 @@
   const countEls = document.querySelectorAll('[data-wishlist-count]');
   const recommendedGrid = document.getElementById('recommended-list') || document.querySelector('.shelf .shelf__row');
   const sortWrapper = document.querySelector('.wishlist-sort');
+  const removeAllBtn = document.getElementById('wishlist-remove-all');
 
   let rawWishlistData = { items: [], totalCount: 0, savedCount: 0, totalValue: 0 };
   let historyData = { items: [], itemCount: 0 };
@@ -126,15 +127,42 @@
       </li>`;
   }
 
+  // Promotion state — same rules used across the store: gold for free
+  // giveaways, silver for discounted (on sale) items.
+  function isFreeThisWeek(item) {
+    return Number(item.price) === 0;
+  }
+
+  function isDiscounted(item) {
+    return !isFreeThisWeek(item) && Number(item.oldPrice) > Number(item.price);
+  }
+
+  function discountPercent(item) {
+    const oldPrice = Number(item.oldPrice);
+    const price = Number(item.price);
+    if (!oldPrice || oldPrice <= price) return 0;
+    return Math.round(((oldPrice - price) / oldPrice) * 100);
+  }
+
   function recommendedCardHTML(item) {
     const detailUrl = item.href || `listing.html?game=${item.id}`;
-    const priceHTML = item.oldPrice
-      ? `<span class="card__price-old">${money(item.oldPrice)}</span><span class="card__price-now">${money(item.price)}</span>`
-      : `<span class="card__price-now">${item.price === 0 ? 'Free' : money(item.price)}</span>`;
+    const isFree = isFreeThisWeek(item);
+    const isDeal = isDiscounted(item);
 
-    const badge = item.badge && item.badge !== 'Physical'
-      ? `<span class="card__badge${item.badge === 'New' ? ' card__badge--new' : ''}">${item.badge}</span>`
-      : '';
+    const priceHTML = isFree
+      ? `<span class="card__price-free">Free this week</span>`
+      : item.oldPrice
+        ? `<span class="card__price-old">${money(item.oldPrice)}</span><span class="card__price-now card__price-now--deal">${money(item.price)}</span>`
+        : `<span class="card__price-now">${money(item.price)}</span>`;
+
+    let badge = '';
+    if (isFree) {
+      badge = `<span class="card__badge card__badge--free">Free this week</span>`;
+    } else if (isDeal) {
+      badge = `<span class="card__badge card__badge--deal">-${discountPercent(item)}%</span>`;
+    } else if (item.badge && item.badge !== 'Physical') {
+      badge = `<span class="card__badge${item.badge === 'New' ? ' card__badge--new' : ''}">${item.badge}</span>`;
+    }
 
     const imgTag = item.image
       ? `<img src="${item.image}" alt="${item.title} poster" loading="lazy">`
@@ -142,7 +170,7 @@
 
     return `
       <li>
-        <article class="card recommended-card" data-id="${item.id}" data-href="${detailUrl}">
+        <article class="card recommended-card${isFree ? ' card--free' : isDeal ? ' card--deal' : ''}" data-id="${item.id}" data-href="${detailUrl}">
           <div class="card__art ${item.art || 'card__art--1'}">
             <a href="${detailUrl}" aria-label="View ${item.title} details">
               ${imgTag}
@@ -153,7 +181,7 @@
           <div class="card__body">
             <h3 class="card__title"><a href="${detailUrl}">${item.title}</a></h3>
             <p class="card__meta">${item.genre} &middot; ${item.platform}</p>
-            <div class="card__price">${priceHTML}</div>
+            <div class="card__price${isFree ? ' card__price--free' : isDeal ? ' card__price--deal' : ''}">${priceHTML}</div>
           </div>
         </article>
       </li>`;
@@ -217,6 +245,14 @@
 
     if (countHeader) {
       countHeader.textContent = `${savedCount} item${savedCount === 1 ? '' : ''} saved`;
+    }
+
+    // "Remove all" only makes sense when there are saved items and the user is
+    // looking at the active list (not the History/Bin view).
+    if (removeAllBtn) {
+      const visible = savedCount > 0 && currentFilter !== 'history';
+      removeAllBtn.hidden = !visible;
+      removeAllBtn.disabled = !visible;
     }
   }
 
@@ -357,6 +393,36 @@
   if (sortSelect) {
     sortSelect.addEventListener('change', () => {
       render();
+    });
+  }
+
+  // Remove all saved items (soft-delete to the History/Bin, so it is reversible)
+  if (removeAllBtn) {
+    removeAllBtn.addEventListener('click', async () => {
+      if (!requireLogin()) return;
+
+      const items = rawWishlistData.items || [];
+      if (items.length === 0) {
+        showToast('Your wishlist is already empty.', 'info');
+        return;
+      }
+
+      const plural = items.length === 1 ? '' : 's';
+      const confirmed = window.confirm(
+        `Remove all ${items.length} item${plural} from your wishlist?\n` +
+        'They will move to History, where you can restore them later.'
+      );
+      if (!confirmed) return;
+
+      removeAllBtn.disabled = true;
+      try {
+        const res = await api('/api/wishlist', { method: 'DELETE' });
+        showToast((res && res.message) || 'Wishlist cleared.', 'info');
+        await Promise.all([loadWishlist(), loadHistory()]);
+      } catch (err) {
+        showToast(err.message, 'error');
+        removeAllBtn.disabled = false;
+      }
     });
   }
 

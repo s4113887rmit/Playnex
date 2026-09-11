@@ -4,6 +4,8 @@
   --primary: #ffffff;
   --secondary: #ffffff;
   --accent: #ff8500;
+  --gold: #ffd166;
+  --silver: #cfd8e4;
 
   --surface-1: #10101e;
   --surface-2: #171728;
@@ -590,6 +592,46 @@ img {
  50% { color: #ef4444 !important; transform: scale(1.18); }
 }
 
+/* Cart icon blink on add — same motion as the wishlist heart, in cart accent. */
+.cart-nav--blink,
+.cart-nav--blink svg {
+  animation: cart-nav-blink 0.8s ease-in-out 2;
+}
+
+.cart-nav--blink svg {
+  color: inherit;
+  stroke: currentColor;
+}
+
+@keyframes cart-nav-blink {
+ 0%, 100% { color: var(--text-muted); transform: scale(1); }
+ 50% { color: var(--accent) !important; transform: scale(1.18); }
+}
+
+/* Wishlist heart badge — same counter behaviour as the cart badge, in heart red.
+   Declared after .nav-count so the red overrides the shared accent background. */
+.nav-count.nav-count--wishlist {
+  background: #ef4444;
+  color: #fff5f5;
+}
+
+@keyframes nav-count-bump {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.45); }
+  100% { transform: scale(1); }
+}
+
+.nav-count--bump {
+  animation: nav-count-bump 0.45s ease-out;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.28);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nav-count--bump {
+    animation: none;
+  }
+}
+
 .icon-btn.is-active {
   color: var(--text);
 }
@@ -1002,6 +1044,99 @@ img {
   pointer-events: none;
 }
 
+/* ---------- hero advert slides (launch / on sale / free) ---------- */
+
+.hero-card--ad .hero-card__art::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(160deg, rgba(7, 7, 18, 0.15) 0%, rgba(7, 7, 18, 0.55) 55%, rgba(7, 7, 18, 0.92) 100%);
+}
+
+.hero-card__ad-overlay {
+  display: none;
+}
+
+/* Caption block pinned to the bottom of every advert card. */
+.hero-card__ad-body {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  text-align: left;
+  pointer-events: none;
+}
+
+.hero-card__ad-kind {
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #1a0f00;
+}
+
+.hero-card__ad-title {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.hero-card__ad-code {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  text-shadow: 0 0 12px rgba(255, 209, 102, 0.5);
+}
+
+.hero-card__ad-cta {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.hero-card--launch .hero-card__ad-kind {
+  background: var(--accent);
+  color: #1a0f00;
+}
+
+.hero-card--sale .hero-card__ad-kind {
+  background: var(--silver);
+  color: #1b2130;
+}
+
+.hero-card--free .hero-card__ad-kind {
+  background: #3ddc97;
+  color: #04281a;
+}
+
+.hero-card__ad-badge {
+  align-self: flex-start;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+
 /* ---------- promo strip ---------- */
 
 .promo-strip {
@@ -1120,8 +1255,74 @@ img {
     border-color 0.15s ease;
 }
 
+/* Recommended shelf: every card is the same size regardless of how long the
+   title or price text is, so the row stays flush. */
 .recommended-card {
   cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Recommended shelf keeps every card identical in size: equal-width columns
+   that never wrap one card onto a row of its own, regardless of how many
+   recommendations there are or how wide the viewport is. */
+#recommended-list {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-auto-rows: 1fr;
+  align-items: stretch;
+}
+
+#recommended-list > li {
+  display: flex;
+  height: 100%;
+}
+
+#recommended-list > li > .recommended-card {
+  width: 100%;
+  height: 100%;
+}
+
+#recommended-list .recommended-card .card__title {
+  min-height: 2.6em;
+}
+
+.shelf__row > li {
+  display: flex;
+}
+
+.shelf__row > li > .recommended-card {
+  width: 100%;
+}
+
+.recommended-card .card__art {
+  flex: 0 0 auto;
+  aspect-ratio: 3 / 4;
+}
+
+.recommended-card .card__body {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+}
+
+.recommended-card .card__title {
+  min-height: 2.6em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.recommended-card .card__meta {
+  min-height: 1.2em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recommended-card .card__price {
+  margin-top: auto;
 }
 
 .card:hover {
@@ -1989,6 +2190,26 @@ img {
   grid-template-columns: 1fr 1fr;
   gap: 16px;
   margin-top: 16px;
+}
+
+/* Auto-fill bar at the top of the payment block: button + explanatory hint. */
+.form-row--autofill {
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+
+.autofill-hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+@media (max-width: 560px) {
+  .form-row--autofill {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-row:first-of-type {
@@ -4851,6 +5072,18 @@ a.btn.is-disabled {
   font-weight: 600;
 }
 
+/* Voucher code beside the label wraps instead of pushing the amount off the row. */
+.cart-summary__row--discount span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* The amount actually deducted, emphasised against the green label. */
+.cart-summary__voucher-amount {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 /* Card placeholder art */
 .card__placeholder-art {
   width: 100%;
@@ -5112,5 +5345,448 @@ a.btn.is-disabled {
     bottom: -30px;
     right: 50%;
     transform: translateX(50%);
+  }
+}
+/* ---------- Promo cards: Free this week (gold) & On sale (silver) ---------- */
+
+@keyframes promo-shimmer {
+  0% {
+    background-position: -140% 0;
+  }
+  100% {
+    background-position: 240% 0;
+  }
+}
+
+@keyframes promo-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 1px var(--glow-soft), 0 6px 20px var(--glow-soft);
+  }
+  50% {
+    box-shadow: 0 0 0 1px var(--glow-strong), 0 10px 30px var(--glow-strong);
+  }
+}
+
+/* Base promo card: tinted surface, metallic border and a moving sheen. */
+.card--free,
+.card--deal {
+  position: relative;
+  border: 1px solid var(--promo-main);
+  background:
+    linear-gradient(
+      110deg,
+      transparent 30%,
+      var(--promo-sheen) 47%,
+      var(--promo-sheen-strong) 50%,
+      var(--promo-sheen) 53%,
+      transparent 70%
+    ) no-repeat,
+    linear-gradient(160deg, var(--promo-tint) 0%, var(--surface-1) 62%);
+  background-size: 240% 100%, 100% 100%;
+  animation: promo-shimmer 3.4s linear infinite, promo-glow 3.4s ease-in-out infinite;
+  transition: transform 0.2s ease;
+}
+
+.card--free:hover,
+.card--deal:hover {
+  transform: translateY(-3px);
+}
+
+/* Gold = free this week */
+.card--free {
+  --promo-main: var(--gold);
+  --promo-tint: rgba(255, 209, 102, 0.12);
+  --promo-sheen: rgba(255, 209, 102, 0.16);
+  --promo-sheen-strong: rgba(255, 236, 179, 0.42);
+  --promo-glow: rgba(255, 209, 102, 0.35);
+  --glow-soft: rgba(255, 209, 102, 0.22);
+  --glow-strong: rgba(255, 209, 102, 0.55);
+  --promo-ink: #2c1c00;
+  --promo-label: var(--gold);
+  --promo-price: #ffe6a8;
+}
+
+/* Silver = discounted (on sale), never free */
+.card--deal {
+  --promo-main: var(--silver);
+  --promo-tint: rgba(207, 216, 228, 0.10);
+  --promo-sheen: rgba(207, 216, 228, 0.16);
+  --promo-sheen-strong: rgba(245, 249, 255, 0.40);
+  --promo-glow: rgba(207, 216, 228, 0.30);
+  --glow-soft: rgba(207, 216, 228, 0.18);
+  --glow-strong: rgba(226, 234, 244, 0.50);
+  --promo-ink: #1b2130;
+  --promo-label: var(--silver);
+  --promo-price: #e6ecf5;
+}
+
+/* Text and badge inside a promo card take the metallic accent. */
+.card--free .card__title a,
+.card--deal .card__title a,
+.card--free .card__meta,
+.card--deal .card__meta {
+  color: var(--promo-price);
+}
+
+.card--free .card__meta,
+.card--deal .card__meta {
+  opacity: 0.85;
+}
+
+.card__badge--free,
+.card__badge--deal {
+  background: var(--promo-label);
+  color: var(--promo-ink);
+  letter-spacing: 0.03em;
+  font-weight: 800;
+  animation: promo-glow 3.4s ease-in-out infinite;
+}
+
+.card__price--free,
+.card__price--deal {
+  align-items: center;
+}
+
+.card__price-free,
+.card__price-deal {
+  display: inline-block;
+  line-height: 15px;
+  box-sizing: content-box;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--promo-ink);
+  background: var(--promo-label);
+  padding: 3px 8px;
+  border-radius: 3px;
+}
+
+/* The discounted price itself glints silver. */
+.card__price-now--deal {
+  color: var(--promo-price);
+  text-shadow: 0 0 12px rgba(226, 234, 244, 0.35);
+}
+
+/* Thumbnail art on a promo card gets a metallic rim. */
+.card--free .card__art,
+.card--deal .card__art {
+  box-shadow: inset 0 0 0 1px var(--promo-main), inset 0 -40px 60px -30px rgba(7, 7, 18, 0.9);
+}
+
+/* ---------- Already-owned digital titles ---------- */
+
+/* Not a promotion: the game is simply no longer for sale to this account, so
+   the card is muted rather than highlighted. */
+.card--owned {
+  opacity: 0.62;
+}
+
+.card--owned .card__art img {
+  filter: grayscale(0.55) brightness(0.8);
+}
+
+.card__badge--owned {
+  background: rgba(12, 12, 26, 0.86);
+  color: #b9c2d6;
+  border: 1px solid rgba(185, 194, 214, 0.45);
+  letter-spacing: 0.06em;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.card--owned .card__add[disabled],
+.card__add[disabled] {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card--free,
+  .card--deal,
+  .card__badge--free,
+  .card__badge--deal {
+    animation: none;
+  }
+  .card--free:hover,
+  .card--deal:hover {
+    transform: none;
+  }
+}
+
+/* ---------- Subnav: highlight the promo tabs ---------- */
+
+.subnav__link[href*="cat=free"],
+.subnav__link[href*="cat=sale"] {
+  font-weight: 700;
+}
+
+.subnav__link[href*="cat=free"] {
+  color: var(--gold);
+}
+
+.subnav__link[href*="cat=sale"] {
+  color: var(--silver);
+}
+
+.subnav__link[href*="cat=free"]:hover,
+.subnav__link[href*="cat=free"].is-active {
+  color: var(--gold);
+}
+
+.subnav__link[href*="cat=sale"]:hover,
+.subnav__link[href*="cat=sale"].is-active {
+  color: var(--silver);
+}
+
+.subnav__link[href*="cat=free"].is-active {
+  border-bottom-color: var(--gold);
+}
+
+.subnav__link[href*="cat=sale"].is-active {
+  border-bottom-color: var(--silver);
+}
+
+/* ---------- Wishlist: remove all ---------- */
+
+.wishlist-sort {
+  gap: 10px;
+}
+
+#wishlist-remove-all {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+#wishlist-remove-all[hidden] {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .wishlist-sort {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .wishlist-sort .sort-select {
+    flex: 1;
+  }
+}
+/* ---------- Voucher hint under the cart promo form ---------- */
+
+.promo-form__hint {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+/* ---------- Grand-opening offers page ---------- */
+
+.offer-page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 40px 80px;
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+.offer-hero__title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.15;
+  margin: 10px 0 16px;
+  color: var(--text);
+}
+
+.offer-hero__lead {
+  max-width: 760px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+.offer-hero__lead strong {
+  color: var(--accent);
+}
+
+.offer-voucher__heading,
+.offer-terms h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  margin-bottom: 18px;
+  color: var(--text);
+}
+
+/* Voucher ticket: perforated stub on the left, code + copy button on the right. */
+.voucher-card {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 209, 102, 0.45);
+  background: linear-gradient(140deg, rgba(255, 209, 102, 0.14) 0%, var(--surface-1) 60%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55), 0 0 26px rgba(255, 209, 102, 0.12);
+}
+
+.voucher-card__stub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 168px;
+  padding: 28px 22px;
+  background: linear-gradient(160deg, var(--gold) 0%, #ffb84d 100%);
+  color: #2c1c00;
+}
+
+.voucher-card__amount {
+  font-family: 'Cinzel', serif;
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.voucher-card__label {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.voucher-card__body {
+  flex: 1;
+  padding: 26px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.voucher-card__caption {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.voucher-card__code {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--gold);
+  text-shadow: 0 0 16px rgba(255, 209, 102, 0.35);
+  user-select: all;
+  word-break: break-all;
+}
+
+.voucher-card__copy {
+  align-self: flex-start;
+  margin-top: 10px;
+}
+
+.voucher-card__status {
+  min-height: 18px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.voucher-card__status.is-success {
+  color: #3ddc97;
+}
+
+.voucher-card__status.is-error {
+  color: #e74c3c;
+}
+
+/* Numbered redemption steps */
+.offer-steps {
+  margin-top: 28px;
+  padding: 22px 26px;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+  counter-reset: none;
+}
+
+.offer-steps li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+
+.offer-steps__num {
+  flex: 0 0 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  background: var(--accent);
+  color: #1a0f00;
+}
+
+.offer-steps code {
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: var(--surface-3);
+  border: 1px solid var(--border);
+  color: var(--gold);
+  font-size: 13px;
+}
+
+/* Terms list + closing calls to action */
+.offer-terms__list {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 26px;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+.offer-terms__list strong {
+  color: var(--text);
+}
+
+.offer-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 720px) {
+  .offer-page {
+    padding: 32px 20px 64px;
+    gap: 36px;
+  }
+
+  .voucher-card {
+    flex-direction: column;
+  }
+
+  .voucher-card__stub {
+    min-width: 0;
+    flex-direction: row;
+    gap: 12px;
+    padding: 18px 22px;
+  }
+
+  .voucher-card__amount {
+    font-size: 30px;
   }
 }

@@ -48,7 +48,7 @@
     <a href="shopping.html" class="subnav__link<%= (currentSubnav === 'all' || !currentSubnav) ? ' is-active' : '' %>">All</a>
     <a href="shopping.html?cat=digital" class="subnav__link<%= currentSubnav === 'digital' ? ' is-active' : '' %>">Digital games</a>
     <a href="shopping.html?cat=merch" class="subnav__link<%= currentSubnav === 'merch' ? ' is-active' : '' %>">Physical merch</a>
-    <a href="shopping.html?cat=deals" class="subnav__link<%= currentSubnav === 'deals' ? ' is-active' : '' %>">Deals</a>
+    <a href="shopping.html?cat=sale" class="subnav__link<%= (currentSubnav === 'sale' || currentSubnav === 'deals') ? ' is-active' : '' %>">On sale</a>
     <a href="shopping.html?cat=free" class="subnav__link<%= currentSubnav === 'free' ? ' is-active' : '' %>">Free this week</a>
   </nav>
   <% } else if (currentSubnavType === 'community') { %>

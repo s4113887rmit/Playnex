@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const Cart = require('../models/Cart');
 const Wishlist = require('../models/Wishlist');
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 
 async function getCart(userId) {
   let cart = await Cart.findOne({ userId });
@@ -32,6 +33,8 @@ async function saveOrder(order) {
     subtotal: order.subtotal,
     shipping: order.shipping,
     tax: order.tax || 0,
+    discount: order.discount || 0,
+    promoCode: order.promoCode || '',
     total: order.total,
     shippingInfo: order.shippingInfo,
     paymentInfo: order.paymentInfo,
@@ -46,6 +49,50 @@ async function getOrder(id) {
 
 async function getAllOrders(userId) {
   return await Order.find({ userId }).sort({ createdAt: -1 }).lean();
+}
+
+/**
+ * Product ids the user has already bought that cannot be bought again.
+ *
+ * A digital key is granted once per account, so owning it permanently removes
+ * it from sale for that account. Physical goods are deliberately excluded:
+ * a disc or a hoodie can be re-ordered as many times as the buyer likes.
+ *
+ * The category is taken from the order snapshot when it was saved, and falls
+ * back to the live product record for orders created before that field existed.
+ */
+async function getOwnedDigitalIds(userId) {
+  if (!userId || mongoose.connection.readyState !== 1) return [];
+
+  const orders = await Order.find({ userId }).select('items.productId items.category').lean();
+  const candidateIds = new Set();
+  const categoryById = {};
+
+  orders.forEach((order) => {
+    (order.items || []).forEach((item) => {
+      if (!item || !item.productId) return;
+      candidateIds.add(String(item.productId));
+      if (item.category) categoryById[String(item.productId)] = item.category;
+    });
+  });
+
+  if (!candidateIds.size) return [];
+
+  const ids = [...candidateIds];
+  const liveProducts = await Product.find({ id: { $in: ids } }).select('id category').lean();
+  liveProducts.forEach((p) => {
+    if (!categoryById[String(p.id)]) categoryById[String(p.id)] = p.category;
+  });
+
+  return ids.filter((id) => categoryById[id] === 'digital');
+}
+
+/**
+ * Is this specific product already owned by the user in a non-repeatable way?
+ */
+async function isDigitalOwned(userId, productId) {
+  const owned = await getOwnedDigitalIds(userId);
+  return owned.includes(String(productId));
 }
 
 const EMPTY_STATS = { wishlistCount: 0, cartCount: 0, purchasedCount: 0 };
@@ -113,6 +160,8 @@ module.exports = {
   saveOrder,
   getOrder,
   getAllOrders,
+  getOwnedDigitalIds,
+  isDigitalOwned,
   getStats,
   getStatsBatch
 };
