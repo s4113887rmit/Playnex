@@ -113,10 +113,24 @@ function saveBase64Image(base64Data) {
   return 'uploads/' + filename;
 }
 
+// Guards credential endpoints: signup, login, password reset and the sensitive
+// account changes. The ceiling is deliberately low because these are the routes
+// an attacker would hammer.
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
   message: { error: 'Too many attempts. Please try again in 15 minutes.' },
+  standardHeaders: true,
+  legacyHeaders: false
+});
+
+// Ordinary account navigation. Viewing or saving your own profile is normal use
+// and must not consume the credential budget, otherwise a user could be locked
+// out of signing in simply by opening their profile page repeatedly.
+const profileLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 150,
+  message: { error: 'Too many requests. Please slow down and try again shortly.' },
   standardHeaders: true,
   legacyHeaders: false
 });
@@ -550,7 +564,7 @@ function profilePayload(user) {
   };
 }
 
-app.post('/api/auth/profile', authLimiter, authGuard('profile-get'), async (req, res) => {
+app.post('/api/auth/profile', profileLimiter, authGuard('profile-get'), async (req, res) => {
   try {
     var user = await findSessionUser(req);
     if (!user) {
@@ -563,7 +577,7 @@ app.post('/api/auth/profile', authLimiter, authGuard('profile-get'), async (req,
   }
 });
 
-app.put('/api/auth/profile', authLimiter, authGuard('profile-put'), async (req, res) => {
+app.put('/api/auth/profile', profileLimiter, authGuard('profile-put'), async (req, res) => {
   try {
     var { name, description, profilePicture } = req.body;
     var user = await findSessionUser(req);

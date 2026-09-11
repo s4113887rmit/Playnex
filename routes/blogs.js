@@ -210,7 +210,7 @@ router.post('/blog/:id/update', async (req, res) => {
         isEdit: true
       });
     }
-    if (post.authorId !== String(user._id)) {
+    if (String(post.authorId) !== String(user._id)) {
       return res.status(403).send('You can only edit your own posts');
     }
 
@@ -237,7 +237,7 @@ router.post('/blog/:id/delete', async (req, res) => {
     const post = await Blog.findById(req.params.id);
     if (!post) return res.status(404).send('Post not found');
     if (!user) return res.redirect('/Login.html');
-    if (post.authorId !== String(user._id)) {
+    if (String(post.authorId) !== String(user._id)) {
       return res.status(403).send('You can only delete your own posts');
     }
     await Blog.findByIdAndDelete(req.params.id);
@@ -291,7 +291,7 @@ router.post('/blog/:id/comment/:commentId/delete', async (req, res) => {
     if (!comment) return res.status(404).send('Comment not found');
     if (!user) return res.redirect('/Login.html');
 
-    const isOwner = comment.authorId === String(user._id);
+    const isOwner = String(comment.authorId) === String(user._id);
     const isAdmin = user.role === 'admin';
     if (!isOwner && !isAdmin) {
       return res.status(403).send('You can only delete your own comments');
@@ -378,7 +378,7 @@ router.put('/api/blogs/:id', async (req, res) => {
   try {
     const post = await Blog.findById(req.params.id);
     if (!post) return res.status(404).json({ error: 'Blog post not found.' });
-    if (post.authorId !== String(user._id)) {
+    if (String(post.authorId) !== String(user._id)) {
       return res.status(403).json({ error: 'You can only edit your own posts.' });
     }
 
@@ -404,7 +404,7 @@ router.delete('/api/blogs/:id', async (req, res) => {
   try {
     const post = await Blog.findById(req.params.id);
     if (!post) return res.status(404).json({ error: 'Blog post not found.' });
-    if (post.authorId !== String(user._id)) {
+    if (String(post.authorId) !== String(user._id)) {
       return res.status(403).json({ error: 'You can only delete your own posts.' });
     }
     await Blog.findByIdAndDelete(req.params.id);
